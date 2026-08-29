@@ -1,0 +1,19 @@
+services:
+  bot:
+    build: .
+    image: elecciones-bot:latest
+    container_name: elecciones-bot
+    ports:
+      - "8090:8090"
+    env_file:
+      - .env
+    volumes:
+      - bot-data:/app/data
+      - bot-cache:/app/data/cache
+      - bot-rclone:/root/.config/rclone
+    restart: unless-stopped
+
+volumes:
+  bot-data:
+  bot-cache:
+  bot-rclone:

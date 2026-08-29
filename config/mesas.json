@@ -1,0 +1,1570 @@
+[
+  {
+    "codigo": 1,
+    "seccional": "CHAPARRAL",
+    "numero_local": 1,
+    "municipio": "CHAPARRAL",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 2,
+    "seccional": "CHAPARRAL",
+    "numero_local": 2,
+    "municipio": "CHAPARRAL",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 3,
+    "seccional": "CHAPARRAL",
+    "numero_local": 3,
+    "municipio": "CHAPARRAL",
+    "ubicacion": "CHAPARRAL - DOS QUEBRADAS - ESCUELA"
+  },
+  {
+    "codigo": 4,
+    "seccional": "CHAPARRAL",
+    "numero_local": 4,
+    "municipio": "CHAPARRAL",
+    "ubicacion": "CHAPARRAL - ESCUELA GUADUAL"
+  },
+  {
+    "codigo": 5,
+    "seccional": "CHAPARRAL",
+    "numero_local": 5,
+    "municipio": "CHAPARRAL",
+    "ubicacion": "CHAPARRAL - LA MARINA - COLEGIO"
+  },
+  {
+    "codigo": 6,
+    "seccional": "CHAPARRAL",
+    "numero_local": 6,
+    "municipio": "CHAPARRAL",
+    "ubicacion": "CHAPARRAL - LAGUNILLA - COLEGIO"
+  },
+  {
+    "codigo": 7,
+    "seccional": "CHAPARRAL",
+    "numero_local": 7,
+    "municipio": "CHAPARRAL",
+    "ubicacion": "CHAPARRAL - LOS SAUCES ESCUELA"
+  },
+  {
+    "codigo": 8,
+    "seccional": "CHAPARRAL",
+    "numero_local": 8,
+    "municipio": "CHAPARRAL",
+    "ubicacion": "CHAPARRAL - SAN PABLO AMBEIMA . ESCUELA"
+  },
+  {
+    "codigo": 11,
+    "seccional": "CHAPARRAL",
+    "numero_local": 11,
+    "municipio": "CHAPARRAL",
+    "ubicacion": "CHAPARRAL - POTRERITO - COLEGIO"
+  },
+  {
+    "codigo": 12,
+    "seccional": "CHAPARRAL",
+    "numero_local": 12,
+    "municipio": "CHAPARRAL",
+    "ubicacion": "CHAPARRAL - RISALDA - COLEGIO"
+  },
+  {
+    "codigo": 14,
+    "seccional": "CHAPARRAL",
+    "numero_local": 14,
+    "municipio": "CHAPARRAL",
+    "ubicacion": "CHAPARRAL - LINEA DIAMANTE - CASETA COMUNAL"
+  },
+  {
+    "codigo": 18,
+    "seccional": "CHAPARRAL",
+    "numero_local": 18,
+    "municipio": "CHAPARRAL",
+    "ubicacion": "CHAPARRAL - LA ARGENTINA HERMOSAS - PARADERO"
+  },
+  {
+    "codigo": 30,
+    "seccional": "CHAPARRAL",
+    "numero_local": 1,
+    "municipio": "ORTEGA",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 31,
+    "seccional": "CHAPARRAL",
+    "numero_local": 2,
+    "municipio": "ORTEGA",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 32,
+    "seccional": "CHAPARRAL",
+    "numero_local": 3,
+    "municipio": "ORTEGA",
+    "ubicacion": "ORTEGA - BANDERA - COLEGIO"
+  },
+  {
+    "codigo": 33,
+    "seccional": "CHAPARRAL",
+    "numero_local": 4,
+    "municipio": "ORTEGA",
+    "ubicacion": "ORTEGA- MESONES - COLEGIO"
+  },
+  {
+    "codigo": 34,
+    "seccional": "CHAPARRAL",
+    "numero_local": 5,
+    "municipio": "ORTEGA",
+    "ubicacion": "ORTEGA-EL VERGEL - ESCUELA"
+  },
+  {
+    "codigo": 35,
+    "seccional": "CHAPARRAL",
+    "numero_local": 6,
+    "municipio": "ORTEGA",
+    "ubicacion": "ORTEGA - ALTO DEL CIELO - COLEGIO"
+  },
+  {
+    "codigo": 39,
+    "seccional": "CHAPARRAL",
+    "numero_local": 10,
+    "municipio": "ORTEGA",
+    "ubicacion": "CEDRALES PERALONSO - ESCUELA"
+  },
+  {
+    "codigo": 41,
+    "seccional": "CHAPARRAL",
+    "numero_local": 12,
+    "municipio": "ORTEGA",
+    "ubicacion": "ORTEGA - CHICALA - ESCUELA"
+  },
+  {
+    "codigo": 43,
+    "seccional": "CHAPARRAL",
+    "numero_local": 14,
+    "municipio": "ORTEGA",
+    "ubicacion": "ORTEGA - EL MACO - COLEGIO"
+  },
+  {
+    "codigo": 49,
+    "seccional": "CHAPARRAL",
+    "numero_local": 20,
+    "municipio": "ORTEGA",
+    "ubicacion": "ORTEGA - SAMARIA - COLEGIO"
+  },
+  {
+    "codigo": 51,
+    "seccional": "FRESNO",
+    "numero_local": 1,
+    "municipio": "ARMERO",
+    "ubicacion": "SAN PEDRO - COLEGIO"
+  },
+  {
+    "codigo": 52,
+    "seccional": "FRESNO",
+    "numero_local": 1,
+    "municipio": "FALAN",
+    "ubicacion": "FALAN-LA PLAYA-CASA DE ELVERTH MIRANDA"
+  },
+  {
+    "codigo": 53,
+    "seccional": "FRESNO",
+    "numero_local": 2,
+    "municipio": "FALAN",
+    "ubicacion": "FALAN-FRIAS-COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 54,
+    "seccional": "FRESNO",
+    "numero_local": 3,
+    "municipio": "FALAN",
+    "ubicacion": "FALAN-FRIAS-PARQUE PRINCIPAL"
+  },
+  {
+    "codigo": 55,
+    "seccional": "FRESNO",
+    "numero_local": 4,
+    "municipio": "FALAN",
+    "ubicacion": "FALAN - ALTO DEL OSO"
+  },
+  {
+    "codigo": 56,
+    "seccional": "FRESNO",
+    "numero_local": 1,
+    "municipio": "FRESNO",
+    "ubicacion": "FRESNO - COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 57,
+    "seccional": "FRESNO",
+    "numero_local": 2,
+    "municipio": "FRESNO",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 58,
+    "seccional": "FRESNO",
+    "numero_local": 3,
+    "municipio": "FRESNO",
+    "ubicacion": "FRESNO - COOPERATIVA DE CAFICULTORES"
+  },
+  {
+    "codigo": 59,
+    "seccional": "FRESNO",
+    "numero_local": 4,
+    "municipio": "FRESNO",
+    "ubicacion": "FRESNO-LA LINDA- ESCUELA"
+  },
+  {
+    "codigo": 60,
+    "seccional": "FRESNO",
+    "numero_local": 5,
+    "municipio": "FRESNO",
+    "ubicacion": "FRESNO-CAMPEON ALTO - ESCUELA"
+  },
+  {
+    "codigo": 61,
+    "seccional": "FRESNO",
+    "numero_local": 6,
+    "municipio": "FRESNO",
+    "ubicacion": "FRESNO-CAMPEON BAJO - PUESTO DE SALUD"
+  },
+  {
+    "codigo": 62,
+    "seccional": "FRESNO",
+    "numero_local": 7,
+    "municipio": "FRESNO",
+    "ubicacion": "BETANIA - COLEGIO"
+  },
+  {
+    "codigo": 63,
+    "seccional": "FRESNO",
+    "numero_local": 8,
+    "municipio": "FRESNO",
+    "ubicacion": "FRESNO - COLOMBIA - ESCUELA"
+  },
+  {
+    "codigo": 66,
+    "seccional": "FRESNO",
+    "numero_local": 11,
+    "municipio": "FRESNO",
+    "ubicacion": "FRESNO - FATIMA - ESCUELA"
+  },
+  {
+    "codigo": 67,
+    "seccional": "FRESNO",
+    "numero_local": 12,
+    "municipio": "FRESNO",
+    "ubicacion": "FRESNO-PAVAS - ESCUELA"
+  },
+  {
+    "codigo": 68,
+    "seccional": "FRESNO",
+    "numero_local": 13,
+    "municipio": "FRESNO",
+    "ubicacion": "FRESNO - LA PICOTA - COLEGIO"
+  },
+  {
+    "codigo": 69,
+    "seccional": "FRESNO",
+    "numero_local": 14,
+    "municipio": "FRESNO",
+    "ubicacion": "FRESNO - LA AGUADITA (CENTRO POBLADO)- SALON COMUNAL"
+  },
+  {
+    "codigo": 70,
+    "seccional": "FRESNO",
+    "numero_local": 15,
+    "municipio": "FRESNO",
+    "ubicacion": "LOS ANDES- ESCUELA"
+  },
+  {
+    "codigo": 73,
+    "seccional": "FRESNO",
+    "numero_local": 1,
+    "municipio": "HERVEO",
+    "ubicacion": "COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 74,
+    "seccional": "FRESNO",
+    "numero_local": 2,
+    "municipio": "HERVEO",
+    "ubicacion": "ARENILLO- COLEGIO"
+  },
+  {
+    "codigo": 75,
+    "seccional": "FRESNO",
+    "numero_local": 3,
+    "municipio": "HERVEO",
+    "ubicacion": "HERVEO - EL PLACER - ESCUELA"
+  },
+  {
+    "codigo": 76,
+    "seccional": "FRESNO",
+    "numero_local": 4,
+    "municipio": "HERVEO",
+    "ubicacion": "HERVEO -LEONERA - ESCUELA"
+  },
+  {
+    "codigo": 77,
+    "seccional": "FRESNO",
+    "numero_local": 5,
+    "municipio": "HERVEO",
+    "ubicacion": "HERVEO - PADUA (CENTRO POBLADO) COOPERATIVA DE CAFICULTORES"
+  },
+  {
+    "codigo": 78,
+    "seccional": "FRESNO",
+    "numero_local": 1,
+    "municipio": "FRESNO",
+    "ubicacion": "FRESNO - EL HATILLO - ESCUELA"
+  },
+  {
+    "codigo": 79,
+    "seccional": "FRESNO",
+    "numero_local": 2,
+    "municipio": "FRESNO",
+    "ubicacion": "MARIQUITA - LA CABAÑA - ESCUELA"
+  },
+  {
+    "codigo": 80,
+    "seccional": "FRESNO",
+    "numero_local": 1,
+    "municipio": "PALOCABILDO",
+    "ubicacion": "PALOCABILDO - COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 81,
+    "seccional": "FRESNO",
+    "numero_local": 2,
+    "municipio": "FALAN",
+    "ubicacion": "PALOCABILDO- CENTRO POBLADO - COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 82,
+    "seccional": "FRESNO",
+    "numero_local": 3,
+    "municipio": "PALOCABILDO",
+    "ubicacion": "PALOCABILDO -CENTRO POBLADO-COOPERATIVA DE CAFICULTORES"
+  },
+  {
+    "codigo": 83,
+    "seccional": "FRESNO",
+    "numero_local": 4,
+    "municipio": "PALOCABILDO",
+    "ubicacion": "ASTURIAS- ESCUELA"
+  },
+  {
+    "codigo": 84,
+    "seccional": "FRESNO",
+    "numero_local": 5,
+    "municipio": "PALOCABILDO",
+    "ubicacion": "MULEROS- ESCUELA"
+  },
+  {
+    "codigo": 85,
+    "seccional": "IBAGUE",
+    "numero_local": 1,
+    "municipio": "ALVARADO",
+    "ubicacion": "Cabecera-OFICINA COMITE MUNICIPAL ALVARADO"
+  },
+  {
+    "codigo": 86,
+    "seccional": "IBAGUE",
+    "numero_local": 2,
+    "municipio": "ALVARADO",
+    "ubicacion": "ALVARADO-LA TIGRERA - COLEGIO"
+  },
+  {
+    "codigo": 87,
+    "seccional": "IBAGUE",
+    "numero_local": 3,
+    "municipio": "ALVARADO",
+    "ubicacion": "ALVARADO - LAGUNETA - ESCUELA"
+  },
+  {
+    "codigo": 88,
+    "seccional": "IBAGUE",
+    "numero_local": 4,
+    "municipio": "ALVARADO",
+    "ubicacion": "ALVARADO - PIEDRAS BLANCAS - ESCUELA"
+  },
+  {
+    "codigo": 89,
+    "seccional": "IBAGUE",
+    "numero_local": 5,
+    "municipio": "ALVARADO",
+    "ubicacion": "ALVARADO - VERACRUZ CENTRO POBLADO (SALÓN COMUNAL)"
+  },
+  {
+    "codigo": 93,
+    "seccional": "IBAGUE",
+    "numero_local": 1,
+    "municipio": "ANZOATEGUI",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 94,
+    "seccional": "IBAGUE",
+    "numero_local": 2,
+    "municipio": "ANZOATEGUI",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 95,
+    "seccional": "IBAGUE",
+    "numero_local": 3,
+    "municipio": "ANZOATEGUI",
+    "ubicacion": "ANZOATEGUI - BUENOS AIRES - ESCUELA"
+  },
+  {
+    "codigo": 96,
+    "seccional": "IBAGUE",
+    "numero_local": 4,
+    "municipio": "ANZOATEGUI",
+    "ubicacion": "ANZOATEGUI - SANTA BARBARA - ESCUELA"
+  },
+  {
+    "codigo": 97,
+    "seccional": "IBAGUE",
+    "numero_local": 5,
+    "municipio": "ANZOATEGUI",
+    "ubicacion": "ANZOATEGUI - EL HATILLO - ESCUELA"
+  },
+  {
+    "codigo": 99,
+    "seccional": "IBAGUE",
+    "numero_local": 7,
+    "municipio": "ANZOATEGUI",
+    "ubicacion": "LISBOA - BIBLIOTECA"
+  },
+  {
+    "codigo": 104,
+    "seccional": "IBAGUE",
+    "numero_local": 1,
+    "municipio": "IBAGUE",
+    "ubicacion": "COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 105,
+    "seccional": "IBAGUE",
+    "numero_local": 2,
+    "municipio": "IBAGUE",
+    "ubicacion": "COOPERATIVA CALLE 13"
+  },
+  {
+    "codigo": 106,
+    "seccional": "IBAGUE",
+    "numero_local": 3,
+    "municipio": "IBAGUE",
+    "ubicacion": "COOPERATIVA CALLE 13"
+  },
+  {
+    "codigo": 107,
+    "seccional": "IBAGUE",
+    "numero_local": 4,
+    "municipio": "IBAGUE",
+    "ubicacion": "IBAGUE - AMBALA PARTE ALTA -ESCUELA"
+  },
+  {
+    "codigo": 108,
+    "seccional": "IBAGUE",
+    "numero_local": 5,
+    "municipio": "ANZOATEGUI",
+    "ubicacion": "IBAGUE-CHINA ALTA-ESCUELA"
+  },
+  {
+    "codigo": 109,
+    "seccional": "IBAGUE",
+    "numero_local": 6,
+    "municipio": "IBAGUE",
+    "ubicacion": "IBAGUE - CHARCO RICO BAJO - LA PLANADA"
+  },
+  {
+    "codigo": 110,
+    "seccional": "IBAGUE",
+    "numero_local": 7,
+    "municipio": "IBAGUE",
+    "ubicacion": "IBAGUE - EL TOTUMO (CENTRO POBLADO) - ESCUELA"
+  },
+  {
+    "codigo": 112,
+    "seccional": "IBAGUE",
+    "numero_local": 9,
+    "municipio": "IBAGUE",
+    "ubicacion": "IBAGUE - LAURELES - COLEGIO"
+  },
+  {
+    "codigo": 113,
+    "seccional": "IBAGUE",
+    "numero_local": 10,
+    "municipio": "IBAGUE",
+    "ubicacion": "IBAGUE - CAY VICTORIA - FUNDACIÓN ITACHUE"
+  },
+  {
+    "codigo": 114,
+    "seccional": "IBAGUE",
+    "numero_local": 11,
+    "municipio": "IBAGUE",
+    "ubicacion": "IBAGUE - LLANITOS - ESCUELA"
+  },
+  {
+    "codigo": 118,
+    "seccional": "IBAGUE",
+    "numero_local": 15,
+    "municipio": "IBAGUE",
+    "ubicacion": "IBAGUE_15_Corregimiento-IBAGUÉ-SAN JUAN DE LA CHINA (CENTRO POBLADO) COOPERATIVA"
+  },
+  {
+    "codigo": 120,
+    "seccional": "IBAGUE",
+    "numero_local": 17,
+    "municipio": "IBAGUE",
+    "ubicacion": "IBAGUE - CATAIMITA - ESCUELA"
+  },
+  {
+    "codigo": 123,
+    "seccional": "IBAGUE",
+    "numero_local": 20,
+    "municipio": "IBAGUE",
+    "ubicacion": "CORREGIMIENTO EL PORVENIR -ESCUELA"
+  },
+  {
+    "codigo": 128,
+    "seccional": "IBAGUE",
+    "numero_local": 25,
+    "municipio": "IBAGUE",
+    "ubicacion": "Vereda Loma Cocora Escuela"
+  },
+  {
+    "codigo": 129,
+    "seccional": "IBAGUE",
+    "numero_local": 1,
+    "municipio": "VENADILLO",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 130,
+    "seccional": "IBAGUE",
+    "numero_local": 2,
+    "municipio": "VENADILLO",
+    "ubicacion": "MALABAR - COLEGIO"
+  },
+  {
+    "codigo": 131,
+    "seccional": "IBAGUE",
+    "numero_local": 3,
+    "municipio": "VENADILLO",
+    "ubicacion": "PALMAR LA ESPERANZA - ESCUELA"
+  },
+  {
+    "codigo": 132,
+    "seccional": "IBAGUE",
+    "numero_local": 4,
+    "municipio": "VENADILLO",
+    "ubicacion": "JUNIN (CENTRO POBLADO) - COLEGIO"
+  },
+  {
+    "codigo": 133,
+    "seccional": "IBAGUE",
+    "numero_local": 5,
+    "municipio": "VENADILLO",
+    "ubicacion": "VENADILLO_5_Vereda El Salto - ESCUELA"
+  },
+  {
+    "codigo": 134,
+    "seccional": "LIBANO",
+    "numero_local": 1,
+    "municipio": "CASABIANCA",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 135,
+    "seccional": "LIBANO",
+    "numero_local": 2,
+    "municipio": "CASABIANCA",
+    "ubicacion": "SEDE COOPERATIVA CAFILIBANO - CASCO URBANO CASABIANCA"
+  },
+  {
+    "codigo": 136,
+    "seccional": "LIBANO",
+    "numero_local": 3,
+    "municipio": "CASABIANCA",
+    "ubicacion": "LA CRISTALINA - ESCUELA"
+  },
+  {
+    "codigo": 137,
+    "seccional": "LIBANO",
+    "numero_local": 4,
+    "municipio": "CASABIANCA",
+    "ubicacion": "PEÑITAS CRUCE HOYO CALIENTE"
+  },
+  {
+    "codigo": 138,
+    "seccional": "LIBANO",
+    "numero_local": 5,
+    "municipio": "CASABIANCA",
+    "ubicacion": "CASABIANCA - SAN JERONIMO-ESCUELA"
+  },
+  {
+    "codigo": 139,
+    "seccional": "LIBANO",
+    "numero_local": 6,
+    "municipio": "CASABIANCA",
+    "ubicacion": "CASABIANCA-LLANADAS-ESCUELA"
+  },
+  {
+    "codigo": 141,
+    "seccional": "LIBANO",
+    "numero_local": 1,
+    "municipio": "LERIDA",
+    "ubicacion": "LÉRIDA -DELICIAS - COLEGIO"
+  },
+  {
+    "codigo": 142,
+    "seccional": "LIBANO",
+    "numero_local": 1,
+    "municipio": "LIBANO",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 143,
+    "seccional": "LIBANO",
+    "numero_local": 2,
+    "municipio": "LERIDA",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 144,
+    "seccional": "LIBANO",
+    "numero_local": 3,
+    "municipio": "LIBANO",
+    "ubicacion": "Cooperativa de Caficultores"
+  },
+  {
+    "codigo": 145,
+    "seccional": "LIBANO",
+    "numero_local": 4,
+    "municipio": "LERIDA",
+    "ubicacion": "COOPERATIVA DE CAFICULTORES SEDE LA 14"
+  },
+  {
+    "codigo": 146,
+    "seccional": "LIBANO",
+    "numero_local": 5,
+    "municipio": "LERIDA",
+    "ubicacion": "DELICIAS DEL CONVENIO (Libano,Lerida)"
+  },
+  {
+    "codigo": 147,
+    "seccional": "LIBANO",
+    "numero_local": 6,
+    "municipio": "LIBANO",
+    "ubicacion": "Vereda HORIZONTE ESCUELA"
+  },
+  {
+    "codigo": 148,
+    "seccional": "LIBANO",
+    "numero_local": 7,
+    "municipio": "LIBANO",
+    "ubicacion": "PARQUE PRINCIPAL-EL CONVENIO"
+  },
+  {
+    "codigo": 149,
+    "seccional": "LIBANO",
+    "numero_local": 8,
+    "municipio": "LIBANO",
+    "ubicacion": "LIBANO PATIO BONITO - COLEGIO"
+  },
+  {
+    "codigo": 150,
+    "seccional": "LIBANO",
+    "numero_local": 9,
+    "municipio": "LIBANO",
+    "ubicacion": "LIBANO EL TESORO - ESCUELA"
+  },
+  {
+    "codigo": 151,
+    "seccional": "LIBANO",
+    "numero_local": 10,
+    "municipio": "LIBANO",
+    "ubicacion": "LIBANO TIERRADENTRO - COLEGIO"
+  },
+  {
+    "codigo": 152,
+    "seccional": "LIBANO",
+    "numero_local": 11,
+    "municipio": "LIBANO",
+    "ubicacion": "LÍBANO SAN FERNANDO - COLEGIO"
+  },
+  {
+    "codigo": 153,
+    "seccional": "LIBANO",
+    "numero_local": 12,
+    "municipio": "LIBANO",
+    "ubicacion": "LÍBANO SANTA TERESA - COLEGIO"
+  },
+  {
+    "codigo": 154,
+    "seccional": "LIBANO",
+    "numero_local": 13,
+    "municipio": "LIBANO",
+    "ubicacion": "LIBANO - BULGARIA- ESCUELA"
+  },
+  {
+    "codigo": 155,
+    "seccional": "LIBANO",
+    "numero_local": 14,
+    "municipio": "LIBANO",
+    "ubicacion": "LIBANO- EL DIAMANTE - PARADERO COREA"
+  },
+  {
+    "codigo": 156,
+    "seccional": "LIBANO",
+    "numero_local": 15,
+    "municipio": "LIBANO",
+    "ubicacion": "LIBANO-MARENGO-ESCUELA"
+  },
+  {
+    "codigo": 160,
+    "seccional": "LIBANO",
+    "numero_local": 19,
+    "municipio": "LIBANO",
+    "ubicacion": "LÍBANO CAMPOALEGRE COLEGIO"
+  },
+  {
+    "codigo": 161,
+    "seccional": "LIBANO",
+    "numero_local": 20,
+    "municipio": "LIBANO",
+    "ubicacion": "LÍBANO PANTANILLO SALÓN COMUNAL"
+  },
+  {
+    "codigo": 162,
+    "seccional": "LIBANO",
+    "numero_local": 1,
+    "municipio": "SANTA ISABEL",
+    "ubicacion": "COMITE DE CAFETEROS DE SANTA ISABEL"
+  },
+  {
+    "codigo": 163,
+    "seccional": "LIBANO",
+    "numero_local": 2,
+    "municipio": "SANTA ISABEL",
+    "ubicacion": "SANTA ISABEL- COLON - ESCUELA"
+  },
+  {
+    "codigo": 164,
+    "seccional": "LIBANO",
+    "numero_local": 3,
+    "municipio": "SANTA ISABEL",
+    "ubicacion": "SANTA ISABEL- LA RICA - ESCUELA"
+  },
+  {
+    "codigo": 165,
+    "seccional": "LIBANO",
+    "numero_local": 4,
+    "municipio": "SANTA ISABEL",
+    "ubicacion": "SANTA ISABEL-SAN RAFAEL - ESCUELA"
+  },
+  {
+    "codigo": 166,
+    "seccional": "LIBANO",
+    "numero_local": 1,
+    "municipio": "VILLAHERMOSA",
+    "ubicacion": "COMITÉ CAFETEROS VILLAHERMOSA"
+  },
+  {
+    "codigo": 167,
+    "seccional": "LIBANO",
+    "numero_local": 2,
+    "municipio": "VILLAHERMOSA",
+    "ubicacion": "Cooperativa de caficultores Villahermosa"
+  },
+  {
+    "codigo": 168,
+    "seccional": "LIBANO",
+    "numero_local": 3,
+    "municipio": "VILLAHERMOSA",
+    "ubicacion": "Vereda-VILLAHERMOSA -LA ESTRELLA - ESCUELA"
+  },
+  {
+    "codigo": 169,
+    "seccional": "LIBANO",
+    "numero_local": 4,
+    "municipio": "VILLAHERMOSA",
+    "ubicacion": "VILLAHERMOSA - EL CASTILLO - ESCUELA"
+  },
+  {
+    "codigo": 170,
+    "seccional": "LIBANO",
+    "numero_local": 5,
+    "municipio": "VILLAHERMOSA",
+    "ubicacion": "VILLAHERMOSA - POTOSI - ESCUELA"
+  },
+  {
+    "codigo": 173,
+    "seccional": "LIBANO",
+    "numero_local": 8,
+    "municipio": "VILLAHERMOSA",
+    "ubicacion": "VILLAHERMOSA YARUMAL - COLEGIO"
+  },
+  {
+    "codigo": 178,
+    "seccional": "PLANADAS",
+    "numero_local": 1,
+    "municipio": "ATACO",
+    "ubicacion": "COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 179,
+    "seccional": "PLANADAS",
+    "numero_local": 2,
+    "municipio": "ATACO",
+    "ubicacion": "LA NUEVA REFORMA - ESCUELA"
+  },
+  {
+    "codigo": 180,
+    "seccional": "PLANADAS",
+    "numero_local": 3,
+    "municipio": "ATACO",
+    "ubicacion": "MORAS - ESCUELA"
+  },
+  {
+    "codigo": 181,
+    "seccional": "PLANADAS",
+    "numero_local": 4,
+    "municipio": "ATACO",
+    "ubicacion": "PALESTINA - ESCUELA"
+  },
+  {
+    "codigo": 182,
+    "seccional": "PLANADAS",
+    "numero_local": 5,
+    "municipio": "ATACO",
+    "ubicacion": "ANDES ESTRELLA - ESCUELA"
+  },
+  {
+    "codigo": 183,
+    "seccional": "PLANADAS",
+    "numero_local": 6,
+    "municipio": "ATACO",
+    "ubicacion": "BALSILLAS - ESCUELA"
+  },
+  {
+    "codigo": 184,
+    "seccional": "PLANADAS",
+    "numero_local": 7,
+    "municipio": "ATACO",
+    "ubicacion": "CANOAS DE SAN ROQUE - ESCUELA"
+  },
+  {
+    "codigo": 187,
+    "seccional": "PLANADAS",
+    "numero_local": 10,
+    "municipio": "ATACO",
+    "ubicacion": "PAUJIL - ESCUELA"
+  },
+  {
+    "codigo": 188,
+    "seccional": "PLANADAS",
+    "numero_local": 11,
+    "municipio": "ATACO",
+    "ubicacion": "CASA DE ZINC - ESCUELA"
+  },
+  {
+    "codigo": 189,
+    "seccional": "PLANADAS",
+    "numero_local": 12,
+    "municipio": "ATACO",
+    "ubicacion": "CASA VERDE - ESCUELA"
+  },
+  {
+    "codigo": 194,
+    "seccional": "PLANADAS",
+    "numero_local": 17,
+    "municipio": "ATACO",
+    "ubicacion": "ATACO - SANTA RITA - COLEGIO"
+  },
+  {
+    "codigo": 195,
+    "seccional": "PLANADAS",
+    "numero_local": 18,
+    "municipio": "ATACO",
+    "ubicacion": "BERLIN - ESCUELA"
+  },
+  {
+    "codigo": 196,
+    "seccional": "PLANADAS",
+    "numero_local": 19,
+    "municipio": "ATACO",
+    "ubicacion": "CAMPO HERMOSO - ESCUELA"
+  },
+  {
+    "codigo": 197,
+    "seccional": "PLANADAS",
+    "numero_local": 20,
+    "municipio": "ATACO",
+    "ubicacion": "POMARROSO - ESCUELA"
+  },
+  {
+    "codigo": 198,
+    "seccional": "PLANADAS",
+    "numero_local": 21,
+    "municipio": "ATACO",
+    "ubicacion": "SANTIAGO PEREZ - COMITÉ DE CAFETEROS"
+  },
+  {
+    "codigo": 199,
+    "seccional": "PLANADAS",
+    "numero_local": 22,
+    "municipio": "ATACO",
+    "ubicacion": "EL CAIRO - ESCUELA"
+  },
+  {
+    "codigo": 200,
+    "seccional": "PLANADAS",
+    "numero_local": 23,
+    "municipio": "ATACO",
+    "ubicacion": "HOLANDA - ESCUELA"
+  },
+  {
+    "codigo": 203,
+    "seccional": "PLANADAS",
+    "numero_local": 1,
+    "municipio": "PLANADAS",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 204,
+    "seccional": "PLANADAS",
+    "numero_local": 2,
+    "municipio": "PLANADAS",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 205,
+    "seccional": "PLANADAS",
+    "numero_local": 3,
+    "municipio": "PLANADAS",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 206,
+    "seccional": "PLANADAS",
+    "numero_local": 4,
+    "municipio": "ATACO",
+    "ubicacion": "PLANADAS - COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 207,
+    "seccional": "PLANADAS",
+    "numero_local": 5,
+    "municipio": "PLANADAS",
+    "ubicacion": "PLANADAS - ESMERALDA ALTA - ESCUELA"
+  },
+  {
+    "codigo": 208,
+    "seccional": "PLANADAS",
+    "numero_local": 6,
+    "municipio": "PLANADAS",
+    "ubicacion": "SAN AGUSTIN - ESCUELA"
+  },
+  {
+    "codigo": 215,
+    "seccional": "PLANADAS",
+    "numero_local": 13,
+    "municipio": "PLANADAS",
+    "ubicacion": "MONTALVO - ESCUELA"
+  },
+  {
+    "codigo": 216,
+    "seccional": "PLANADAS",
+    "numero_local": 14,
+    "municipio": "PLANADAS",
+    "ubicacion": "EL RUBI - ESCUELA"
+  },
+  {
+    "codigo": 217,
+    "seccional": "PLANADAS",
+    "numero_local": 15,
+    "municipio": "PLANADAS",
+    "ubicacion": "LOS MANGOS - ESCUELA"
+  },
+  {
+    "codigo": 219,
+    "seccional": "PLANADAS",
+    "numero_local": 17,
+    "municipio": "PLANADAS",
+    "ubicacion": "CENTRO POBLADO BILBAO - COOPERATIVA DE CAFICULTORES"
+  },
+  {
+    "codigo": 221,
+    "seccional": "PLANADAS",
+    "numero_local": 19,
+    "municipio": "PLANADAS",
+    "ubicacion": "Corregimiento-GAITANIA - COLISEO GAITANIA"
+  },
+  {
+    "codigo": 223,
+    "seccional": "PLANADAS",
+    "numero_local": 21,
+    "municipio": "PLANADAS",
+    "ubicacion": "LA ILUSIÓN - ESCUELA"
+  },
+  {
+    "codigo": 224,
+    "seccional": "PLANADAS",
+    "numero_local": 22,
+    "municipio": "PLANADAS",
+    "ubicacion": "EL CASTILLO - ESCUELA"
+  },
+  {
+    "codigo": 225,
+    "seccional": "PLANADAS",
+    "numero_local": 23,
+    "municipio": "PLANADAS",
+    "ubicacion": "Vereda-EL OASIS ALTO - FONDA ELICENIO"
+  },
+  {
+    "codigo": 226,
+    "seccional": "PLANADAS",
+    "numero_local": 24,
+    "municipio": "PLANADAS",
+    "ubicacion": "Vereda La Palmera - Coliseo"
+  },
+  {
+    "codigo": 227,
+    "seccional": "RIOBLANCO",
+    "numero_local": 1,
+    "municipio": "RIOBLANCO",
+    "ubicacion": "COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 228,
+    "seccional": "RIOBLANCO",
+    "numero_local": 2,
+    "municipio": "RIOBLANCO",
+    "ubicacion": "COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 229,
+    "seccional": "RIOBLANCO",
+    "numero_local": 3,
+    "municipio": "RIOBLANCO",
+    "ubicacion": "MARACAIBO - ESCUELA"
+  },
+  {
+    "codigo": 230,
+    "seccional": "RIOBLANCO",
+    "numero_local": 4,
+    "municipio": "RIOBLANCO",
+    "ubicacion": "SAN JOSE LINDOSA . COLEGIO"
+  },
+  {
+    "codigo": 231,
+    "seccional": "RIOBLANCO",
+    "numero_local": 5,
+    "municipio": "RIOBLANCO",
+    "ubicacion": "LA URIBE - ESCUELA"
+  },
+  {
+    "codigo": 232,
+    "seccional": "RIOBLANCO",
+    "numero_local": 6,
+    "municipio": "RIOBLANCO",
+    "ubicacion": "GAITAN - COLEGIO"
+  },
+  {
+    "codigo": 233,
+    "seccional": "RIOBLANCO",
+    "numero_local": 7,
+    "municipio": "RIOBLANCO",
+    "ubicacion": "BARBACOAS - ESCUELA"
+  },
+  {
+    "codigo": 234,
+    "seccional": "RIOBLANCO",
+    "numero_local": 8,
+    "municipio": "RIOBLANCO",
+    "ubicacion": "HERRERA CABECERA MPAL - COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 237,
+    "seccional": "RIOBLANCO",
+    "numero_local": 11,
+    "municipio": "RIOBLANCO",
+    "ubicacion": "PUERTO SALDAÑA (CENTRO POBLADO) - COLEGIO"
+  },
+  {
+    "codigo": 238,
+    "seccional": "RIOBLANCO",
+    "numero_local": 12,
+    "municipio": "RIOBLANCO",
+    "ubicacion": "QUEBRADON - COLEGIO"
+  },
+  {
+    "codigo": 241,
+    "seccional": "RIOBLANCO",
+    "numero_local": 15,
+    "municipio": "RIOBLANCO",
+    "ubicacion": "ESCUELA- LA VERBENA"
+  },
+  {
+    "codigo": 245,
+    "seccional": "RIOBLANCO",
+    "numero_local": 19,
+    "municipio": "RIOBLANCO",
+    "ubicacion": "EL DUDA - ESCUELA"
+  },
+  {
+    "codigo": 246,
+    "seccional": "RIOBLANCO",
+    "numero_local": 1,
+    "municipio": "RONCESVALLES",
+    "ubicacion": "EL CEDRO - ESCUELA"
+  },
+  {
+    "codigo": 247,
+    "seccional": "RIOBLANCO",
+    "numero_local": 1,
+    "municipio": "SAN ANTONIO",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 248,
+    "seccional": "RIOBLANCO",
+    "numero_local": 2,
+    "municipio": "SAN ANTONIO",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 249,
+    "seccional": "RIOBLANCO",
+    "numero_local": 3,
+    "municipio": "SAN ANTONIO",
+    "ubicacion": "SAN JOSE - ESCUELA"
+  },
+  {
+    "codigo": 250,
+    "seccional": "RIOBLANCO",
+    "numero_local": 4,
+    "municipio": "SAN ANTONIO",
+    "ubicacion": "SANTA ROSA DE TETUAN - ESCUELA"
+  },
+  {
+    "codigo": 251,
+    "seccional": "RIOBLANCO",
+    "numero_local": 5,
+    "municipio": "SAN ANTONIO",
+    "ubicacion": "TOLDA BLANCA - CENTRO COMUNAL"
+  },
+  {
+    "codigo": 252,
+    "seccional": "RIOBLANCO",
+    "numero_local": 6,
+    "municipio": "ORTEGA",
+    "ubicacion": "PLAYARRICA COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 253,
+    "seccional": "RIOBLANCO",
+    "numero_local": 7,
+    "municipio": "SAN ANTONIO",
+    "ubicacion": "SAN ANTONIO - VILLAHERMOSA - ESCUELA"
+  },
+  {
+    "codigo": 254,
+    "seccional": "RIOBLANCO",
+    "numero_local": 8,
+    "municipio": "SAN ANTONIO",
+    "ubicacion": "SAN ANTONIO - EL SALADO - ESCUELA"
+  },
+  {
+    "codigo": 257,
+    "seccional": "ROVIRA",
+    "numero_local": 1,
+    "municipio": "CAJAMARCA",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 258,
+    "seccional": "ROVIRA",
+    "numero_local": 2,
+    "municipio": "CAJAMARCA",
+    "ubicacion": "COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 259,
+    "seccional": "ROVIRA",
+    "numero_local": 1,
+    "municipio": "ROVIRA",
+    "ubicacion": "COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 260,
+    "seccional": "ROVIRA",
+    "numero_local": 2,
+    "municipio": "ROVIRA",
+    "ubicacion": "COMITE DE CAFETEROS"
+  },
+  {
+    "codigo": 261,
+    "seccional": "ROVIRA",
+    "numero_local": 3,
+    "municipio": "ROVIRA",
+    "ubicacion": "COOMERSA"
+  },
+  {
+    "codigo": 262,
+    "seccional": "ROVIRA",
+    "numero_local": 4,
+    "municipio": "ROVIRA",
+    "ubicacion": "ROVIRA LA ESPERANZA - ESCUELA"
+  },
+  {
+    "codigo": 263,
+    "seccional": "ROVIRA",
+    "numero_local": 5,
+    "municipio": "ROVIRA",
+    "ubicacion": "Vereda SAN ROQUE -FINCA DE LUIS JAVIER TORRES"
+  },
+  {
+    "codigo": 265,
+    "seccional": "ROVIRA",
+    "numero_local": 7,
+    "municipio": "ROVIRA",
+    "ubicacion": "ROVIRA LA LIBERTAD - COLEGIO"
+  },
+  {
+    "codigo": 266,
+    "seccional": "ROVIRA",
+    "numero_local": 8,
+    "municipio": "ROVIRA",
+    "ubicacion": "ROVIRA LA LUISA- COLEGIO"
+  },
+  {
+    "codigo": 267,
+    "seccional": "ROVIRA",
+    "numero_local": 9,
+    "municipio": "ROVIRA",
+    "ubicacion": "ROVIRA LOS ANDES- ESCUELA"
+  },
+  {
+    "codigo": 268,
+    "seccional": "ROVIRA",
+    "numero_local": 10,
+    "municipio": "ROVIRA",
+    "ubicacion": "ROVIRA HERVIDERO BAJO-ESCUELA"
+  },
+  {
+    "codigo": 274,
+    "seccional": "ROVIRA",
+    "numero_local": 16,
+    "municipio": "ROVIRA",
+    "ubicacion": "ROVIRA- RIOMANSO - CASERIO"
+  },
+  {
+    "codigo": 275,
+    "seccional": "ROVIRA",
+    "numero_local": 17,
+    "municipio": "ROVIRA",
+    "ubicacion": "ROVIRA - SAN VICENTE - ESCUELA (GUADUAL SAN VICENTE)"
+  },
+  {
+    "codigo": 276,
+    "seccional": "ROVIRA",
+    "numero_local": 18,
+    "municipio": "ROVIRA",
+    "ubicacion": "Vereda-ROVIRA-CALICÁ- CASETA"
+  },
+  {
+    "codigo": 277,
+    "seccional": "ROVIRA",
+    "numero_local": 19,
+    "municipio": "ROVIRA",
+    "ubicacion": "ROVIRA - GUAIMARAL- ESCUELA"
+  },
+  {
+    "codigo": 278,
+    "seccional": "ROVIRA",
+    "numero_local": 1,
+    "municipio": "ROVIRA",
+    "ubicacion": "EL PORVENIR - ESCUELA"
+  },
+  {
+    "codigo": 279,
+    "seccional": "ROVIRA",
+    "numero_local": 1,
+    "municipio": "ROVIRA",
+    "ubicacion": "VALLE DE SAN JUAN - BUENAVISTA ALTA - ESCUELA"
+  },
+  {
+    "codigo": 280,
+    "seccional": "ROVIRA",
+    "numero_local": 2,
+    "municipio": "ROVIRA",
+    "ubicacion": "VALLE DE SAN JUAN - VALLECITO - ESCUELA"
+  },
+  {
+    "codigo": 281,
+    "seccional": "ROVIRA",
+    "numero_local": 3,
+    "municipio": "VALLE DE SAN JUAN",
+    "ubicacion": "VALLE DE SAN JUAN - LA ALEGRIA -ESCUELA"
+  },
+  {
+    "codigo": 282,
+    "seccional": "ROVIRA",
+    "numero_local": 4,
+    "municipio": "VALLE DE SAN JUAN",
+    "ubicacion": "CEDALIA PARTE BAJA - ESCUELA - cambiar a Finca de Gilberto Bonilla"
+  },
+  {
+    "codigo": 283,
+    "seccional": "VILLARRICA",
+    "numero_local": 1,
+    "municipio": "ALPUJARRA",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 284,
+    "seccional": "VILLARRICA",
+    "numero_local": 2,
+    "municipio": "ALPUJARRA",
+    "ubicacion": "EL ACHIRAL- ESCUELA"
+  },
+  {
+    "codigo": 285,
+    "seccional": "VILLARRICA",
+    "numero_local": 3,
+    "municipio": "ALPUJARRA",
+    "ubicacion": "EL MORAL- ESCUELA"
+  },
+  {
+    "codigo": 286,
+    "seccional": "VILLARRICA",
+    "numero_local": 4,
+    "municipio": "ALPUJARRA",
+    "ubicacion": "EL CARMEN- CASETA COMUNAL"
+  },
+  {
+    "codigo": 287,
+    "seccional": "VILLARRICA",
+    "numero_local": 5,
+    "municipio": "ALPUJARRA",
+    "ubicacion": "EL GUARUMO- ESCUELA"
+  },
+  {
+    "codigo": 288,
+    "seccional": "VILLARRICA",
+    "numero_local": 6,
+    "municipio": "ALPUJARRA",
+    "ubicacion": "CENTRO POBLADO LA ARADA- CASETA COMUNAL"
+  },
+  {
+    "codigo": 289,
+    "seccional": "VILLARRICA",
+    "numero_local": 1,
+    "municipio": "CUNDAY",
+    "ubicacion": "EL RECREO- ESCUELA"
+  },
+  {
+    "codigo": 290,
+    "seccional": "VILLARRICA",
+    "numero_local": 2,
+    "municipio": "CUNDAY",
+    "ubicacion": "EL RODEO- ESCUELA"
+  },
+  {
+    "codigo": 291,
+    "seccional": "VILLARRICA",
+    "numero_local": 3,
+    "municipio": "CUNDAY",
+    "ubicacion": "LA AURORA- COMITÉ DE CAFETEROS"
+  },
+  {
+    "codigo": 292,
+    "seccional": "VILLARRICA",
+    "numero_local": 4,
+    "municipio": "CUNDAY",
+    "ubicacion": "CENTRO POBLADO TRES ESQUINAS CUNDAY - COMITÉ DE CAFETEROS"
+  },
+  {
+    "codigo": 293,
+    "seccional": "VILLARRICA",
+    "numero_local": 1,
+    "municipio": "DOLORES",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 294,
+    "seccional": "VILLARRICA",
+    "numero_local": 2,
+    "municipio": "ALPUJARRA",
+    "ubicacion": "COMITÉ DE CAFETEROS"
+  },
+  {
+    "codigo": 295,
+    "seccional": "VILLARRICA",
+    "numero_local": 3,
+    "municipio": "DOLORES",
+    "ubicacion": "LA SOLEDAD- ESCUELA"
+  },
+  {
+    "codigo": 296,
+    "seccional": "VILLARRICA",
+    "numero_local": 4,
+    "municipio": "DOLORES",
+    "ubicacion": "SAN ANDRES- ESCUELA"
+  },
+  {
+    "codigo": 297,
+    "seccional": "VILLARRICA",
+    "numero_local": 5,
+    "municipio": "DOLORES",
+    "ubicacion": "JAPON- ESCUELA"
+  },
+  {
+    "codigo": 298,
+    "seccional": "VILLARRICA",
+    "numero_local": 6,
+    "municipio": "DOLORES",
+    "ubicacion": "PICACHOS- ESCUELA"
+  },
+  {
+    "codigo": 299,
+    "seccional": "VILLARRICA",
+    "numero_local": 7,
+    "municipio": "DOLORES",
+    "ubicacion": "SAN JOSE- CASETA COMUNAL"
+  },
+  {
+    "codigo": 301,
+    "seccional": "VILLARRICA",
+    "numero_local": 9,
+    "municipio": "DOLORES",
+    "ubicacion": "LLANITOS- CASETA COMUNAL"
+  },
+  {
+    "codigo": 302,
+    "seccional": "VILLARRICA",
+    "numero_local": 10,
+    "municipio": "DOLORES",
+    "ubicacion": "SAN PEDRO- ESCUELA"
+  },
+  {
+    "codigo": 308,
+    "seccional": "VILLARRICA",
+    "numero_local": 1,
+    "municipio": "ICONONZO",
+    "ubicacion": "COMITÉ DE CAFETEROS"
+  },
+  {
+    "codigo": 309,
+    "seccional": "VILLARRICA",
+    "numero_local": 2,
+    "municipio": "ICONONZO",
+    "ubicacion": "SAN JOSE DE GUATIMBOL- PUESTO DE SALUD"
+  },
+  {
+    "codigo": 310,
+    "seccional": "VILLARRICA",
+    "numero_local": 3,
+    "municipio": "ICONONZO",
+    "ubicacion": "BALCONCITOS- SALON COMUNAL"
+  },
+  {
+    "codigo": 311,
+    "seccional": "VILLARRICA",
+    "numero_local": 4,
+    "municipio": "ICONONZO",
+    "ubicacion": "HOYA GRANDE - ESCUELA"
+  },
+  {
+    "codigo": 312,
+    "seccional": "VILLARRICA",
+    "numero_local": 5,
+    "municipio": "ICONONZO",
+    "ubicacion": "LA FILA- COLEGIO"
+  },
+  {
+    "codigo": 313,
+    "seccional": "VILLARRICA",
+    "numero_local": 6,
+    "municipio": "ICONONZO",
+    "ubicacion": "PIE DE CUESTA ALTA- FINCA EL DIVISO"
+  },
+  {
+    "codigo": 315,
+    "seccional": "VILLARRICA",
+    "numero_local": 1,
+    "municipio": "MELGAR",
+    "ubicacion": "CALCUTA- ESCUELA"
+  },
+  {
+    "codigo": 316,
+    "seccional": "VILLARRICA",
+    "numero_local": 1,
+    "municipio": "PRADO",
+    "ubicacion": "MONTOSO-COMITÉ DE CAFETEROS"
+  },
+  {
+    "codigo": 317,
+    "seccional": "VILLARRICA",
+    "numero_local": 1,
+    "municipio": "PRADO",
+    "ubicacion": "PURIFICACIÓN- VILLA ESPERANZA -CASETA COMUNAL"
+  },
+  {
+    "codigo": 318,
+    "seccional": "VILLARRICA",
+    "numero_local": 1,
+    "municipio": "VILLARRICA",
+    "ubicacion": "Comité de Cafeteros"
+  },
+  {
+    "codigo": 319,
+    "seccional": "VILLARRICA",
+    "numero_local": 2,
+    "municipio": "CUNDAY",
+    "ubicacion": "COMITÉ DE CAFETEROS"
+  },
+  {
+    "codigo": 320,
+    "seccional": "VILLARRICA",
+    "numero_local": 3,
+    "municipio": "VILLARRICA",
+    "ubicacion": "EL CASTILLO- ESCUELA"
+  },
+  {
+    "codigo": 321,
+    "seccional": "VILLARRICA",
+    "numero_local": 4,
+    "municipio": "VILLARRICA",
+    "ubicacion": "EL DIVISO- CASETA COMUNAL"
+  },
+  {
+    "codigo": 322,
+    "seccional": "VILLARRICA",
+    "numero_local": 5,
+    "municipio": "VILLARRICA",
+    "ubicacion": "LA ISLA- ESCUELA"
+  },
+  {
+    "codigo": 323,
+    "seccional": "VILLARRICA",
+    "numero_local": 6,
+    "municipio": "VILLARRICA",
+    "ubicacion": "CRUCERO- ESCUELA"
+  },
+  {
+    "codigo": 324,
+    "seccional": "VILLARRICA",
+    "numero_local": 7,
+    "municipio": "VILLARRICA",
+    "ubicacion": "Vereda El Recuerdo"
+  }
+]

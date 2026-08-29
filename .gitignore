@@ -1,0 +1,14 @@
+node_modules/
+data/
+logs/
+secrets/
+.env
+.env.deploy
+.env.server
+*.db
+*.db-wal
+*.db-shm
+*.xlsx
+*.log
+npm-debug.log
+.DS_Store

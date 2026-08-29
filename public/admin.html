@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Panel de Contingencia — Bot WhatsApp</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  /* Design tokens — Sistema "The Institutional Vanguard" (appweb-skills-fnc: fnc-design-system) */
+  :root {
+    --primary:#8d1024; --primary-container:#a5122a; --on-primary:#ffffff;
+    --secondary:#1b502d; --secondary-container:#2e7d32; --on-secondary:#ffffff;
+    --background:#fdfdfd; --surface:#fdfdfd;
+    --surface-dim:#eef1ee; --surface-container:#f0f4f0;
+    --surface-container-high:#e6ebe6; --surface-container-highest:#dde2dd;
+    --surface-container-low:#f7faf7; --surface-container-lowest:#ffffff;
+    --on-surface:#0a1a0d; --on-surface-variant:#3a4a3d;
+    --outline:#717a6d; --outline-variant:#c0c9bb;
+    --error:#ba1a1a;
+    --shadow-ambient:0px 8px 32px rgba(141,16,36,0.05);
+    --shadow-float:0px 16px 48px rgba(141,16,36,0.08);
+    --radius-sm:0.375rem; --radius-md:0.5rem; --radius-lg:0.875rem; --radius-xl:1.25rem;
+  }
+
+  * { box-sizing:border-box; }
+  body {
+    margin:0; color:var(--on-surface); min-height:100vh; position:relative;
+    font-family:'Inter','Public Sans',system-ui,Segoe UI,Roboto,sans-serif;
+    background:var(--background);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4,h5,h6 { font-family:'Public Sans','Inter',system-ui,sans-serif; color:var(--on-surface); }
+
+  /* Glass utility (repo fnc-design-system) */
+  .glass { background:rgba(255,255,255,0.8); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+
+  header { position:sticky; top:0; z-index:60; }
+  header.glass-top {
+    padding:12px 18px; display:flex; justify-content:space-between; align-items:center;
+    border-radius:0 0 var(--radius-lg) var(--radius-lg);
+    border-bottom:1px solid var(--outline-variant);
+    box-shadow:var(--shadow-ambient);
+  }
+  header h1 { font-size:16px; margin:0; color:var(--on-surface); }
+  #user { color:var(--on-surface-variant); font-size:13px; }
+
+  .wrap { max-width:1100px; margin:18px auto; padding:0 14px; }
+  .tabs { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .tab { padding:9px 16px; border-radius:var(--radius-md); cursor:pointer; font-weight:600; color:var(--on-surface-variant);
+    background:var(--surface-container); border:1px solid transparent; transition:all .2s ease; }
+  .tab:hover { background:var(--surface-container-high); color:var(--on-surface); }
+  .tab.active { background:var(--surface-container-lowest); color:var(--primary); border:1px solid var(--outline-variant);
+    box-shadow:var(--shadow-ambient); font-weight:600; }
+  .panel { display:none; }
+  .panel.active { display:block; }
+
+  .card {
+    background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:var(--radius-xl);
+    padding:14px; margin-bottom:14px; position:relative; overflow:hidden;
+    box-shadow:var(--shadow-ambient);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { text-align:left; padding:6px 8px; border-bottom:1px solid rgba(113,122,109,0.18); vertical-align:top; }
+  th { background:var(--surface-container-low); color:var(--on-surface-variant); }
+  td { color:var(--on-surface); }
+
+  .btn { background:linear-gradient(135deg,var(--primary),var(--primary-container)); color:#fff;
+    border:1px solid rgba(255,255,255,0.2); padding:8px 14px; border-radius:var(--radius-md); cursor:pointer; font-weight:600;
+    box-shadow:var(--shadow-ambient); transition:filter .2s ease, transform .2s ease; }
+  .btn:hover { filter:brightness(1.05); transform:translateY(-1px); }
+  .btn.sec { background:var(--surface-container); color:var(--primary); border:1px solid var(--outline-variant); box-shadow:none; }
+  .btn.bad { background:linear-gradient(135deg,#ba1a1a,#d33); }
+
+  .badge { display:inline-block; padding:2px 7px; border-radius:10px; font-size:11px; }
+  .badge.ok { background:rgba(27,80,45,0.14); color:var(--secondary); }
+  .badge.bad { background:rgba(186,26,26,0.12); color:var(--error); }
+  .badge.warn { background:rgba(163,107,0,0.16); color:#a36b00; }
+
+  input,select { padding:6px 8px; border:1px solid var(--outline-variant); border-radius:var(--radius-sm); width:100%; margin:3px 0; background:var(--surface-container-lowest); color:var(--on-surface); }
+  input:focus,select:focus { outline:none; box-shadow:0 0 0 1px var(--primary); }
+  label { font-size:12px; color:var(--on-surface-variant); }
+
+  /* Modal overlay (repo: blur 4px) + GlassModal box */
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,0.55); display:none; align-items:center; justify-content:center;
+    backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); }
+  .modal.show { display:flex; }
+  .modal .box { background:var(--surface-container-lowest); border:1px solid var(--outline-variant); border-radius:1.5rem; padding:18px; width:min(440px,92vw);
+    box-shadow:var(--shadow-ambient); }
+
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:140px; }
+  .bar { height:8px; background:rgba(113,122,109,0.18); border-radius:5px; overflow:hidden; margin-top:3px; }
+  .bar > span { display:block; height:100%; background:linear-gradient(90deg,var(--primary),var(--primary-container)); }
+  .hidden { display:none; }
+  .login { max-width:380px; margin:80px auto; }
+  .msg { font-size:12px; margin:6px 0; }
+  .err { color:var(--error); } .okm { color:var(--secondary); }
+  h3,h4 { color:var(--on-surface); }
+  hr { border:0; border-top:1px solid var(--outline-variant); margin:12px 0; }
+</style>
+</head>
+<body>
+
+<header class="glass-top"><h1>Bot de Contingencia WhatsApp → Sheets</h1><span id="user" class="hidden"></span></header>
+
+<div id="loginView" class="wrap login">
+  <div class="card">
+    <h3>Acceso</h3>
+    <label>Usuario</label><input id="userIn" />
+    <label>Contraseña</label><input id="passIn" type="password" />
+    <div class="msg err hidden" id="loginErr"></div>
+    <button class="btn" id="loginBtn" style="margin-top:8px;">Entrar</button>
+  </div>
+</div>
+
+<div id="appView" class="wrap hidden">
+  <div class="tabs">
+    <div class="tab active" data-t="lineas">Líneas</div>
+    <div class="tab" data-t="coord">Coordinadores</div>
+    <div class="tab" data-t="importar">Importar</div>
+    <div class="tab" data-t="informes">Informes</div>
+  </div>
+
+  <!-- LÍNEAS -->
+  <div class="panel active" id="p-lineas">
+    <div class="card">
+      <div class="row" style="align-items:center"><h3 style="margin:0">Números por seccional</h3><button class="btn sec" id="refreshEstado" style="flex:0">Actualizar estado</button></div>
+      <table id="tblLineas"><thead><tr><th>Seccional</th><th>Instancia</th><th>Teléfono</th><th>Activa</th><th>Baneada</th><th>Estado WA</th><th></th></tr></thead><tbody></tbody></table>
+      <hr/>
+      <h4>Alta / edición de línea</h4>
+      <div class="row">
+        <div><label>Seccional</label><input id="l_sec" /></div>
+        <div><label>Instancia (Evolution)</label><input id="l_inst" placeholder="mismo nombre de seccional" /></div>
+        <div><label>Teléfono (opcional)</label><input id="l_tel" /></div>
+      </div>
+      <div class="row" style="align-items:center">
+        <label><input type="checkbox" id="l_enabled" checked /> Activa</label>
+        <label><input type="checkbox" id="l_banned" /> Baneada</label>
+        <button class="btn" id="saveLinea">Guardar línea</button>
+      </div>
+      <div class="msg" id="lineasMsg"></div>
+    </div>
+  </div>
+
+  <!-- COORDINADORES -->
+  <div class="panel" id="p-coord">
+    <div class="card">
+      <div class="row" style="align-items:center">
+        <h3 style="margin:0">Coordinadores de mesa</h3>
+        <button class="btn sec" id="newCoordMesa">+ Nuevo coordinador de mesa</button>
+      </div>
+      <table id="tblCoordMesa"><thead><tr><th>Teléfono</th><th>Nombre</th><th>Seccional</th><th>Mesa</th><th>Municipio</th><th>Voto</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card">
+      <div class="row" style="align-items:center">
+        <h3 style="margin:0">Coordinadores seccionales</h3>
+        <button class="btn sec" id="newCoordSec">+ Nuevo coordinador seccional</button>
+      </div>
+      <table id="tblCoordSec"><thead><tr><th>Teléfono</th><th>Nombre</th><th>Seccional</th><th>Circunscripción</th><th>Municipio</th><th>Mesas</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <!-- IMPORTAR -->
+  <div class="panel" id="p-importar">
+    <div class="card">
+      <h3>Importación y plantilla</h3>
+      <p>El bot se alimenta del mismo Excel en Drive (fuente única). Descarga la plantilla, rellena catálogo + coordinadores + números, súbela a Drive y luego importa.</p>
+      <div class="row">
+        <button class="btn" id="btnImportar">Importar desde Sheet</button>
+        <button class="btn sec" id="btnPlantilla" style="flex:0">Descargar plantilla Excel</button>
+      </div>
+      <div class="msg" id="importMsg"></div>
+    </div>
+  </div>
+
+  <!-- INFORMES -->
+  <div class="panel" id="p-informes">
+    <div class="card">
+      <div class="row" style="align-items:center"><h3 style="margin:0">Informes y alertas tempranas</h3><button class="btn sec" id="btnInformes">Cargar informes</button></div>
+      <div id="informesOut"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal coordinador -->
+<div class="modal" id="modalCoord">
+  <div class="box">
+    <h3 id="modalTitle">Coordinador</h3>
+    <input type="hidden" id="c_tipo" />
+    <div class="row">
+      <div><label>Seccional</label><input id="c_sec" /></div>
+      <div id="c_munWrap"><label>Municipio</label><input id="c_mun" /></div>
+    </div>
+    <div class="row">
+      <div><label>Nombre</label><input id="c_nombre" /></div>
+      <div><label>Contacto (teléfono)</label><input id="c_contacto" /></div>
+    </div>
+    <div class="row" id="c_circWrap">
+      <div><label>Circunscripción</label><input id="c_circ" /></div>
+      <div><label>Número de línea (opcional)</label><input id="c_numero" /></div>
+    </div>
+    <div class="row" id="c_codWrap">
+      <div><label>Código de mesa</label><input id="c_codigo" /></div>
+    </div>
+    <div class="msg" id="c_msg"></div>
+    <div class="row" style="justify-content:flex-end; margin-top:8px;">
+      <button class="btn sec" id="c_cancel">Cancelar</button>
+      <button class="btn" id="c_save">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let TOKEN = localStorage.getItem('bot_token') || '';
+function authHdr(){ return { 'Content-Type':'application/json', 'x-admin-token': TOKEN }; }
+async function api(path, opts={}) {
+  const r = await fetch(path, { ...opts, headers: authHdr() });
+  if (r.status === 401) { logout(); throw new Error('No autenticado'); }
+  return r.json();
+}
+function logout(){ localStorage.removeItem('bot_token'); TOKEN=''; location.reload(); }
+function fmtVoto(v){
+  if (!v) return '<span class="badge warn">sin reporte</span>';
+  const parts = [];
+  if (v.instalacion) parts.push(v.instalacion.instalada==='SI'?'<span class="badge ok">Instalada</span>':'<span class="badge '+(v.instalacion.alerta==='ALERTA'?'bad':'warn')+'">Inst '+v.instalacion.instalada+'</span>');
+  if (v.participacion) parts.push('Sufr: '+(v.participacion.sufragantes||0));
+  if (v.acta021) parts.push(v.acta021.alerta==='ALERTA CUADRE'?'<span class="badge bad">Descuadre</span>':'<span class="badge ok">021 '+v.acta021.control+'</span>');
+  return parts.join(' ');
+}
+function show(app){ document.getElementById('loginView').classList.add('hidden'); document.getElementById('appView').classList.remove('hidden'); document.getElementById('user').classList.remove('hidden'); }
+
+// --- Login ---
+document.getElementById('loginBtn').onclick = async () => {
+  const user = document.getElementById('userIn').value;
+  const password = document.getElementById('passIn').value;
+  try {
+    const r = await fetch('/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({user,password}) });
+    const j = await r.json();
+    if (!j.ok) { document.getElementById('loginErr').textContent='Credenciales inválidas'; document.getElementById('loginErr').classList.remove('hidden'); return; }
+    TOKEN = j.token; localStorage.setItem('bot_token', TOKEN);
+    document.getElementById('user').textContent = user;
+    show(); loadLineas();
+  } catch(e){ document.getElementById('loginErr').textContent=e.message; document.getElementById('loginErr').classList.remove('hidden'); }
+};
+
+// --- Tabs ---
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('p-'+t.dataset.t).classList.add('active');
+  if (t.dataset.t==='coord') loadCoord();
+  if (t.dataset.t==='informes') loadInformes();
+});
+
+// --- Líneas ---
+async function loadLineas(){
+  try { const r = await api('/admin/lineas/estado'); const tb = document.querySelector('#tblLineas tbody'); tb.innerHTML='';
+    r.estados.forEach(l => {
+      tb.innerHTML += `<tr><td>${l.seccional}</td><td>${l.instance}</td><td>${l.phone||''}</td>
+        <td>${l.enabled?'<span class="badge ok">Sí</span>':'<span class="badge bad">No</span>'}</td>
+        <td>${l.banned?'<span class="badge bad">Sí</span>':'No'}</td>
+        <td>${l.estado||'-'}</td>
+        <td><button class="btn sec" onclick="editLinea('${l.seccional}')">Editar</button></td></tr>`;
+    });
+  } catch(e){}
+}
+function editLinea(sec){ const row=[...document.querySelectorAll('#tblLineas tbody tr')].find(tr=>tr.children[0].textContent===sec);
+  document.getElementById('l_sec').value=sec; document.getElementById('l_inst').value=row.children[1].textContent; document.getElementById('l_tel').value=row.children[2].textContent;
+  document.getElementById('l_enabled').checked=row.children[3].textContent==='Sí'; document.getElementById('l_banned').checked=row.children[4].textContent==='Sí';
+  document.getElementById('lineasMsg').textContent='Editando '+sec;
+}
+document.getElementById('saveLinea').onclick = async () => {
+  const b = { seccional:document.getElementById('l_sec').value.toUpperCase(), instance:document.getElementById('l_inst').value, phone:document.getElementById('l_tel').value||null, enabled:document.getElementById('l_enabled').checked, banned:document.getElementById('l_banned').checked };
+  const r = await api('/admin/lineas', { method:'PUT', body:JSON.stringify(b) });
+  document.getElementById('lineasMsg').textContent = r.ok?'Guardado.':'Error';
+  loadLineas();
+};
+document.getElementById('refreshEstado').onclick = loadLineas;
+
+// --- Coordinadores ---
+async function loadCoord(){
+  const r = await api('/admin/coordinadores'); const c = r.coordinadores;
+  const tbM = document.querySelector('#tblCoordMesa tbody'); tbM.innerHTML='';
+  c.mesa.forEach(x => x.mesas.forEach(m => {
+    tbM.innerHTML += `<tr><td>${x.telefono}</td><td>${x.nombre||''}</td><td>${x.seccional}</td><td>${m.codigo}</td><td>${m.municipio||''}</td><td>${fmtVoto(m.voto)}</td>
+      <td><button class="btn sec" onclick="editCoordMesa('${x.telefono}','${m.codigo}')">Editar</button>
+          <button class="btn bad" onclick="delCoordMesa('${x.telefono}','${m.codigo}')">Eliminar</button></td></tr>`;
+  }));
+  const tbS = document.querySelector('#tblCoordSec tbody'); tbS.innerHTML='';
+  c.seccional.forEach(x => {
+    tbS.innerHTML += `<tr><td>${x.telefono}</td><td>${x.nombre||''}</td><td>${x.seccional}</td><td>${x.circunscripcion||''}</td><td>${x.municipio||''}</td><td>${x.mesas.length} mesas</td>
+      <td><button class="btn sec" onclick="editCoordSec('${x.telefono}')">Editar</button>
+          <button class="btn bad" onclick="delCoordSec('${x.seccional}')">Eliminar</button></td></tr>`;
+  });
+}
+document.getElementById('newCoordMesa').onclick = () => openModal('mesa');
+document.getElementById('newCoordSec').onclick = () => openModal('seccional');
+function openModal(tipo, data={}){
+  document.getElementById('c_tipo').value=tipo;
+  document.getElementById('modalTitle').textContent = (tipo==='mesa'?'Coordinador de mesa':'Coordinador seccional');
+  document.getElementById('c_munWrap').style.display = tipo==='mesa'?'flex':'none';
+  document.getElementById('c_codWrap').style.display = tipo==='mesa'?'flex':'none';
+  document.getElementById('c_circWrap').style.display = tipo==='seccional'?'flex':'none';
+  document.getElementById('c_sec').value=data.seccional||''; document.getElementById('c_mun').value=data.municipio||'';
+  document.getElementById('c_nombre').value=data.nombre||''; document.getElementById('c_contacto').value=data.telefono||'';
+  document.getElementById('c_circ').value=data.circunscripcion||''; document.getElementById('c_numero').value=data.numero||'';
+  document.getElementById('c_codigo').value=data.codigo||'';
+  document.getElementById('modalCoord').classList.add('show');
+}
+document.getElementById('c_cancel').onclick = () => document.getElementById('modalCoord').classList.remove('show');
+document.getElementById('c_save').onclick = async () => {
+  const tipo=document.getElementById('c_tipo').value;
+  const b = { seccional:document.getElementById('c_sec').value.toUpperCase(), nombre:document.getElementById('c_nombre').value, contacto:document.getElementById('c_contacto').value,
+    municipio:document.getElementById('c_mun').value, circunscripcion:document.getElementById('c_circ').value, numero:document.getElementById('c_numero').value };
+  if (tipo==='mesa') b.codigo=document.getElementById('c_codigo').value;
+  const r = await api('/admin/coordinadores/'+tipo, { method:'POST', body:JSON.stringify(b) });
+  document.getElementById('c_msg').textContent = r.ok?'Guardado.':'Error: '+(r.error||'');
+  if (r.ok){ document.getElementById('modalCoord').classList.remove('show'); loadCoord(); }
+};
+function editCoordMesa(tel,codigo){ openModal('mesa',{telefono:tel,codigo}); }
+function editCoordSec(tel){ openModal('seccional',{telefono:tel}); }
+async function delCoordMesa(tel,codigo){ await api('/admin/coordinadores/mesa',{method:'DELETE',body:JSON.stringify({codigo})}); loadCoord(); }
+async function delCoordSec(sec){ await api('/admin/coordinadores/seccional',{method:'DELETE',body:JSON.stringify({seccional:sec})}); loadCoord(); }
+
+// --- Importar ---
+document.getElementById('btnImportar').onclick = async () => {
+  document.getElementById('importMsg').textContent='Importando...';
+  const r = await api('/admin/importar',{method:'POST'});
+  document.getElementById('importMsg').textContent = r.ok?('Importado: '+r.mesas+' mesas.'):('Error: '+(r.error||''));
+};
+document.getElementById('btnPlantilla').onclick = async () => {
+  const r = await fetch('/admin/plantilla', { headers: { 'x-admin-token': TOKEN } });
+  if (!r.ok) { document.getElementById('importMsg').textContent='No autorizado para descargar.'; return; }
+  const blob = await r.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'plantilla-contingencia.xlsx';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+// --- Informes ---
+async function loadInformes(){
+  const r = await api('/admin/informes');
+  let h = '<h4>Por seccional</h4><table><thead><tr><th>Seccional</th><th>Mesas</th><th>Instaladas</th><th>021</th><th>Cuadre OK</th><th>Descuadre</th><th>Sufragantes</th></tr></thead><tbody>';
+  r.porSeccional.forEach(s => {
+    const pct = s.total? Math.round(100*s.instaladas/s.total):0;
+    h += `<tr><td>${s.seccional}</td><td>${s.total}</td><td>${s.instaladas} <div class="bar"><span style="width:${pct}%"></span></div></td>
+      <td>${s.mesas021}</td><td>${s.cuadreOK}</td><td>${s.descuadre}</td><td>${s.sufragantes}</td></tr>`;
+  });
+  h += '</tbody></table>';
+  h += '<h4>Por circunscripción</h4><table><thead><tr><th>Circunscripción</th><th>Mesas</th><th>Instaladas</th><th>021</th><th>Sufragantes</th></tr></thead><tbody>';
+  r.porCircunscripcion.forEach(c => { h += `<tr><td>${c.circunscripcion}</td><td>${c.total}</td><td>${c.instaladas}</td><td>${c.mesas021}</td><td>${c.sufragantes}</td></tr>`; });
+  h += '</tbody></table>';
+  h += '<h4>Alertas tempranas ('+r.alertas.length+')</h4>';
+  if (r.alertas.length){ h += '<ul>'; r.alertas.slice(0,50).forEach(a => h += `<li><span class="badge bad">${a.tipo}</span> Mesa ${a.codigo} — ${a.seccional} ${a.municipio||''} ${a.descuadre!==undefined?'('+a.descuadre+')':''}</li>`); h += '</ul>'; }
+  else h += '<p class="okm">Sin alertas.</p>';
+  document.getElementById('informesOut').innerHTML = h;
+}
+document.getElementById('btnInformes').onclick = loadInformes;
+
+// Init
+if (TOKEN) { /* validar */ api('/admin/lineas').then(()=>{ show(); loadLineas(); }).catch(()=>{ logout(); }); }
+</script>
+</body>
+</html>

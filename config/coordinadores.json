@@ -1,0 +1,1368 @@
+[
+  {
+    "telefono": "3124091481",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      "1",
+      105
+    ]
+  },
+  {
+    "telefono": "3158094473",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      "56",
+      311,
+      313
+    ]
+  },
+  {
+    "telefono": "3125499732",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      "104"
+    ]
+  },
+  {
+    "telefono": "3134308435",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      "142",
+      30
+    ]
+  },
+  {
+    "telefono": "3156451713",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      "203",
+      135,
+      137
+    ]
+  },
+  {
+    "telefono": "3209485296",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      "227"
+    ]
+  },
+  {
+    "telefono": "3168664464",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      "257",
+      34
+    ]
+  },
+  {
+    "telefono": "3197303807",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      "318",
+      141
+    ]
+  },
+  {
+    "telefono": "3143180329",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      1,
+      6
+    ]
+  },
+  {
+    "telefono": "3142511925",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      2,
+      7
+    ]
+  },
+  {
+    "telefono": "3187426561",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      3
+    ]
+  },
+  {
+    "telefono": "3202878359",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      4,
+      8
+    ]
+  },
+  {
+    "telefono": "3102179696",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      5
+    ]
+  },
+  {
+    "telefono": "3043945275",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      11
+    ]
+  },
+  {
+    "telefono": "3203617553",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      12
+    ]
+  },
+  {
+    "telefono": "3105848980",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      14
+    ]
+  },
+  {
+    "telefono": "3202547550",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      18
+    ]
+  },
+  {
+    "telefono": "3125691240",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      31
+    ]
+  },
+  {
+    "telefono": "3112769305",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      32
+    ]
+  },
+  {
+    "telefono": "3208946171",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      33
+    ]
+  },
+  {
+    "telefono": "3142907323",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      35
+    ]
+  },
+  {
+    "telefono": "3167105142",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      39
+    ]
+  },
+  {
+    "telefono": "3175362171",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      41
+    ]
+  },
+  {
+    "telefono": "3209900948",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      43
+    ]
+  },
+  {
+    "telefono": "3023428061",
+    "seccional": "CHAPARRAL",
+    "mesas_asignadas": [
+      49
+    ]
+  },
+  {
+    "telefono": "3115998581",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      51
+    ]
+  },
+  {
+    "telefono": "3108705508",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      52
+    ]
+  },
+  {
+    "telefono": "3204518046",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      53
+    ]
+  },
+  {
+    "telefono": "3212056346",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      54
+    ]
+  },
+  {
+    "telefono": "3175128159",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      55
+    ]
+  },
+  {
+    "telefono": "3148623023",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      56,
+      58
+    ]
+  },
+  {
+    "telefono": "3107780833",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      57,
+      61
+    ]
+  },
+  {
+    "telefono": "3155102728",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      59
+    ]
+  },
+  {
+    "telefono": "3203474479",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      60
+    ]
+  },
+  {
+    "telefono": "3223626384",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      62
+    ]
+  },
+  {
+    "telefono": "3176353282",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      63
+    ]
+  },
+  {
+    "telefono": "3225819572",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      66
+    ]
+  },
+  {
+    "telefono": "3182221577",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      67,
+      69
+    ]
+  },
+  {
+    "telefono": "3164576934",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      68,
+      70
+    ]
+  },
+  {
+    "telefono": "3154140046",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      73
+    ]
+  },
+  {
+    "telefono": "3023877442",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      74
+    ]
+  },
+  {
+    "telefono": "3214116302",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      75
+    ]
+  },
+  {
+    "telefono": "3143098290",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      76,
+      78
+    ]
+  },
+  {
+    "telefono": "3147870807",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      77,
+      80
+    ]
+  },
+  {
+    "telefono": "3014866275",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      79
+    ]
+  },
+  {
+    "telefono": "3144833290",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      81
+    ]
+  },
+  {
+    "telefono": "3223364818",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      82
+    ]
+  },
+  {
+    "telefono": "3152635656",
+    "seccional": "FRESNO",
+    "mesas_asignadas": [
+      83,
+      84
+    ]
+  },
+  {
+    "telefono": "3103684912",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      85
+    ]
+  },
+  {
+    "telefono": "3142440124",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      86
+    ]
+  },
+  {
+    "telefono": "3123240380",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      87
+    ]
+  },
+  {
+    "telefono": "3188426593",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      88
+    ]
+  },
+  {
+    "telefono": "3165782876",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      89
+    ]
+  },
+  {
+    "telefono": "3143989755",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      93,
+      96
+    ]
+  },
+  {
+    "telefono": "3186905037",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      94
+    ]
+  },
+  {
+    "telefono": "3214257214",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      95
+    ]
+  },
+  {
+    "telefono": "3156243627",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      97
+    ]
+  },
+  {
+    "telefono": "3235857266",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      99
+    ]
+  },
+  {
+    "telefono": "3203474476",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      104
+    ]
+  },
+  {
+    "telefono": "3107823187",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      106
+    ]
+  },
+  {
+    "telefono": "3125090084",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      107
+    ]
+  },
+  {
+    "telefono": "3102484415",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      108
+    ]
+  },
+  {
+    "telefono": "3203474480",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      109
+    ]
+  },
+  {
+    "telefono": "3124582549",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      110
+    ]
+  },
+  {
+    "telefono": "3166437809",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      112,
+      113
+    ]
+  },
+  {
+    "telefono": "3142410045",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      114
+    ]
+  },
+  {
+    "telefono": "3144859029",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      118
+    ]
+  },
+  {
+    "telefono": "3226195964",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      120
+    ]
+  },
+  {
+    "telefono": "3160822614",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      123,
+      131
+    ]
+  },
+  {
+    "telefono": "3138716804",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      128
+    ]
+  },
+  {
+    "telefono": "3126636389",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      129
+    ]
+  },
+  {
+    "telefono": "3122381932",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      130
+    ]
+  },
+  {
+    "telefono": "3128791196",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      132
+    ]
+  },
+  {
+    "telefono": "3209030068",
+    "seccional": "IBAGUE",
+    "mesas_asignadas": [
+      133
+    ]
+  },
+  {
+    "telefono": "3118042468",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      134
+    ]
+  },
+  {
+    "telefono": "3178953861",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      136
+    ]
+  },
+  {
+    "telefono": "3224162315",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      138,
+      149
+    ]
+  },
+  {
+    "telefono": "3168061012",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      139
+    ]
+  },
+  {
+    "telefono": "3132106397",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      142
+    ]
+  },
+  {
+    "telefono": "3204366284",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      143
+    ]
+  },
+  {
+    "telefono": "3162938409",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      144
+    ]
+  },
+  {
+    "telefono": "3159563760",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      145
+    ]
+  },
+  {
+    "telefono": "3133885332",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      146,
+      147
+    ]
+  },
+  {
+    "telefono": "3112741477",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      148
+    ]
+  },
+  {
+    "telefono": "3173815523",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      150
+    ]
+  },
+  {
+    "telefono": "3245559562",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      151
+    ]
+  },
+  {
+    "telefono": "3102467665",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      152,
+      161
+    ]
+  },
+  {
+    "telefono": "3204755708",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      153
+    ]
+  },
+  {
+    "telefono": "3229439048",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      154,
+      155
+    ]
+  },
+  {
+    "telefono": "3124949456",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      156
+    ]
+  },
+  {
+    "telefono": "3213744999",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      160
+    ]
+  },
+  {
+    "telefono": "3133423606",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      162,
+      165
+    ]
+  },
+  {
+    "telefono": "3212506141",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      163
+    ]
+  },
+  {
+    "telefono": "3214401637",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      164
+    ]
+  },
+  {
+    "telefono": "3203455770",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      166
+    ]
+  },
+  {
+    "telefono": "3123154750",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      167
+    ]
+  },
+  {
+    "telefono": "3123011261",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      168
+    ]
+  },
+  {
+    "telefono": "3174835359",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      169
+    ]
+  },
+  {
+    "telefono": "3194014360",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      170
+    ]
+  },
+  {
+    "telefono": "3182361643",
+    "seccional": "LIBANO",
+    "mesas_asignadas": [
+      173
+    ]
+  },
+  {
+    "telefono": "3223122334",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      178
+    ]
+  },
+  {
+    "telefono": "3223960400",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      179,
+      184
+    ]
+  },
+  {
+    "telefono": "3228047521",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      180
+    ]
+  },
+  {
+    "telefono": "3114775215",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      181
+    ]
+  },
+  {
+    "telefono": "3173819416",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      182
+    ]
+  },
+  {
+    "telefono": "3134529786",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      183
+    ]
+  },
+  {
+    "telefono": "3223518652",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      187
+    ]
+  },
+  {
+    "telefono": "3219749903",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      188,
+      189
+    ]
+  },
+  {
+    "telefono": "3214892791",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      194
+    ]
+  },
+  {
+    "telefono": "3213572576",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      195
+    ]
+  },
+  {
+    "telefono": "3203375394",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      196
+    ]
+  },
+  {
+    "telefono": "3212606045",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      197,
+      199
+    ]
+  },
+  {
+    "telefono": "3118856131",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      198,
+      200
+    ]
+  },
+  {
+    "telefono": "3125703881",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      203,
+      208
+    ]
+  },
+  {
+    "telefono": "3185754390",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      204
+    ]
+  },
+  {
+    "telefono": "3176568021",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      205
+    ]
+  },
+  {
+    "telefono": "3209780668",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      206
+    ]
+  },
+  {
+    "telefono": "3183465851",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      207
+    ]
+  },
+  {
+    "telefono": "3223111316",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      215
+    ]
+  },
+  {
+    "telefono": "3046222776",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      216
+    ]
+  },
+  {
+    "telefono": "3227131855",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      217
+    ]
+  },
+  {
+    "telefono": "3102765122",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      219
+    ]
+  },
+  {
+    "telefono": "3157368508",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      221
+    ]
+  },
+  {
+    "telefono": "3202335975",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      223,
+      226
+    ]
+  },
+  {
+    "telefono": "3206358841",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      224
+    ]
+  },
+  {
+    "telefono": "3204791603",
+    "seccional": "PLANADAS",
+    "mesas_asignadas": [
+      225
+    ]
+  },
+  {
+    "telefono": "3208738640",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      227,
+      230
+    ]
+  },
+  {
+    "telefono": "3138723380",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      228
+    ]
+  },
+  {
+    "telefono": "3202773127",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      229
+    ]
+  },
+  {
+    "telefono": "3143526815",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      231
+    ]
+  },
+  {
+    "telefono": "3138012872",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      232,
+      233
+    ]
+  },
+  {
+    "telefono": "3118941552",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      234
+    ]
+  },
+  {
+    "telefono": "3142267066",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      237
+    ]
+  },
+  {
+    "telefono": "3124475252",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      238
+    ]
+  },
+  {
+    "telefono": "3142209467",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      241
+    ]
+  },
+  {
+    "telefono": "3223657771",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      245
+    ]
+  },
+  {
+    "telefono": "3224277643",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      246
+    ]
+  },
+  {
+    "telefono": "3166082750",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      247
+    ]
+  },
+  {
+    "telefono": "3204984012",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      248
+    ]
+  },
+  {
+    "telefono": "3204980338",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      249
+    ]
+  },
+  {
+    "telefono": "3102200822",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      250
+    ]
+  },
+  {
+    "telefono": "3164939632",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      251
+    ]
+  },
+  {
+    "telefono": "3204903494",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      252
+    ]
+  },
+  {
+    "telefono": "3187841464",
+    "seccional": "RIOBLANCO",
+    "mesas_asignadas": [
+      253,
+      254
+    ]
+  },
+  {
+    "telefono": "3184105790",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      257
+    ]
+  },
+  {
+    "telefono": "3008009509",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      258
+    ]
+  },
+  {
+    "telefono": "3118609084",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      259,
+      262
+    ]
+  },
+  {
+    "telefono": "3202197386",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      260,
+      263
+    ]
+  },
+  {
+    "telefono": "3134285662",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      261
+    ]
+  },
+  {
+    "telefono": "3208367615",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      265,
+      268
+    ]
+  },
+  {
+    "telefono": "3138718067",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      266
+    ]
+  },
+  {
+    "telefono": "3208596830",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      267
+    ]
+  },
+  {
+    "telefono": "3212503012",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      274
+    ]
+  },
+  {
+    "telefono": "3187489719",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      275
+    ]
+  },
+  {
+    "telefono": "3214513711",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      276
+    ]
+  },
+  {
+    "telefono": "3204736569",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      277
+    ]
+  },
+  {
+    "telefono": "3126487911",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      278
+    ]
+  },
+  {
+    "telefono": "3157166781",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      279
+    ]
+  },
+  {
+    "telefono": "3147547703",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      280
+    ]
+  },
+  {
+    "telefono": "3113697766",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      281
+    ]
+  },
+  {
+    "telefono": "3208205117",
+    "seccional": "ROVIRA",
+    "mesas_asignadas": [
+      282
+    ]
+  },
+  {
+    "telefono": "3165364921",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      283,
+      288
+    ]
+  },
+  {
+    "telefono": "3108843069",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      284
+    ]
+  },
+  {
+    "telefono": "3107791973",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      285
+    ]
+  },
+  {
+    "telefono": "3133437707",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      286
+    ]
+  },
+  {
+    "telefono": "3203099077",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      287,
+      299
+    ]
+  },
+  {
+    "telefono": "3164871641",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      289,
+      298
+    ]
+  },
+  {
+    "telefono": "3204871827",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      290
+    ]
+  },
+  {
+    "telefono": "3229115979",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      291
+    ]
+  },
+  {
+    "telefono": "3142841158",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      292
+    ]
+  },
+  {
+    "telefono": "3133678442",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      293
+    ]
+  },
+  {
+    "telefono": "3218037371",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      294
+    ]
+  },
+  {
+    "telefono": "3143742200",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      295
+    ]
+  },
+  {
+    "telefono": "3146032027",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      296
+    ]
+  },
+  {
+    "telefono": "3196591735",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      297
+    ]
+  },
+  {
+    "telefono": "3203474485",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      301,
+      302
+    ]
+  },
+  {
+    "telefono": "3224041263",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      308
+    ]
+  },
+  {
+    "telefono": "3187774788",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      309
+    ]
+  },
+  {
+    "telefono": "3115973402",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      310
+    ]
+  },
+  {
+    "telefono": "3004267374",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      312
+    ]
+  },
+  {
+    "telefono": "3103007237",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      315
+    ]
+  },
+  {
+    "telefono": "3185253839",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      316
+    ]
+  },
+  {
+    "telefono": "3152374074",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      317
+    ]
+  },
+  {
+    "telefono": "3133943059",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      318
+    ]
+  },
+  {
+    "telefono": "3122837911",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      319
+    ]
+  },
+  {
+    "telefono": "3107720403",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      320
+    ]
+  },
+  {
+    "telefono": "3229031706",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      321
+    ]
+  },
+  {
+    "telefono": "3185275710",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      322
+    ]
+  },
+  {
+    "telefono": "3184354164",
+    "seccional": "VILLARRICA",
+    "mesas_asignadas": [
+      323,
+      324
+    ]
+  }
+]

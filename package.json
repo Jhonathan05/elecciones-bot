@@ -1,0 +1,24 @@
+{
+  "name": "elecciones-whatsapp-bot",
+  "version": "0.1.0",
+  "description": "Canal de contingencia por WhatsApp (Evolution API) -> Google Sheets para el preconteo electoral",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
+    "check": "node -e \"require('./src/validators');require('./src/flows');require('./src/state');require('./src/maestro');require('./src/config');console.log('OK')\"",
+    "test:logic": "node test/logic.test.js",
+    "export-maestro": "node scripts/export-maestro.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^13.0.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "googleapis": "^144.0.0",
+    "multer": "^2.3.0",
+    "node-cron": "^3.0.3",
+    "xlsx": "^0.18.5"
+  },
+  "license": "UNLICENCED"
+}
