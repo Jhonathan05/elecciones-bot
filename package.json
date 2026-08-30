@@ -8,6 +8,7 @@
     "dev": "node src/index.js",
     "check": "node -e \"require('./src/validators');require('./src/flows');require('./src/state');require('./src/maestro');require('./src/config');console.log('OK')\"",
     "test:logic": "node test/logic.test.js",
+    "test:e2e": "node test/e2e-bot.js",
     "export-maestro": "node scripts/export-maestro.js"
   },
   "dependencies": {

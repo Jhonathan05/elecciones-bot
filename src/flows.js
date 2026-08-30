@@ -108,7 +108,7 @@ function escribir(session, ctx) {
   return { ok: false, msg: 'Momento desconocido' };
 }
 
-function handle(phone, rawText, ctx, instance) {
+async function handle(phone, rawText, ctx, instance) {
   const text = String(rawText || '').trim();
   const lower = text.toLowerCase();
 
@@ -272,7 +272,7 @@ function handle(phone, rawText, ctx, instance) {
   // --- CONFIRMAR ---
   if (session.paso === 'confirm') {
     if (lower === 'si' || lower === 'sí' || lower === 's') {
-      const resp = escribir(session, ctx);
+      const resp = await escribir(session, ctx);
       if (!resp.ok) return '⚠ No se pudo guardar: ' + resp.msg + '. Corrige con CORREGIR o CANCELAR.';
       ctx.clearSession(phone);
       return `✅ ${NOMBRE_MOMENTO[session.momento]} de la mesa ${session.mesa} registrada.` + (resp.alerta ? `\n${resp.alerta}` : '');

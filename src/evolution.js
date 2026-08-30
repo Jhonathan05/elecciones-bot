@@ -10,20 +10,27 @@ function headers() {
 }
 
 async function request(method, path, body) {
-  const res = await fetch(BASE + path, {
-    method,
-    headers: headers(),
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const txt = await res.text();
-  let json;
-  try { json = txt ? JSON.parse(txt) : {}; } catch { json = { raw: txt }; }
-  if (!res.ok) {
-    const err = new Error('Evolution ' + method + ' ' + path + ' -> ' + res.status + ' ' + txt);
-    err.status = res.status;
-    throw err;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3000);
+  try {
+    const res = await fetch(BASE + path, {
+      method,
+      headers: headers(),
+      body: body ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
+    });
+    const txt = await res.text();
+    let json;
+    try { json = txt ? JSON.parse(txt) : {}; } catch { json = { raw: txt }; }
+    if (!res.ok) {
+      const err = new Error('Evolution ' + method + ' ' + path + ' -> ' + res.status + ' ' + txt);
+      err.status = res.status;
+      throw err;
+    }
+    return json;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return json;
 }
 
 function extraerNumero(remoteJid) {

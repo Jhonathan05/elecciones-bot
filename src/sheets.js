@@ -283,10 +283,10 @@ async function escribirInstalacion(codigo, seccional, municipio, data, ctx) {
     const m = maps['INSTALACION'];
     const ws = wb.Sheets['INSTALACION'];
     const jur = Number(data.jurados);
-    const kit = norm(data.kitElectoral);
-    const sil = Number(data.sillas);
-    const mes = norm(data.mesa);
-    const instalada = (jur === 3 && kit === 'SI' && sil === 3 && mes === 'SI') ? 'SI' : 'NO';
+    const kit = data.kitElectoral;
+    const sil = data.sillas;
+    const mes = data.mesa;
+    const instalada = (jur === 3 && kit === 'Recibido' && sil === 'Completas' && mes === 'Está') ? 'SI' : 'NO';
     const alerta = instalada === 'SI' ? 'OK' : 'ALERTA';
     setCell(ws, f.row, m['JURADOS'], jur);
     setCell(ws, f.row, m['KIT ELECTORAL'], kit);
@@ -295,7 +295,7 @@ async function escribirInstalacion(codigo, seccional, municipio, data, ctx) {
     setCell(ws, f.row, m['OBSERVACIONES'], data.observaciones || '');
     setCell(ws, f.row, m['INSTALADA'], instalada);
     setCell(ws, f.row, m['ALERTA'], alerta, alerta === 'ALERTA' ? ALERTA_RED : OK_GREEN);
-    setCell(ws, f.row, m['REPORTADO_POR'], ctx.linea || '');
+    setCell(ws, f.row, m['REPORTADO_POR'], ctx.telefono || '');
     setCell(ws, f.row, m['FECHA_REPORTE'], new Date().toISOString());
     setCell(ws, f.row, m['VERSION'], versionActualLocal(wb, 'INSTALACION', f.row) + 1);
     setCell(ws, f.row, m['ESTADO'], 'CONFIRMADA');

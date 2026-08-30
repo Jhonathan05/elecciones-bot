@@ -68,7 +68,7 @@ app.post('/webhook/evolution', async (req, res) => {
       return res.json({ ok: true });
     }
     const ctx = makeCtx(phone, instance);
-    const reply = flows.handle(phone, text, ctx, instance);
+    const reply = await flows.handle(phone, text, ctx, instance);
     await evo.sendText(instance, phone, reply);
     res.json({ ok: true });
   } catch (e) {
