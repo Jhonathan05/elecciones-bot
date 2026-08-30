@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  bot:
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile.bot
+    container_name: elecciones-bot
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    environment:
+      - BOT_PORT=8090
+      - NODE_ENV=production
+      - EVOLUTION_API_URL=http://evolution-api:8080
+      - EVOLUTION_API_KEY=${EVOLUTION_API_KEY}
+      - BOT_WEBHOOK_URL=https://${DOMAIN}/webhook/evolution
+      - SHEET_MODE=local
+      - SHEET_LOCAL_PATH=/app/data/cache/3_PRECONTEO_2022-PLANCHAS.xlsx
+      - RCLONE_REMOTE=${RCLONE_REMOTE}
+      - ADMIN_USER=${ADMIN_USER}
+      - ADMIN_PASS_HASH=${ADMIN_PASS_HASH}
+      - CIERRE_HORARIO=${CIERRE_HORARIO}
+      - SECCIONALES_VALIDADAS=${SECCIONALES_VALIDADAS}
+    volumes:
+      - bot-cache:/app/data/cache
+      - bot-data:/app/data
+      - bot-rclone:/root/.config/rclone
+    depends_on:
+      evolution-api:
+        condition: service_healthy
+    networks:
+      - infra-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - certbot-www:/var/www/certbot:ro
+      - certbot-etc:/etc/letsencrypt:ro
+    depends_on:
+      - bot
+    networks:
+      - infra-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done'"
+
+volumes:
+  bot-cache:
+  bot-data:
+  bot-rclone:
+  certbot-etc:
+  certbot-www:
+
+networks:
+  infra-net:
+    external: true
