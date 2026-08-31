@@ -47,29 +47,48 @@ function makeCtx(phone, instance) {
   };
 }
 
+// Cache de deduplicación de mensajes (expira en 2 minutos)
+const processedMsgs = new Set();
+
 // ---- Webhook de Evolution ----
 app.post('/webhook/evolution', async (req, res) => {
   try {
     const body = req.body || {};
-    if (body.event !== 'MESSAGES_UPSERT') return res.json({ ok: true, ignored: true });
+    const evt = String(body.event || '').toUpperCase().replace('.', '_');
+    if (evt !== 'MESSAGES_UPSERT') return res.json({ ok: true, ignored: true });
     const instance = body.instance;
     const data = body.data;
     if (!data || !data.key || data.key.fromMe) return res.json({ ok: true, ignored: true });
+    
+    // Deduplicación por ID de mensaje
+    const msgId = data.key.id;
+    if (msgId) {
+      if (processedMsgs.has(msgId)) {
+        return res.json({ ok: true, duplicated: true });
+      }
+      processedMsgs.add(msgId);
+      setTimeout(() => processedMsgs.delete(msgId), 120000);
+    }
+    
+    console.log('[WEBHOOK INCOMING]', JSON.stringify({ instance, key: data.key, pushName: data.pushName, msg: data.message }));
+
     const remoteJid = data.key.remoteJid;
     const msg = data.message || {};
     const text = msg.conversation || (msg.extendedTextMessage && msg.extendedTextMessage.text) ||
       (msg.imageMessage && msg.imageMessage.caption) || '';
     if (!text) return res.json({ ok: true, ignored: true });
-    const phone = evo.extraerNumero(remoteJid);
+    
+    const phone = await evo.resolveRealPhone(instance, remoteJid);
+    console.log('[WEBHOOK PROCESSED]', { remoteJid, resolvedPhone: phone, text });
     const seccional = getSeccionalDeInstancia(instance);
     if (!seccional) {
-      // línea no asociada / baneada: informar brevemente
-      await evo.sendText(instance, phone, '⛔ Esta línea no está activa para reporte. Contacta al administrador.').catch(() => {});
+      await evo.sendText(instance, remoteJid, '⛔ Esta línea no está activa para reporte. Contacta al administrador.').catch(() => {});
       return res.json({ ok: true });
     }
     const ctx = makeCtx(phone, instance);
     const reply = await flows.handle(phone, text, ctx, instance);
-    await evo.sendText(instance, phone, reply);
+    console.log('[WEBHOOK REPLY TO]', remoteJid, 'REPLY:', reply);
+    await evo.sendText(instance, remoteJid, reply);
     res.json({ ok: true });
   } catch (e) {
     console.error('webhook error', e.message);

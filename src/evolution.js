@@ -9,9 +9,9 @@ function headers() {
   return { 'Content-Type': 'application/json', apikey: KEY };
 }
 
-async function request(method, path, body) {
+async function request(method, path, body, timeoutMs = 8000) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3000);
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch(BASE + path, {
       method,
@@ -33,13 +33,23 @@ async function request(method, path, body) {
   }
 }
 
-function extraerNumero(remoteJid) {
-  // 573001234567@c.us -> 573001234567
-  return String(remoteJid || '').split('@')[0];
+function extraerNumero(keyObj) {
+  if (typeof keyObj === 'string') {
+    return String(keyObj).split('@')[0];
+  }
+  if (!keyObj) return '';
+  const alt = keyObj.remoteJidAlt || keyObj.participantAlt || keyObj.participant || keyObj.remoteJid || '';
+  if (String(alt).includes('@s.whatsapp.net') || String(alt).includes('@c.us')) {
+    return String(alt).split('@')[0];
+  }
+  return String(keyObj.remoteJid || '').split('@')[0];
 }
 
-async function sendText(instance, numero, message) {
-  return request('POST', `/message/sendText/${instance}`, { number: numero, text: message });
+async function sendText(instance, numeroOjid, message) {
+  // Si viene con @lid o @s.whatsapp.net se pasa tal cual en remoteJid / number
+  const target = String(numeroOjid || '');
+  const body = target.includes('@') ? { number: target } : { number: target };
+  return request('POST', `/message/sendText/${instance}`, { number: target, text: message });
 }
 
 async function listInstances() {
@@ -47,25 +57,83 @@ async function listInstances() {
 }
 
 async function createInstance(instance) {
-  return request('POST', '/instance/create', { instanceName: instance, qrcode: true, integration: 'WHATSAPP-BAILEYS' });
+  const res = await request('POST', '/instance/create', { instanceName: instance, qrcode: true, integration: 'WHATSAPP-BAILEYS' });
+  try {
+    await connectInstance(instance);
+  } catch (e) {}
+  return res;
+}
+
+async function connectInstance(instance) {
+  return request('GET', `/instance/connect/${instance}`, undefined, 15000);
+}
+
+async function deleteInstance(instance) {
+  return request('DELETE', `/instance/delete/${instance}`, undefined, 5000);
+}
+
+async function logoutInstance(instance) {
+  return request('DELETE', `/instance/logout/${instance}`, undefined, 5000);
 }
 
 async function setWebhook(instance, url) {
   return request('POST', `/webhook/set/${instance}`, {
-    url,
-    webhook_by_events: false,
-    webhook_base64: false,
-    events: ['MESSAGES_UPSERT'],
+    webhook: {
+      enabled: true,
+      url,
+      byEvents: false,
+      base64: false,
+      events: ['MESSAGES_UPSERT'],
+    },
   });
 }
 
 async function getInstanceStatus(instance) {
   try {
-    const r = await request('GET', `/instance/connectionState/${instance}`);
-    return r;
+    const r = await request('GET', `/instance/connectionState/${instance}`, undefined, 5000);
+    const stateVal = r.instance ? r.instance.state : (r.state || r);
+    if (stateVal === 'open') {
+      return { instance, state: 'open' };
+    }
+    // Para connecting/close/qrcode: pedir QR directamente
+    if (stateVal === 'connecting' || stateVal === 'qrcode' || stateVal === 'close') {
+      try {
+        const conn = await connectInstance(instance);
+        if (conn && conn.base64) {
+          return { instance, state: 'qrcode', qrcode: conn.base64 };
+        }
+      } catch (e) {}
+    }
+    return { instance, state: stateVal };
   } catch (e) {
+    if (e.status === 404) {
+      try {
+        const conn = await connectInstance(instance);
+        if (conn && conn.base64) {
+          return { instance, state: 'qrcode', qrcode: conn.base64 };
+        }
+        return { instance, state: 'connecting' };
+      } catch (err) {
+        return { instance, state: 'error', error: err.message };
+      }
+    }
     return { instance, state: 'error', error: e.message };
   }
 }
 
-module.exports = { sendText, listInstances, createInstance, setWebhook, getInstanceStatus, extraerNumero, BASE };
+async function resolveRealPhone(instance, remoteJid) {
+  if (!remoteJid) return '';
+  const str = String(remoteJid);
+  if (!str.includes('@lid')) {
+    return str.split('@')[0];
+  }
+  try {
+    const res = await request('POST', `/chat/findContacts/${instance}`, { where: { id: str } }, 4000);
+    if (Array.isArray(res) && res[0] && res[0].id && !res[0].id.includes('@lid')) {
+      return res[0].id.split('@')[0];
+    }
+  } catch (e) {}
+  return str.split('@')[0];
+}
+
+module.exports = { sendText, listInstances, createInstance, connectInstance, deleteInstance, logoutInstance, setWebhook, getInstanceStatus, extraerNumero, resolveRealPhone, BASE };

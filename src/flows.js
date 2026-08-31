@@ -128,7 +128,7 @@ async function handle(phone, rawText, ctx, instance) {
     const seccional = ctx.getSeccionalDeInstancia(instance);
     if (!seccional) return '⛔ Este número no está asociado a una seccional. Contacta al administrador.';
     if (ctx.isCerrado()) return '🔒 La jornada está cerrada. Las correcciones deben hacerse directamente en el documento de Drive.';
-    const coord = ctx.maestro.isTelefonoAutorizado(phone);
+    const coord = ctx.maestro.isTelefonoAutorizado(phone, seccional);
     if (!coord) return '⛔ Este número no está autorizado para reportar. Solicita asignación al administrador.';
     session = { paso: 'menu', momento: null, seccional, instance, mesa: null, municipio: null, borrador: {}, campo: null, correccion: false, coordinador: coord };
     ctx.saveSession(phone, session);

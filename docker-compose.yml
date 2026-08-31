@@ -11,9 +11,15 @@ services:
       - bot-data:/app/data
       - bot-cache:/app/data/cache
       - bot-rclone:/root/.config/rclone
+    networks:
+      - infra-net
     restart: unless-stopped
 
 volumes:
   bot-data:
   bot-cache:
   bot-rclone:
+
+networks:
+  infra-net:
+    external: true

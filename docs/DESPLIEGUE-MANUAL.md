@@ -216,13 +216,13 @@ El script diferencia dos entornos y no necesita CI (corres manualmente):
 > debe apuntar `SHEET_MODE=local`, `SHEET_LOCAL_PATH=/app/data/cache/3_PRECONTEO 2022-PLANCHAS.xlsx`
 > y `RCLONE_REMOTE=drive:elecciones/3_PRECONTEO 2022-PLANCHAS.xlsx`.
 
-## 7. Troubleshooting
+## 7. Troubleshooting y Diagnóstico de Errores Conocidos
 
-| Síntoma | Causa probable | Acción |
+| Error / Síntoma | Causa raíz | Solución aplicada |
 |---|---|---|
-| `/health` muestra `coordMesa:0` y log *[sheets] local listo* con 0 | `SHEET_LOCAL_PATH` no apunta a la plantilla, o el archivo no tiene coordinadores | Revisa `.env`, `RCLONE_REMOTE` y que la plantilla tenga datos en PRECONTEO/SECCIONALES |
-| Cambios no aparecen en Drive | `rclone` no instalado/configurado o `RCLONE_REMOTE` vacío | Verifica `rclone lsd <remote>`; el log avisará *rclone no disponible* |
-| Evolution responde 401 al crear instancia | `EVOLUTION_API_KEY` ≠ `AUTHENTICATION_API_KEY` | Igualar ambas |
-| Webhook no llega al bot | `BOT_WEBHOOK_URL` no alcanzable desde Evolution | Usa IP LAN o túnel público |
-| Instancia `qrcode` vacío | Instancia ya conectada o nombre duplicado | Lista instancias en Evolution UI |
-| Login admin falla tras recrear | El hash `$` en `.env` sin comillas | Usa `ADMIN_PASS_HASH='$2a$...'` |
+| **Error 401 Unauthorized** al crear/vincular instancia | Desajuste entre `EVOLUTION_API_KEY` (`.env` del bot) y `AUTHENTICATION_API_KEY` en Evolution. | Asegurar que ambas variables contengan exactamente el mismo string (ej: `evolution_secret_key_2024`). |
+| **`stream:error code 515`** y **`Pre-key upload timeout`** | Evolution API colapsa por latencia en Redis o descarga masiva de historial de chats ("history tsunami"). | 1. Desactivar descargas pesadas en `docker-compose.evolution.yml` (`DATABASE_SAVE_DATA_CHATS=false`, `DATABASE_SAVE_DATA_CONTACTS=false`, `DATABASE_SAVE_DATA_HISTORIC=false`).<br/>2. Habilitar memoria caché local (`CACHE_LOCAL_ENABLED=true`, `CACHE_REDIS_ENABLED=false`). |
+| **WhatsApp LID (`@lid`)** — El bot no responde a mensajes desde iOS/iPhone | Meta enmascara el teléfono real enviando IDs de privacidad (`131134092537857@lid`). | 1. Usar `evo.resolveRealPhone` para extraer el teléfono real del remitente o resolver la JID.<br/>2. Responder directamente al `remoteJid` del chat origen (`131134092537857@lid`) para que WhatsApp entregue la respuesta. |
+| **Doble mensaje / Mensajes duplicados** | Concurrencia al tener habilitados simultáneamente el Webhook Global y el Webhook por Instancia. | 1. Desactivar `WEBHOOK_GLOBAL_ENABLED=false` en `docker-compose.evolution.yml`.<br/>2. Añadir caché de deduplicación de IDs de mensaje (`msgId`) con expiración de 2 minutos en `src/index.js`. |
+| **Instancia colgada en `connecting`** | Sesión de Baileys invalidada o socket congelado en Evolution API. | 1. Usar el nuevo botón **`Reconectar`** en el panel web (`/admin/ui/admin.html`), que ejecuta un logout forzado, elimina el socket colgado y genera un **QR totalmente fresco** en el modal **`Ver QR`**. |
+| **Mensaje de rechazo de autorización (`⛔ Este número no está autorizado...`)** | El emisor no está registrado en la lista de coordinadores (hoja PRECONTEO / SECCIONALES). | Registrar el número telefónico en la pestaña **Coordinadores** del panel web del bot. |

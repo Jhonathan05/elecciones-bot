@@ -80,9 +80,13 @@ function setAdmin(user, passHash) {
     .run(user, passHash, passHash);
 }
 
+function deleteLinea(seccional) {
+  db.prepare('DELETE FROM lineas WHERE seccional = ?').run(seccional);
+}
+
 module.exports = {
   db, DB_PATH,
-  listLineas, getLinea, getLineaPorInstance, upsertLinea, setLineaEstado,
+  listLineas, getLinea, getLineaPorInstance, upsertLinea, setLineaEstado, deleteLinea,
   getSession, saveSession, clearSession,
   getAdmin, setAdmin,
 };

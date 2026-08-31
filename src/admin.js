@@ -71,7 +71,7 @@ router.get('/lineas/estado', requireAuth, async (req, res) => {
   const lineas = state.listLineas();
   const estados = await Promise.all(lineas.map(async l => {
     const st = await evo.getInstanceStatus(l.instance);
-    return { seccional: l.seccional, instance: l.instance, phone: l.phone, enabled: l.enabled, banned: l.banned, estado: st.state || st };
+    return { seccional: l.seccional, instance: l.instance, phone: l.phone, enabled: l.enabled, banned: l.banned, estado: st.state || st, qrcode: st.qrcode || null };
   }));
   res.json({ estados });
 });
@@ -87,10 +87,59 @@ router.put('/lineas', requireAuth, async (req, res) => {
   state.upsertLinea(sec, instance, phone, enabled, banned);
   try {
     await evo.createInstance(instance);
-    await evo.setWebhook(instance, require('./config').CONFIG.BOT_WEBHOOK_URL);
   } catch (e) { /* puede ya existir */ }
+  try {
+    await evo.setWebhook(instance, require('./config').CONFIG.BOT_WEBHOOK_URL);
+  } catch (e) { /* error al configurar webhook */ }
   res.json({ ok: true, linea: state.getLinea(sec) });
 });
+
+// Fuerza reconexión limpia (cierra la sesión de WhatsApp activa o atascada y genera un QR fresco)
+router.post('/lineas/reconectar', requireAuth, async (req, res) => {
+  const b = req.body || {};
+  const sec = String(b.seccional || '').toUpperCase();
+  const linea = sec ? state.getLinea(sec) : null;
+  if (!linea) return res.status(400).json({ error: 'seccional no encontrada' });
+  const instance = linea.instance;
+  
+  // 1. Forzar logout (cierra la sesión vinculada en WhatsApp)
+  try { await evo.logoutInstance(instance); } catch (e) {}
+  await new Promise(r => setTimeout(r, 1000));
+  
+  // 2. Forzar delete
+  try { await evo.deleteInstance(instance); } catch (e) {}
+  await new Promise(r => setTimeout(r, 1000));
+
+  // 3. Recrear instancia e iniciar webhook
+  try { await evo.createInstance(instance); } catch (e) {}
+  try { await evo.setWebhook(instance, require('./config').CONFIG.BOT_WEBHOOK_URL); } catch (e) {}
+
+  // 4. Solicitar el QR fresco directamente
+  let qrCode = null;
+  try {
+    const conn = await evo.connectInstance(instance);
+    if (conn && conn.base64) qrCode = conn.base64;
+  } catch (e) {}
+
+  const st = await evo.getInstanceStatus(instance);
+  if (qrCode) st.qrcode = qrCode;
+
+  res.json({ ok: true, instance, estado: st });
+});
+
+// Eliminar una línea / instancia completamente
+router.delete('/lineas', requireAuth, async (req, res) => {
+  const b = req.body || {};
+  const sec = String(b.seccional || '').toUpperCase();
+  if (!sec) return res.status(400).json({ error: 'seccional requerida' });
+  const linea = state.getLinea(sec);
+  if (linea && linea.instance) {
+    try { await evo.deleteInstance(linea.instance); } catch (e) {}
+  }
+  state.deleteLinea(sec);
+  res.json({ ok: true });
+});
+
 
 // ---------- Coordinadores ----------
 router.get('/coordinadores', requireAuth, async (req, res) => {

@@ -127,8 +127,8 @@
   <!-- LÍNEAS -->
   <div class="panel active" id="p-lineas">
     <div class="card">
-      <div class="row" style="align-items:center"><h3 style="margin:0">Números por seccional</h3><button class="btn sec" id="refreshEstado" style="flex:0">Actualizar estado</button></div>
-      <table id="tblLineas"><thead><tr><th>Seccional</th><th>Instancia</th><th>Teléfono</th><th>Activa</th><th>Baneada</th><th>Estado WA</th><th></th></tr></thead><tbody></tbody></table>
+      <div class="row" style="align-items:center"><h3 style="margin:0">Números por seccional (Instancias WhatsApp)</h3><button class="btn sec" id="refreshEstado" style="flex:0">Actualizar estado</button></div>
+      <table id="tblLineas"><thead><tr><th>Seccional</th><th>Instancia</th><th>Teléfono</th><th>Activa</th><th>Baneada</th><th>Estado WA</th><th>Acciones</th></tr></thead><tbody></tbody></table>
       <hr/>
       <h4>Alta / edición de línea</h4>
       <div class="row">
@@ -142,6 +142,16 @@
         <button class="btn" id="saveLinea">Guardar línea</button>
       </div>
       <div class="msg" id="lineasMsg"></div>
+    </div>
+  </div>
+
+  <!-- Modal QR -->
+  <div class="modal" id="modalQR">
+    <div class="box" style="text-align:center;">
+      <h3 id="qrModalTitle">Código QR de Vinculación</h3>
+      <p id="qrModalSubtitle" style="font-size:13px; color:var(--on-surface-variant);"></p>
+      <div id="qrContainer" style="margin:15px 0;"></div>
+      <button class="btn sec" id="closeQR">Cerrar</button>
     </div>
   </div>
 
@@ -257,20 +267,92 @@ document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
 });
 
 // --- Líneas ---
+const qrsCache = {};
+
 async function loadLineas(){
-  try { const r = await api('/admin/lineas/estado'); const tb = document.querySelector('#tblLineas tbody'); tb.innerHTML='';
+  try {
+    const r = await api('/admin/lineas/estado');
+    const tb = document.querySelector('#tblLineas tbody');
+    tb.innerHTML = '';
     r.estados.forEach(l => {
-      tb.innerHTML += `<tr><td>${l.seccional}</td><td>${l.instance}</td><td>${l.phone||''}</td>
-        <td>${l.enabled?'<span class="badge ok">Sí</span>':'<span class="badge bad">No</span>'}</td>
-        <td>${l.banned?'<span class="badge bad">Sí</span>':'No'}</td>
-        <td>${l.estado||'-'}</td>
-        <td><button class="btn sec" onclick="editLinea('${l.seccional}')">Editar</button></td></tr>`;
+      let qrBtn = '';
+      if (l.qrcode) {
+        qrsCache[l.seccional] = l.qrcode;
+        qrBtn = `<button class="btn ok" style="padding:2px 8px; font-size:11px;" onclick="showQR('${l.seccional}')">Ver QR</button>`;
+      } else {
+        delete qrsCache[l.seccional];
+      }
+      
+      let badgeEstado = `<span class="badge warn">${l.estado || '-'}</span>`;
+      if (l.estado === 'open') badgeEstado = `<span class="badge ok">Conectado</span>`;
+      else if (l.estado === 'connecting') badgeEstado = `<span class="badge warn">Conectando...</span>`;
+      else if (l.estado === 'close' || l.estado === 'error') badgeEstado = `<span class="badge bad">${l.estado}</span>`;
+
+      tb.innerHTML += `<tr>
+        <td><strong>${l.seccional}</strong></td>
+        <td>${l.instance}</td>
+        <td>${l.phone || '-'}</td>
+        <td>${l.enabled ? '<span class="badge ok">Sí</span>' : '<span class="badge bad">No</span>'}</td>
+        <td>${l.banned ? '<span class="badge bad">Sí</span>' : 'No'}</td>
+        <td>${badgeEstado} ${qrBtn}</td>
+        <td>
+          <button class="btn sec" style="padding:3px 8px;" onclick="editLinea('${l.seccional}')">Editar</button>
+          <button class="btn sec" style="padding:3px 8px; color:var(--tertiary);" onclick="reconectarLinea('${l.seccional}')" title="Forzar nuevo QR si está atascado">Reconectar</button>
+          <button class="btn bad" style="padding:3px 8px;" onclick="delLinea('${l.seccional}')">Eliminar</button>
+        </td>
+      </tr>`;
     });
   } catch(e){}
 }
-function editLinea(sec){ const row=[...document.querySelectorAll('#tblLineas tbody tr')].find(tr=>tr.children[0].textContent===sec);
-  document.getElementById('l_sec').value=sec; document.getElementById('l_inst').value=row.children[1].textContent; document.getElementById('l_tel').value=row.children[2].textContent;
-  document.getElementById('l_enabled').checked=row.children[3].textContent==='Sí'; document.getElementById('l_banned').checked=row.children[4].textContent==='Sí';
+
+function showQR(sec) {
+  const qr = qrsCache[sec];
+  if (!qr) return alert('No hay código QR disponible para esta instancia.');
+  document.getElementById('qrModalTitle').textContent = `Código QR — ${sec}`;
+  document.getElementById('qrModalSubtitle').textContent = 'Escanea este código desde WhatsApp > Dispositivos vinculados';
+  document.getElementById('qrContainer').innerHTML = `<img src="${qr}" style="width:230px; height:230px; border-radius:12px; border:2px solid var(--outline);"/>`;
+  document.getElementById('modalQR').classList.add('show');
+}
+document.getElementById('closeQR').onclick = () => document.getElementById('modalQR').classList.remove('show');
+
+async function reconectarLinea(sec) {
+  if (!confirm(`¿Deseas reiniciar la conexión y generar un QR nuevo para ${sec}?`)) return;
+  document.getElementById('lineasMsg').textContent = `Reconectando ${sec}... solicitando nuevo QR...`;
+  try {
+    const r = await api('/admin/lineas/reconectar', { method: 'POST', body: JSON.stringify({ seccional: sec }) });
+    if (r.ok) {
+      document.getElementById('lineasMsg').textContent = `Instancia ${sec} reiniciada.`;
+      await loadLineas();
+      if (r.estado && r.estado.qrcode) {
+        showQR(sec);
+      }
+    } else {
+      document.getElementById('lineasMsg').textContent = `Error al reconectar ${sec}`;
+    }
+  } catch (e) {
+    document.getElementById('lineasMsg').textContent = `Error: ${e.message}`;
+  }
+}
+
+async function delLinea(sec) {
+  if (!confirm(`¿Seguro que deseas eliminar la línea/instancia ${sec}?`)) return;
+  try {
+    await api('/admin/lineas', { method: 'DELETE', body: JSON.stringify({ seccional: sec }) });
+    document.getElementById('lineasMsg').textContent = `Línea ${sec} eliminada.`;
+    loadLineas();
+  } catch (e) {
+    document.getElementById('lineasMsg').textContent = `Error al eliminar: ${e.message}`;
+  }
+}
+
+function editLinea(sec){
+  const row=[...document.querySelectorAll('#tblLineas tbody tr')].find(tr=>tr.children[0].textContent.trim()===sec);
+  if (!row) return;
+  document.getElementById('l_sec').value=sec;
+  document.getElementById('l_inst').value=row.children[1].textContent;
+  document.getElementById('l_tel').value=row.children[2].textContent==='-'?'':row.children[2].textContent;
+  document.getElementById('l_enabled').checked=row.children[3].textContent.includes('Sí');
+  document.getElementById('l_banned').checked=row.children[4].textContent.includes('Sí');
   document.getElementById('lineasMsg').textContent='Editando '+sec;
 }
 document.getElementById('saveLinea').onclick = async () => {
