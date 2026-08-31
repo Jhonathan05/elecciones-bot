@@ -395,7 +395,7 @@ async function mapaVotos() {
     
     const inst = readSheet(wb.Sheets['INSTALACION'], mI, [
       'SECCIONAL UBICACION MESA', 'MUNICIPIO POR EL QUE VOTA', 'CÓDIGO MESA', 'INSTALADA', 'ALERTA',
-      'JURADOS PRESENTES', 'KIT ELECTORAL', 'SILLAS', 'MESA', 'OBSERVACIONES'
+      'JURADOS', 'KIT ELECTORAL', 'SILLAS', 'MESA FÍSICA', 'OBSERVACIONES'
     ]);
     
     const part = readSheet(wb.Sheets['PARTICIPACION'], mPa, [
@@ -433,10 +433,10 @@ async function mapaVotos() {
       map[k].instalacion = {
         instalada: norm(r['INSTALADA']),
         alerta: norm(r['ALERTA']),
-        jurados: num(r['JURADOS PRESENTES']),
+        jurados: num(r['JURADOS']),
         kit: r['KIT ELECTORAL'] || '',
         sillas: r['SILLAS'] || '',
-        mesaFisica: r['MESA'] || '',
+        mesaFisica: r['MESA FÍSICA'] || '',
         observaciones: r['OBSERVACIONES'] || ''
       };
     });
