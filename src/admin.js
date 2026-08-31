@@ -282,12 +282,12 @@ router.post('/config', requireAuth, (req, res) => {
   if (b.rcloneRemote !== undefined) cfg.RCLONE_REMOTE = b.rcloneRemote.trim();
   if (b.cierreHorario !== undefined) cfg.CIERRE_HORARIO = b.cierreHorario.trim();
   
-  // Re-inicializar maestro y sheets con la nueva ruta si existe el archivo
-  try {
-    sheets.cargarCoordinadores().then(() => {
-      maestro.cargar();
-    }).catch(() => {});
-  } catch(e){}
+  res.json({ ok: true, msg: 'Configuración actualizada en caliente.', config: {
+    sheetLocalPath: cfg.SHEET_LOCAL_PATH,
+    rcloneRemote: cfg.RCLONE_REMOTE,
+    cierreHorario: cfg.CIERRE_HORARIO
+  }});
+});
 
 // ---------- Backups de Seguridad ----------
 router.post('/backup', requireAuth, async (req, res) => {
