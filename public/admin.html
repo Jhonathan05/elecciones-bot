@@ -137,8 +137,31 @@
   <!-- LÍNEAS -->
   <div class="panel active" id="p-lineas">
     <div class="card">
-      <div class="row" style="align-items:center"><h3 style="margin:0">Números por seccional (Instancias WhatsApp)</h3><button class="btn sec" id="refreshEstado" style="flex:0">Actualizar estado</button></div>
-      <table id="tblLineas"><thead><tr><th>Seccional</th><th>Instancia</th><th>Teléfono</th><th>Activa</th><th>Baneada</th><th>Estado WA</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+      <div class="row" style="align-items:center; justify-space-between;">
+        <h3 style="margin:0">Números por seccional (Instancias WhatsApp)</h3>
+        <button class="btn sec" id="refreshEstado" style="flex:0">Actualizar estado</button>
+      </div>
+      
+      <!-- Buscador de Líneas -->
+      <div style="margin:10px 0 14px 0; max-width:320px;">
+        <label style="font-size:11px;">Buscar Línea / Seccional / Estado:</label>
+        <input id="f_lineaSearch" placeholder="Ej: LIBANO, open, error..." style="padding:5px 8px; font-size:12px;" />
+      </div>
+
+      <table id="tblLineas">
+        <thead>
+          <tr>
+            <th>Seccional</th>
+            <th>Instancia</th>
+            <th>Teléfono</th>
+            <th>Activa</th>
+            <th>Baneada</th>
+            <th>Estado WA</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
       <hr/>
       <h4>Alta / edición de línea</h4>
       <div class="row">
@@ -281,6 +304,18 @@
     </div>
 
     <div class="card" style="margin-top:16px;">
+      <h3>💾 Copias de Seguridad (Backups)</h3>
+      <p style="font-size:12px; color:var(--on-surface-variant); margin-bottom:12px;">
+        Genera copias de respaldo estáticas del archivo Excel de contingencia en caliente con marca de tiempo.
+      </p>
+      <div class="row" style="align-items:center; gap:12px;">
+        <button class="btn ok" id="btnCreateBackup">Crear Backup de Seguridad</button>
+        <span id="backupMsg" class="msg" style="margin:0;"></span>
+      </div>
+      <div id="backupsList" style="margin-top:12px; font-size:12px;"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
       <h3>⚙️ Configuración Dinámica de Rutas de Almacenamiento</h3>
       <p style="font-size:12px; color:var(--on-surface-variant); margin-bottom:12px;">
         Configura en caliente la ruta del volumen local del servidor o contenedor Docker donde reside el archivo de Excel y el destino de sincronización remota RClone.
@@ -305,8 +340,14 @@
   <!-- INFORMES -->
   <div class="panel" id="p-informes">
     <div class="card">
-      <div class="row" style="align-items:center"><h3 style="margin:0">Informes y alertas tempranas</h3><button class="btn sec" id="btnInformes">Cargar informes</button></div>
-      <div id="informesOut"></div>
+      <div class="row" style="align-items:center; justify-content:space-between;">
+        <h3 style="margin:0">Informes y alertas tempranas</h3>
+        <div style="display:flex; gap:8px;">
+          <button class="btn ok" id="btnExportCSV">📥 Descargar Consolidado CSV</button>
+          <button class="btn sec" id="btnInformes">Cargar informes</button>
+        </div>
+      </div>
+      <div id="informesOut" style="margin-top:14px;"></div>
     </div>
   </div>
 </div>
@@ -398,48 +439,72 @@ async function init(){
     loadLineas(); loadCoord(); loadConfig();
   } else {
     document.getElementById('loginView').classList.remove('hidden');
-    document.getElementById('appView').classList.add('hidden');
+    document.getElementById('appView').classList.remove('hidden');
   }
 }
 
 // --- Líneas ---
 const qrsCache = {};
+let rawLineasEstados = [];
 
 async function loadLineas(){
   try {
     const r = await api('/admin/lineas/estado');
-    const tb = document.querySelector('#tblLineas tbody');
-    tb.innerHTML = '';
-    r.estados.forEach(l => {
-      let qrBtn = '';
-      if (l.qrcode) {
-        qrsCache[l.seccional] = l.qrcode;
-        qrBtn = `<button class="btn ok" style="padding:2px 8px; font-size:11px;" onclick="showQR('${l.seccional}')">Ver QR</button>`;
-      } else {
-        delete qrsCache[l.seccional];
-      }
-      
-      let badgeEstado = `<span class="badge warn">${l.estado || '-'}</span>`;
-      if (l.estado === 'open') badgeEstado = `<span class="badge ok">Conectado</span>`;
-      else if (l.estado === 'connecting') badgeEstado = `<span class="badge warn">Conectando...</span>`;
-      else if (l.estado === 'close' || l.estado === 'error') badgeEstado = `<span class="badge bad">${l.estado}</span>`;
-
-      tb.innerHTML += `<tr>
-        <td><strong>${l.seccional}</strong></td>
-        <td>${l.instance}</td>
-        <td>${l.phone || '-'}</td>
-        <td>${l.enabled ? '<span class="badge ok">Sí</span>' : '<span class="badge bad">No</span>'}</td>
-        <td>${l.banned ? '<span class="badge bad">Sí</span>' : 'No'}</td>
-        <td>${badgeEstado} ${qrBtn}</td>
-        <td>
-          <button class="btn sec" style="padding:3px 8px;" onclick="editLinea('${l.seccional}')">Editar</button>
-          <button class="btn sec" style="padding:3px 8px; color:var(--tertiary);" onclick="reconectarLinea('${l.seccional}')" title="Forzar nuevo QR si está atascado">Reconectar</button>
-          <button class="btn bad" style="padding:3px 8px;" onclick="delLinea('${l.seccional}')">Eliminar</button>
-        </td>
-      </tr>`;
-    });
+    rawLineasEstados = r.estados || [];
+    renderLineasTable();
   } catch(e){}
 }
+
+function renderLineasTable() {
+  const filterText = (document.getElementById('f_lineaSearch').value || '').toLowerCase().trim();
+  const tb = document.querySelector('#tblLineas tbody');
+  tb.innerHTML = '';
+  
+  const filtered = rawLineasEstados.filter(x => {
+    if (!filterText) return true;
+    const sMatch = (x.seccional || '').toLowerCase().includes(filterText);
+    const iMatch = (x.instance || '').toLowerCase().includes(filterText);
+    const stMatch = (String(x.estado || '')).toLowerCase().includes(filterText);
+    const pMatch = (x.phone || '').includes(filterText);
+    return sMatch || iMatch || stMatch || pMatch;
+  });
+
+  if (filtered.length === 0) {
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--outline); padding:14px;">No se encontraron líneas con el filtro indicado.</td></tr>';
+    return;
+  }
+
+  filtered.forEach(l => {
+    let qrBtn = '';
+    if (l.qrcode) {
+      qrsCache[l.seccional] = l.qrcode;
+      qrBtn = `<button class="btn ok" style="padding:2px 8px; font-size:11px;" onclick="showQR('${l.seccional}')">Ver QR</button>`;
+    } else {
+      delete qrsCache[l.seccional];
+    }
+    
+    let badgeEstado = `<span class="badge warn">${l.estado || '-'}</span>`;
+    if (l.estado === 'open') badgeEstado = `<span class="badge ok">Conectado</span>`;
+    else if (l.estado === 'connecting') badgeEstado = `<span class="badge warn">Conectando...</span>`;
+    else if (l.estado === 'close' || l.estado === 'error') badgeEstado = `<span class="badge bad">${l.estado}</span>`;
+
+    tb.innerHTML += `<tr>
+      <td><strong>${l.seccional}</strong></td>
+      <td>${l.instance}</td>
+      <td>${l.phone || '-'}</td>
+      <td>${l.enabled ? '<span class="badge ok">Sí</span>' : '<span class="badge bad">No</span>'}</td>
+      <td>${l.banned ? '<span class="badge bad">Sí</span>' : 'No'}</td>
+      <td>${badgeEstado} ${qrBtn}</td>
+      <td>
+        <button class="btn sec" style="padding:3px 8px;" onclick="editLinea('${l.seccional}')">Editar</button>
+        <button class="btn sec" style="padding:3px 8px; color:var(--tertiary);" onclick="reconectarLinea('${l.seccional}')" title="Forzar nuevo QR si está atascado">Reconectar</button>
+        <button class="btn bad" style="padding:3px 8px;" onclick="delLinea('${l.seccional}')">Eliminar</button>
+      </td>
+    </tr>`;
+  });
+}
+
+document.getElementById('f_lineaSearch').oninput = renderLineasTable;
 
 function showQR(sec) {
   const qr = qrsCache[sec];
@@ -859,7 +924,7 @@ async function delCoordSec(sec){
   else alert('Error al eliminar: ' + (r.error || r.msg || ''));
 }
 
-// --- Importar y Configuración Dinámica ---
+// --- Importar, Configuración y Backups ---
 async function loadConfig() {
   try {
     const r = await api('/admin/config');
@@ -868,7 +933,44 @@ async function loadConfig() {
       document.getElementById('cfg_rcloneRemote').value = r.config.rcloneRemote || '';
     }
   } catch(e){}
+  loadBackupsList();
 }
+
+async function loadBackupsList() {
+  try {
+    const r = await api('/admin/backups');
+    const bList = document.getElementById('backupsList');
+    if (r.ok && r.backups && r.backups.length) {
+      let h = '<strong>Backups de seguridad existentes:</strong><ul>';
+      r.backups.slice(0, 10).forEach(b => {
+        h += `<li>📄 <code>${b}</code></li>`;
+      });
+      h += '</ul>';
+      bList.innerHTML = h;
+    } else {
+      bList.innerHTML = '<p style="color:var(--outline);">No hay backups creados aún.</p>';
+    }
+  } catch(e){}
+}
+
+document.getElementById('btnCreateBackup').onclick = async () => {
+  document.getElementById('backupMsg').className = 'msg';
+  document.getElementById('backupMsg').textContent = 'Creando backup...';
+  try {
+    const r = await api('/admin/backup', { method: 'POST' });
+    if (r.ok) {
+      document.getElementById('backupMsg').className = 'msg okm';
+      document.getElementById('backupMsg').textContent = '✅ ' + (r.msg || 'Backup creado.');
+      loadBackupsList();
+    } else {
+      document.getElementById('backupMsg').className = 'msg err';
+      document.getElementById('backupMsg').textContent = '⚠️ ' + (r.error || 'Error al crear backup.');
+    }
+  } catch(e) {
+    document.getElementById('backupMsg').className = 'msg err';
+    document.getElementById('backupMsg').textContent = '⚠️ ' + e.message;
+  }
+};
 
 document.getElementById('btnSaveConfig').onclick = async () => {
   const localP = document.getElementById('cfg_localPath').value.trim();
@@ -888,6 +990,19 @@ document.getElementById('btnSaveConfig').onclick = async () => {
     document.getElementById('cfgMsg').className = 'msg err';
     document.getElementById('cfgMsg').textContent = '⚠️ ' + e.message;
   }
+};
+
+document.getElementById('btnExportCSV').onclick = async () => {
+  try {
+    const res = await fetch('/admin/exportar-csv', { headers: { 'x-admin-token': TOKEN } });
+    if (!res.ok) return alert('Error al exportar CSV');
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'consolidado-electoral.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch(e) { alert('Error: ' + e.message); }
 };
 
 document.getElementById('btnImportar').onclick = async () => {

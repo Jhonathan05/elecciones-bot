@@ -289,12 +289,68 @@ router.post('/config', requireAuth, (req, res) => {
     }).catch(() => {});
   } catch(e){}
 
-  res.json({ ok: true, msg: 'Configuración actualizada en caliente.', config: {
-    sheetLocalPath: cfg.SHEET_LOCAL_PATH,
-    rcloneRemote: cfg.RCLONE_REMOTE,
-    cierreHorario: cfg.CIERRE_HORARIO
-  }});
+// ---------- Backups de Seguridad ----------
+router.post('/backup', requireAuth, async (req, res) => {
+  try {
+    const backupDir = path.join(__dirname, '..', 'data', 'backups');
+    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+    
+    const srcPath = require('./config').CONFIG.SHEET_LOCAL_PATH;
+    if (!fs.existsSync(srcPath)) return res.status(400).json({ error: 'El archivo Excel origen no existe.' });
+    
+    const timeStr = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupName = `backup_${timeStr}.xlsx`;
+    const destPath = path.join(backupDir, backupName);
+    
+    fs.copyFileSync(srcPath, destPath);
+    res.json({ ok: true, msg: 'Backup creado exitosamente.', fileName: backupName });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
+
+router.get('/backups', requireAuth, (req, res) => {
+  try {
+    const backupDir = path.join(__dirname, '..', 'data', 'backups');
+    if (!fs.existsSync(backupDir)) return res.json({ backups: [] });
+    const files = fs.readdirSync(backupDir).filter(f => f.endsWith('.xlsx')).reverse();
+    res.json({ backups: files });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ---------- Exportación Consolidada a CSV ----------
+router.get('/exportar-csv', requireAuth, async (req, res) => {
+  try {
+    const mapa = await sheets.mapaVotos();
+    const { coordMesa } = sheets.getCoordinadores();
+    const coordMap = new Map();
+    coordMesa.forEach(c => {
+      c.mesas.forEach(m => {
+        coordMap.set(`${m.codigo}|${maestro.norm(m.seccional)}|${maestro.norm(m.municipio)}`, c.telefono);
+      });
+    });
+
+    let csv = 'SECCIONAL,MUNICIPIO,MESA,COORDINADOR_TEL,INSTALADA,SUFRAGANTES_PARTICIPACION,TOTAL_VOTOS_ACTA,PLANCHA_1,PLANCHA_2,PLANCHA_3,PLANCHA_4,PLANCHA_5,BLANCO,NULOS,NO_MARCADOS,INCINERADOS,ALERTA_ACTA\n';
+
+    const seccionalesList = maestro.seccionales();
+    seccionalesList.forEach(secName => {
+      const listMesas = maestro.mesasDeSeccional(secName);
+      listMesas.forEach(m => {
+        const k = `${m.codigo}|${maestro.norm(m.seccional)}|${maestro.norm(m.municipio)}`;
+        const datos = mapa[k] || {};
+        const inst = datos.instalacion || {};
+        const part = datos.participacion || {};
+        const acta = datos.acta021 || {};
+        const coordTel = coordMap.get(k) || '';
+
+        csv += `"${m.seccional}","${m.municipio}",${m.codigo},"${coordTel}","${inst.instalada || 'NO'}",${part.totalSufragantes || 0},${acta.totalSufragantes || 0},${acta.plancha1 || 0},${acta.plancha2 || 0},${acta.plancha3 || 0},${acta.plancha4 || 0},${acta.plancha5 || 0},${acta.blanco || 0},${acta.nulos || 0},${acta.noMarcados || 0},${acta.incinerados || 0},"${acta.alerta || 'PENDIENTE'}"\n`;
+      });
+    });
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="consolidado-electoral.csv"');
+    res.send(csv);
+  } catch (e) { res.status(500).send('Error al generar CSV: ' + e.message); }
+});
+
 router.post('/importar', requireAuth, upload.single('archivo'), async (req, res) => {
   try {
     const buffer = req.file ? req.file.buffer : undefined;
@@ -307,7 +363,7 @@ router.post('/importar', requireAuth, upload.single('archivo'), async (req, res)
 
 router.get('/plantilla', requireAuth, (req, res) => {
   const file = path.join(__dirname, '..', '3_PRECONTEO 2022-PLANCHAS.xlsx');
-  if (!fs.existsSync(file)) return res.status(404).json({ error: 'Plantilla no generada. Corre scripts/build-template.js' });
+  if (!fs.existsSync(file)) return res.status(404).json({ error: 'Plantilla no encontrada' });
   res.download(file, 'plantilla-contingencia.xlsx');
 });
 
