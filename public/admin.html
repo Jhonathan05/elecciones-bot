@@ -316,24 +316,28 @@
     </div>
 
     <div class="card" style="margin-top:16px;">
-      <h3>⚙️ Configuración Dinámica de Rutas de Almacenamiento</h3>
+      <h3>⚙️ Ubicación del Archivo Excel Sincronizado</h3>
       <p style="font-size:12px; color:var(--on-surface-variant); margin-bottom:12px;">
-        Configura en caliente la ruta del volumen local del servidor o contenedor Docker donde reside el archivo de Excel y el destino de sincronización remota RClone.
+        Define la ruta local del archivo Excel de contingencia que se mantendrá sincronizado con Google Drive y la carpeta compartida.
       </p>
-      <div class="row">
-        <div style="flex:2; min-width:240px;">
-          <label style="font-weight:600;">Ruta Local del Archivo Excel (SHEET_LOCAL_PATH):</label>
-          <div style="display:flex; gap:6px;">
-            <input id="cfg_localPath" placeholder="/app/shared/3_PRECONTEO 2022-PLANCHAS.xlsx" style="flex:1;" />
-            <input type="file" id="filePickerInput" accept=".xlsx,.xls,.csv" style="display:none;" />
-            <button class="btn sec" id="btnBrowseFile" style="padding:4px 10px; font-size:12px; white-space:nowrap;" title="Buscar archivo en el explorador de archivos local">📁 Explorar...</button>
-          </div>
-        </div>
-        <div style="flex:2; min-width:240px;">
-          <label style="font-weight:600;">Ruta Remota de RClone (RCLONE_REMOTE):</label>
-          <input id="cfg_rcloneRemote" placeholder="gdrive:Elecciones2026/3_PRECONTEO 2022-PLANCHAS.xlsx" />
+      <div>
+        <label style="font-weight:600;">Ruta del Archivo Excel Sincronizado:</label>
+        <div style="display:flex; gap:6px;">
+          <input id="cfg_localPath" placeholder="/app/shared/3_PRECONTEO 2022-PLANCHAS.xlsx" style="flex:1;" />
+          <input type="file" id="filePickerInput" accept=".xlsx,.xls,.csv" style="display:none;" />
+          <button class="btn sec" id="btnBrowseFile" style="padding:4px 10px; font-size:12px; white-space:nowrap;" title="Buscar archivo en el explorador de archivos local">📁 Explorar...</button>
         </div>
       </div>
+
+      <!-- Opciones Avanzadas de Sincronización Remota (Opcional) -->
+      <details style="margin-top:10px; font-size:12px; color:var(--on-surface-variant);">
+        <summary style="cursor:pointer; font-weight:500;">Modo avanzado: Sincronización directa RClone (Opcional)</summary>
+        <div style="margin-top:8px;">
+          <label style="font-weight:600;">Destino Remoto de RClone (RCLONE_REMOTE):</label>
+          <input id="cfg_rcloneRemote" placeholder="gdrive:Elecciones2026/3_PRECONTEO 2022-PLANCHAS.xlsx" />
+        </div>
+      </details>
+
       <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
         <button class="btn ok" id="btnSaveConfig">Guardar Configuración en Caliente</button>
         <span id="cfgMsg" class="msg" style="margin:0;"></span>
