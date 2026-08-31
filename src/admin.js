@@ -253,7 +253,39 @@ router.delete('/coordinadores/seccional', requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
-// ---------- Importar y plantilla ----------
+// ---------- Ajustes y Configuración Dinámica de Rutas ----------
+router.get('/config', requireAuth, (req, res) => {
+  res.json({
+    ok: true,
+    config: {
+      sheetLocalPath: require('./config').CONFIG.SHEET_LOCAL_PATH,
+      rcloneRemote: require('./config').CONFIG.RCLONE_REMOTE,
+      sheetMode: require('./config').CONFIG.SHEET_MODE,
+      cierreHorario: require('./config').CONFIG.CIERRE_HORARIO || 'No configurado',
+    }
+  });
+});
+
+router.post('/config', requireAuth, (req, res) => {
+  const b = req.body || {};
+  const cfg = require('./config').CONFIG;
+  if (b.sheetLocalPath) cfg.SHEET_LOCAL_PATH = b.sheetLocalPath.trim();
+  if (b.rcloneRemote !== undefined) cfg.RCLONE_REMOTE = b.rcloneRemote.trim();
+  if (b.cierreHorario !== undefined) cfg.CIERRE_HORARIO = b.cierreHorario.trim();
+  
+  // Re-inicializar maestro y sheets con la nueva ruta si existe el archivo
+  try {
+    sheets.cargarCoordinadores().then(() => {
+      maestro.cargar();
+    }).catch(() => {});
+  } catch(e){}
+
+  res.json({ ok: true, msg: 'Configuración actualizada en caliente.', config: {
+    sheetLocalPath: cfg.SHEET_LOCAL_PATH,
+    rcloneRemote: cfg.RCLONE_REMOTE,
+    cierreHorario: cfg.CIERRE_HORARIO
+  }});
+});
 router.post('/importar', requireAuth, upload.single('archivo'), async (req, res) => {
   try {
     const buffer = req.file ? req.file.buffer : undefined;

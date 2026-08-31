@@ -266,16 +266,39 @@
     </div>
   </div>
 
-  <!-- IMPORTAR -->
+  <!-- IMPORTAR Y AJUSTES -->
   <div class="panel" id="p-importar">
     <div class="card">
-      <h3>Importación y plantilla</h3>
-      <p>El bot se alimenta del mismo Excel en Drive (fuente única). Descarga la plantilla, rellena catálogo + coordinadores + números, súbela a Drive y luego importa.</p>
-      <div class="row">
-        <button class="btn" id="btnImportar">Importar desde Sheet</button>
-        <button class="btn sec" id="btnPlantilla" style="flex:0">Descargar plantilla Excel</button>
+      <h3>Sincronización y Plantilla Excel</h3>
+      <p style="font-size:13px; color:var(--on-surface-variant);">
+        El bot lee y escribe directamente en el archivo Excel local compartido (fuente única de verdad). Si los digitadores humanos editan el archivo en Drive, presiona para sincronizar al instante.
+      </p>
+      <div class="row" style="margin-bottom:12px;">
+        <button class="btn" id="btnImportar">Sincronizar e Importar desde Sheet</button>
+        <button class="btn sec" id="btnPlantilla" style="flex:0">Descargar Plantilla Excel</button>
       </div>
       <div class="msg" id="importMsg"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>⚙️ Configuración Dinámica de Rutas de Almacenamiento</h3>
+      <p style="font-size:12px; color:var(--on-surface-variant); margin-bottom:12px;">
+        Configura en caliente la ruta del volumen local del servidor o contenedor Docker donde reside el archivo de Excel y el destino de sincronización remota RClone.
+      </p>
+      <div class="row">
+        <div style="flex:2; min-width:240px;">
+          <label style="font-weight:600;">Ruta Local del Archivo Excel (SHEET_LOCAL_PATH):</label>
+          <input id="cfg_localPath" placeholder="/app/shared/3_PRECONTEO 2022-PLANCHAS.xlsx" />
+        </div>
+        <div style="flex:2; min-width:240px;">
+          <label style="font-weight:600;">Ruta Remota de RClone (RCLONE_REMOTE):</label>
+          <input id="cfg_rcloneRemote" placeholder="gdrive:Elecciones2026/3_PRECONTEO 2022-PLANCHAS.xlsx" />
+        </div>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+        <button class="btn ok" id="btnSaveConfig">Guardar Configuración en Caliente</button>
+        <span id="cfgMsg" class="msg" style="margin:0;"></span>
+      </div>
     </div>
   </div>
 
@@ -350,14 +373,28 @@ document.getElementById('loginBtn').onclick = async () => {
 };
 
 // --- Tabs ---
-document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
-  t.classList.add('active');
-  document.getElementById('p-'+t.dataset.t).classList.add('active');
-  if (t.dataset.t==='coord') loadCoord();
-  if (t.dataset.t==='informes') loadInformes();
-});
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tab[onclick="showTab('${id}')"]`).classList.add('active');
+  document.getElementById('p-'+id).classList.add('active');
+  if (id==='lineas') loadLineas();
+  if (id==='coord') loadCoord();
+  if (id==='importar') { loadConfig(); }
+  if (id==='informes') loadInformes();
+}
+
+async function init(){
+  const ok = await checkAuth();
+  if (ok){
+    document.getElementById('loginView').classList.add('hidden');
+    document.getElementById('appView').classList.remove('hidden');
+    loadLineas(); loadCoord(); loadConfig();
+  } else {
+    document.getElementById('loginView').classList.remove('hidden');
+    document.getElementById('appView').classList.add('hidden');
+  }
+}
 
 // --- Líneas ---
 const qrsCache = {};
@@ -816,7 +853,37 @@ async function delCoordSec(sec){
   else alert('Error al eliminar: ' + (r.error || r.msg || ''));
 }
 
-// --- Importar ---
+// --- Importar y Configuración Dinámica ---
+async function loadConfig() {
+  try {
+    const r = await api('/admin/config');
+    if (r.ok && r.config) {
+      document.getElementById('cfg_localPath').value = r.config.sheetLocalPath || '';
+      document.getElementById('cfg_rcloneRemote').value = r.config.rcloneRemote || '';
+    }
+  } catch(e){}
+}
+
+document.getElementById('btnSaveConfig').onclick = async () => {
+  const localP = document.getElementById('cfg_localPath').value.trim();
+  const remoteP = document.getElementById('cfg_rcloneRemote').value.trim();
+  document.getElementById('cfgMsg').className = 'msg';
+  document.getElementById('cfgMsg').textContent = 'Guardando configuración...';
+  try {
+    const r = await api('/admin/config', { method:'POST', body: JSON.stringify({ sheetLocalPath: localP, rcloneRemote: remoteP }) });
+    if (r.ok) {
+      document.getElementById('cfgMsg').className = 'msg okm';
+      document.getElementById('cfgMsg').textContent = '✅ Configuración actualizada en caliente.';
+    } else {
+      document.getElementById('cfgMsg').className = 'msg err';
+      document.getElementById('cfgMsg').textContent = '⚠️ Error al guardar: ' + (r.error || '');
+    }
+  } catch(e) {
+    document.getElementById('cfgMsg').className = 'msg err';
+    document.getElementById('cfgMsg').textContent = '⚠️ ' + e.message;
+  }
+};
+
 document.getElementById('btnImportar').onclick = async () => {
   document.getElementById('importMsg').textContent='Importando...';
   const r = await api('/admin/importar',{method:'POST'});
