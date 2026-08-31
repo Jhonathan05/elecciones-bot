@@ -155,6 +155,19 @@
     </div>
   </div>
 
+  <!-- Modal Detalle de Reportes por Mesa -->
+  <div class="modal" id="modalReportes">
+    <div class="box" style="max-width:650px; width:90%; max-height:85vh; overflow-y:auto;">
+      <div class="row" style="align-items:center; justify-content:space-between; margin-bottom:12px;">
+        <h3 id="repModalTitle" style="margin:0;">Detalle de Reportes de Mesa</h3>
+        <button class="btn sec" id="closeReportes" style="padding:2px 8px;">✕ Cerrar</button>
+      </div>
+      <p id="repModalSubtitle" style="font-size:13px; color:var(--on-surface-variant); margin-top:0; border-bottom:1px solid var(--outline-variant); padding-bottom:8px;"></p>
+      
+      <div id="repModalBody"></div>
+    </div>
+  </div>
+
   <!-- COORDINADORES -->
   <div class="panel" id="p-coord">
     <!-- 1. COORDINADORES SECCIONALES PRIMERO -->
@@ -547,6 +560,13 @@ function renderMesaPage() {
         codigo: m.codigo 
       }).replace(/"/g, '&quot;');
 
+      const escVoto = JSON.stringify({
+        codigo: m.codigo,
+        seccional: m.seccional,
+        municipio: m.municipio,
+        voto: m.voto || {}
+      }).replace(/"/g, '&quot;');
+
       let btnAcciones = '';
       if (m.asignado) {
         btnAcciones = `<button class="btn sec" style="padding:2px 6px; font-size:11px;" onclick="editCoordMesa('${escData}')">Editar</button>
@@ -555,6 +575,8 @@ function renderMesaPage() {
         btnAcciones = `<button class="btn ok" style="padding:2px 6px; font-size:11px;" onclick="assignCoordMesa('${m.seccional}','${m.municipio}',${m.codigo})">+ Asignar</button>`;
       }
 
+      const reportBadge = fmtReporteBtn(m);
+
       tbM.innerHTML += `<tr>
         <td>${m.seccional}</td>
         <td><strong>Mesa ${m.codigo}</strong></td>
@@ -562,7 +584,7 @@ function renderMesaPage() {
         <td>${badgeEstado}</td>
         <td>${m.nombre || '<span style="color:var(--outline);">—</span>'}</td>
         <td>${m.telefono || '<span style="color:var(--outline);">—</span>'}</td>
-        <td>${fmtVoto(m.voto)}</td>
+        <td>${reportBadge}</td>
         <td>${btnAcciones}</td>
       </tr>`;
     });
@@ -576,6 +598,132 @@ function renderMesaPage() {
   document.getElementById('btnPrevPage').disabled = currentPage <= 1;
   document.getElementById('btnNextPage').disabled = currentPage >= maxPage;
 }
+
+function fmtReporteBtn(m) {
+  const v = m.voto || {};
+  const instOk = v.instalacion && v.instalacion.instalada === 'SI';
+  const partSuf = v.participacion ? v.participacion.totalSufragantes : 0;
+  const preOk = v.acta021 && v.acta021.totalSufragantes > 0;
+  
+  const escVoto = JSON.stringify({
+    codigo: m.codigo,
+    seccional: m.seccional,
+    municipio: m.municipio,
+    voto: v
+  }).replace(/"/g, '&quot;');
+
+  let label = 'Ver Reportes';
+  let cls = 'btn sec';
+  if (preOk) {
+    label = '📊 Preconteo listo';
+    cls = 'btn ok';
+  } else if (partSuf > 0) {
+    label = `👥 ${partSuf} Votos`;
+    cls = 'btn ok';
+  } else if (instOk) {
+    label = '✅ Instalada';
+    cls = 'btn ok';
+  }
+
+  return `<button class="${cls}" style="padding:3px 8px; font-size:11px;" onclick="showMesaReports('${escVoto}')">${label}</button>`;
+}
+
+function showMesaReports(rawJson) {
+  const d = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
+  const v = d.voto || {};
+
+  document.getElementById('repModalTitle').textContent = `Mesa ${d.codigo} — ${d.municipio} (${d.seccional})`;
+  document.getElementById('repModalSubtitle').textContent = `Reportes de jornada ingresados para la Mesa ${d.codigo}`;
+
+  let html = '';
+
+  // --- Momento 1: Instalación ---
+  const inst = v.instalacion;
+  html += `<div style="background:var(--surface-variant); padding:12px; border-radius:8px; margin-bottom:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+      <h4 style="margin:0; color:var(--primary);">1️⃣ Instalación de la Mesa</h4>
+      ${inst ? `<span class="badge ${inst.instalada === 'SI' ? 'ok' : 'warn'}">${inst.instalada === 'SI' ? 'INSTALADA' : 'PENDIENTE'}</span>` : '<span class="badge warn">SIN REPORTAR</span>'}
+    </div>`;
+  
+  if (inst && (inst.jurados !== undefined || inst.kit || inst.sillas || inst.mesaFisica)) {
+    html += `<table style="font-size:12px; margin-top:6px; width:100%;">
+      <tr><td><strong>Jurados Presentes:</strong></td><td>${inst.jurados !== undefined ? inst.jurados : '—'}</td></tr>
+      <tr><td><strong>Kit Electoral:</strong></td><td>${inst.kit || '—'}</td></tr>
+      <tr><td><strong>Sillas:</strong></td><td>${inst.sillas || '—'}</td></tr>
+      <tr><td><strong>Mesa Física:</strong></td><td>${inst.mesaFisica || '—'}</td></tr>
+      <tr><td><strong>Observaciones:</strong></td><td>${inst.observaciones || 'Sin observaciones'}</td></tr>
+    </table>`;
+  } else {
+    html += `<p style="font-size:12px; color:var(--on-surface-variant); margin:4px 0 0 0;">No se ha recibido el reporte de instalación de esta mesa.</p>`;
+  }
+  html += `</div>`;
+
+  // --- Momento 2: Participación ---
+  const part = v.participacion;
+  html += `<div style="background:var(--surface-variant); padding:12px; border-radius:8px; margin-bottom:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+      <h4 style="margin:0; color:var(--primary);">2️⃣ Participación (Boletines Parciales)</h4>
+      ${part ? `<span class="badge ok">${part.totalSufragantes || 0} Sufragantes</span>` : '<span class="badge warn">SIN REPORTAR</span>'}
+    </div>`;
+  
+  if (part && (part.b1 || part.b2 || part.b3)) {
+    html += `<table style="font-size:12px; margin-top:6px; width:100%;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--outline);">
+          <th style="text-align:left;">Boletín</th>
+          <th style="text-align:left;">Sufragantes Acumulados</th>
+          <th style="text-align:left;">Observaciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Boletín 1</strong></td><td>${part.b1 && part.b1.sufragantes ? part.b1.sufragantes : '—'}</td><td>${part.b1 ? (part.b1.obs || 'Sin obs') : '—'}</td></tr>
+        <tr><td><strong>Boletín 2</strong></td><td>${part.b2 && part.b2.sufragantes ? part.b2.sufragantes : '—'}</td><td>${part.b2 ? (part.b2.obs || 'Sin obs') : '—'}</td></tr>
+        <tr><td><strong>Boletín 3</strong></td><td>${part.b3 && part.b3.sufragantes ? part.b3.sufragantes : '—'}</td><td>${part.b3 ? (part.b3.obs || 'Sin obs') : '—'}</td></tr>
+      </tbody>
+    </table>`;
+  } else {
+    html += `<p style="font-size:12px; color:var(--on-surface-variant); margin:4px 0 0 0;">No se han recibido boletines parciales de participación.</p>`;
+  }
+  html += `</div>`;
+
+  // --- Momento 3: Preconteo (Acta 021) ---
+  const acta = v.acta021;
+  const esCuadreErr = acta && acta.alerta === 'ALERTA CUADRE';
+  html += `<div style="background:var(--surface-variant); padding:12px; border-radius:8px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+      <h4 style="margin:0; color:var(--primary);">3️⃣ Preconteo (Acta 021)</h4>
+      ${acta && acta.totalSufragantes > 0 
+        ? `<span class="badge ${esCuadreErr ? 'bad' : 'ok'}">${esCuadreErr ? 'DESCUADRE (' + acta.descuadre + ')' : 'CUADRE OK'}</span>` 
+        : '<span class="badge warn">SIN REPORTAR</span>'}
+    </div>`;
+  
+  if (acta && acta.totalSufragantes > 0) {
+    html += `<table style="font-size:12px; margin-top:6px; width:100%;">
+      <tr><td><strong>Total Votos Sufragantes (Mesa):</strong></td><td><strong>${acta.totalSufragantes}</strong></td></tr>
+      <tr><td><strong>Plancha 1:</strong></td><td>${acta.plancha1 || 0}</td></tr>
+      <tr><td><strong>Plancha 2:</strong></td><td>${acta.plancha2 || 0}</td></tr>
+      <tr><td><strong>Plancha 3:</strong></td><td>${acta.plancha3 || 0}</td></tr>
+      <tr><td><strong>Plancha 4:</strong></td><td>${acta.plancha4 || 0}</td></tr>
+      <tr><td><strong>Plancha 5:</strong></td><td>${acta.plancha5 || 0}</td></tr>
+      <tr><td><strong>Votos en Blanco:</strong></td><td>${acta.blanco || 0}</td></tr>
+      <tr><td><strong>Votos Nulos:</strong></td><td>${acta.nulos || 0}</td></tr>
+      <tr><td><strong>Votos no Marcados:</strong></td><td>${acta.noMarcados || 0}</td></tr>
+      <tr><td><strong>Votos Incinerados:</strong></td><td>${acta.incinerados || 0}</td></tr>
+      <tr style="border-top:1px solid var(--outline);"><td><strong>Control / Cuadre Votos:</strong></td><td><strong>${acta.control || 'OK'} ${esCuadreErr ? '(Diferencia: ' + acta.descuadre + ' votos)' : ''}</strong></td></tr>
+      <tr><td><strong>Observaciones / Constancias:</strong></td><td>${acta.observaciones || 'Sin constancias'}</td></tr>
+    </table>`;
+  } else {
+    html += `<p style="font-size:12px; color:var(--on-surface-variant); margin:4px 0 0 0;">No se ha registrado aún el preconteo del Acta 021.</p>`;
+  }
+  html += `</div>`;
+
+  document.getElementById('repModalBody').innerHTML = html;
+  document.getElementById('modalReportes').classList.add('show');
+}
+
+document.getElementById('closeReportes').onclick = () => {
+  document.getElementById('modalReportes').classList.remove('show');
+};
 
 // Event Listeners de Filtros y Paginación
 document.getElementById('f_secFilter').onchange = applyMesaFilters;

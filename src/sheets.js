@@ -382,17 +382,77 @@ async function mapaVotos() {
     const wb = loadWb();
     const mP = maps['PRECONTEO'], mI = maps['INSTALACION'], mPa = maps['PARTICIPACION'];
     const readSheet = (ws, m, headers) => {
+      if (!ws || !m) return [];
       const rows = X.utils.sheet_to_json(ws, { header: 1, defval: undefined, blankrows: false });
       return rows.slice(1).map(row => { const o = {}; headers.forEach(h => o[h] = row[m[h]]); return o; });
     };
-    const pre = readSheet(wb.Sheets['PRECONTEO'], mP, ['SECCIONAL UBICACION MESA', 'MUNICIPIO POR EL QUE VOTA', 'CÓDIGO MESA', 'CONTROL', 'DESCUADRE', 'ALERTA', 'Total Sufragantes Planchas', 'Plancha 1', 'Plancha 2', 'Plancha 3', 'Plancha 4', 'Plancha 5']);
-    const inst = readSheet(wb.Sheets['INSTALACION'], mI, ['SECCIONAL UBICACION MESA', 'MUNICIPIO POR EL QUE VOTA', 'CÓDIGO MESA', 'INSTALADA', 'ALERTA']);
-    const part = readSheet(wb.Sheets['PARTICIPACION'], mPa, ['SECCIONAL UBICACION MESA', 'MUNICIPIO POR EL QUE VOTA', 'CÓDIGO MESA', 'TOTAL SUFRAGANTES', 'ALERTA']);
+    
+    const pre = readSheet(wb.Sheets['PRECONTEO'], mP, [
+      'SECCIONAL UBICACION MESA', 'MUNICIPIO POR EL QUE VOTA', 'CÓDIGO MESA', 'CONTROL', 'DESCUADRE', 'ALERTA',
+      'Total Sufragantes Planchas', 'Plancha 1', 'Plancha 2', 'Plancha 3', 'Plancha 4', 'Plancha 5',
+      'Votos en Blanco Planchas', 'Votos Nulos Planchas', 'Votos no Marcados Planchas', 'Votos Incinerados Planchas', 'OTRAS CONSTANCIAS'
+    ]);
+    
+    const inst = readSheet(wb.Sheets['INSTALACION'], mI, [
+      'SECCIONAL UBICACION MESA', 'MUNICIPIO POR EL QUE VOTA', 'CÓDIGO MESA', 'INSTALADA', 'ALERTA',
+      'JURADOS PRESENTES', 'KIT ELECTORAL', 'SILLAS', 'MESA', 'OBSERVACIONES'
+    ]);
+    
+    const part = readSheet(wb.Sheets['PARTICIPACION'], mPa, [
+      'SECCIONAL UBICACION MESA', 'MUNICIPIO POR EL QUE VOTA', 'CÓDIGO MESA', 'TOTAL SUFRAGANTES', 'ALERTA',
+      'SUFRAGANTES B1', 'OBS B1', 'SUFRAGANTES B2', 'OBS B2', 'SUFRAGANTES B3', 'OBS B3'
+    ]);
+    
     const map = {};
     const key = r => `${r['CÓDIGO MESA']}|${norm(r['SECCIONAL UBICACION MESA'])}|${norm(r['MUNICIPIO POR EL QUE VOTA'])}`;
-    pre.forEach(r => { map[key(r)] = map[key(r)] || {}; map[key(r)].acta021 = { control: norm(r['CONTROL']), descuadre: num(r['DESCUADRE']), alerta: norm(r['ALERTA']), sufragantes: num(r['Total Sufragantes Planchas']), planchas: { 1: num(r['Plancha 1']), 2: num(r['Plancha 2']), 3: num(r['Plancha 3']), 4: num(r['Plancha 4']), 5: num(r['Plancha 5']) } }; });
-    inst.forEach(r => { map[key(r)] = map[key(r)] || {}; map[key(r)].instalacion = { instalada: norm(r['INSTALADA']), alerta: norm(r['ALERTA']) }; });
-    part.forEach(r => { map[key(r)] = map[key(r)] || {}; map[key(r)].participacion = { sufragantes: num(r['TOTAL SUFRAGANTES']), alerta: norm(r['ALERTA']) }; });
+    
+    pre.forEach(r => {
+      const k = key(r);
+      map[k] = map[k] || {};
+      map[k].acta021 = {
+        control: norm(r['CONTROL']),
+        descuadre: num(r['DESCUADRE']),
+        alerta: norm(r['ALERTA']),
+        totalSufragantes: num(r['Total Sufragantes Planchas']),
+        plancha1: num(r['Plancha 1']),
+        plancha2: num(r['Plancha 2']),
+        plancha3: num(r['Plancha 3']),
+        plancha4: num(r['Plancha 4']),
+        plancha5: num(r['Plancha 5']),
+        blanco: num(r['Votos en Blanco Planchas']),
+        nulos: num(r['Votos Nulos Planchas']),
+        noMarcados: num(r['Votos no Marcados Planchas']),
+        incinerados: num(r['Votos Incinerados Planchas']),
+        observaciones: r['OTRAS CONSTANCIAS'] || ''
+      };
+    });
+    
+    inst.forEach(r => {
+      const k = key(r);
+      map[k] = map[k] || {};
+      map[k].instalacion = {
+        instalada: norm(r['INSTALADA']),
+        alerta: norm(r['ALERTA']),
+        jurados: num(r['JURADOS PRESENTES']),
+        kit: r['KIT ELECTORAL'] || '',
+        sillas: r['SILLAS'] || '',
+        mesaFisica: r['MESA'] || '',
+        observaciones: r['OBSERVACIONES'] || ''
+      };
+    });
+    
+    part.forEach(r => {
+      const k = key(r);
+      map[k] = map[k] || {};
+      map[k].participacion = {
+        totalSufragantes: num(r['TOTAL SUFRAGANTES']),
+        alerta: norm(r['ALERTA']),
+        b1: { sufragantes: num(r['SUFRAGANTES B1']), obs: r['OBS B1'] || '' },
+        b2: { sufragantes: num(r['SUFRAGANTES B2']), obs: r['OBS B2'] || '' },
+        b3: { sufragantes: num(r['SUFRAGANTES B3']), obs: r['OBS B3'] || '' }
+      };
+    });
+    
     return map;
   });
 }
