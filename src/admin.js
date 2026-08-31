@@ -70,7 +70,16 @@ router.get('/lineas', requireAuth, (req, res) => res.json({ lineas: state.listLi
 router.get('/lineas/estado', requireAuth, async (req, res) => {
   const lineas = state.listLineas();
   const estados = await Promise.all(lineas.map(async l => {
-    const st = await evo.getInstanceStatus(l.instance);
+    let st = await evo.getInstanceStatus(l.instance);
+    // Si da error con el nombre exacto de la DB, probar variante en minúsculas/capitalizada
+    if ((!st.state || st.state === 'error') && l.instance) {
+      const altName = l.instance.charAt(0).toUpperCase() + l.instance.slice(1).toLowerCase();
+      const stAlt = await evo.getInstanceStatus(altName);
+      if (stAlt && stAlt.state && stAlt.state !== 'error') {
+        st = stAlt;
+        state.upsertLinea(l.seccional, altName, l.phone, l.enabled, l.banned);
+      }
+    }
     return { seccional: l.seccional, instance: l.instance, phone: l.phone, enabled: l.enabled, banned: l.banned, estado: st.state || st, qrcode: st.qrcode || null };
   }));
   res.json({ estados });
