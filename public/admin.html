@@ -373,16 +373,22 @@ document.getElementById('loginBtn').onclick = async () => {
 };
 
 // --- Tabs ---
-function showTab(id){
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelector(`.tab[onclick="showTab('${id}')"]`).classList.add('active');
-  document.getElementById('p-'+id).classList.add('active');
-  if (id==='lineas') loadLineas();
-  if (id==='coord') loadCoord();
-  if (id==='importar') { loadConfig(); }
-  if (id==='informes') loadInformes();
+function switchTab(tId) {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+  const tabBtn = document.querySelector(`.tab[data-t="${tId}"]`);
+  const panelEl = document.getElementById('p-' + tId);
+  if (tabBtn) tabBtn.classList.add('active');
+  if (panelEl) panelEl.classList.add('active');
+  if (tId === 'lineas') loadLineas();
+  if (tId === 'coord') loadCoord();
+  if (tId === 'importar') loadConfig();
+  if (tId === 'informes') loadInformes();
 }
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => switchTab(t.dataset.t);
+});
 
 async function init(){
   const ok = await checkAuth();
