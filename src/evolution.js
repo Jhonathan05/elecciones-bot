@@ -57,7 +57,11 @@ async function listInstances() {
 }
 
 async function createInstance(instance) {
-  const res = await request('POST', '/instance/create', { instanceName: instance, qrcode: true, integration: 'WHATSAPP-BAILEYS' });
+  const res = await request('POST', '/instance/create', { 
+    instanceName: instance, 
+    qrcode: true, 
+    integration: 'WHATSAPP-BAILEYS'
+  });
   try {
     await connectInstance(instance);
   } catch (e) {}

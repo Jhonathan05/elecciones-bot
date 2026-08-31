@@ -199,6 +199,28 @@ async function init() {
     else throw new Error('SHEET_LOCAL_PATH no existe y no hay semilla: ' + CONFIG.SHEET_LOCAL_PATH);
   }
   analyze(loadWb());
+  
+  // Sembrar automáticamente las seccionales en la tabla lineas de la base de datos si no existen
+  try {
+    const wb = loadWb();
+    if (wb.Sheets['SECCIONALES'] && maps['SECCIONALES']) {
+      const sws = wb.Sheets['SECCIONALES'];
+      const rows = X.utils.sheet_to_json(sws, { header: 1, defval: undefined, blankrows: false });
+      rows.slice(1).forEach(row => {
+        const sec = norm(row[0]);
+        if (sec && sec !== 'N/A') {
+          const cur = state.getLinea(sec);
+          if (!cur) {
+            const num = digits(row[5]);
+            state.upsertLinea(sec, sec.toLowerCase(), num || null, 1, 0);
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.warn('Error al sembrar líneas iniciales de seccionales:', e.message);
+  }
+
   console.log('[sheets] local listo. PRECONTEO filas:', (rowsIdx['PRECONTEO'] || []).length,
     '| coord mesa:', coordinadores.coordMesa.length, '| coord seccional:', coordinadores.coordSec.length);
   return true;

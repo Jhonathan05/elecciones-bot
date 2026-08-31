@@ -36,6 +36,7 @@ function makeCtx(phone, instance) {
     getSeccionalDeInstancia,
     isCerrado,
     maestro,
+    state,
     linea: instance,
     telefono: phone,
     sheets: {
@@ -88,6 +89,12 @@ app.post('/webhook/evolution', async (req, res) => {
     const ctx = makeCtx(phone, instance);
     const reply = await flows.handle(phone, text, ctx, instance);
     console.log('[WEBHOOK REPLY TO]', remoteJid, 'REPLY:', reply);
+    
+    if (process.env.NODE_ENV === 'production') {
+      // Simular tiempo de lectura/escritura de 1.5 a 3 segundos
+      await new Promise(r => setTimeout(r, 1500 + Math.random() * 1500));
+    }
+    
     await evo.sendText(instance, remoteJid, reply);
     res.json({ ok: true });
   } catch (e) {

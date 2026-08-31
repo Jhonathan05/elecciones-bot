@@ -92,6 +92,29 @@ docker exec elecciones-bot npm run test:logic
 
 ## 🔒 Control de Seguridad y Fraude
 - **Autenticación por Whitelist**: Solo los números de teléfono registrados como Coordinadores Seccionales o Coordinadores de Mesa pueden iniciar la interacción.
-- **Vínculo Automático Privacy ID (`@lid`)**: Sincroniza automáticamente los números privados de usuarios iPhone/WhatsApp Business con la seccional correspondiente.
+- **Vínculo Automático Privacy ID (`@lid`)**: Sincroniza automáticamente los números privados de usuarios iPhone/WhatsApp Business con la seccional correspondiente y los persiste en SQLite (`lid_mappings`).
 - **Validación de Respuestas Guiadas por Número**: Los menús operan con opciones numéricas (`1`, `2`) evitando fallos tipográficos.
 - **Verificación previa a Diligenciamiento**: Muestra nombre del coordinador, seccional, municipio y ubicación de mesa para confirmación previa antes de capturar votos.
+- **Control de Desajuste de Seccional**: Alerta y guía al usuario si escribe a la línea de una seccional distinta a la asignada.
+- **Auto-selección para Coordinador de Mesa Única**: Agiliza el flujo para los coordinadores con una sola mesa asignada saltando la solicitud del código y yendo directo a la confirmación de datos.
+
+---
+
+## 🛠️ Solución de Problemas Frecuentes (Troubleshooting)
+
+### 1. Error *"No se pudo vincular el dispositivo. Vuelve a intentarlo más tarde"* en WhatsApp Business
+* **Causa:** Restricción temporal de Meta (soft-ban) por múltiples intentos o versión beta de la app móvil.
+* **Solución:**
+  1. Asegúrate de que la app móvil de WhatsApp Business no esté en programa Beta y esté actualizada.
+  2. Si persiste, usa un WhatsApp estándar temporalmente o espera 12-24h para que Meta libere la restricción del número.
+
+### 2. Mensaje *"Este número no está autorizado para reportar"* en iPhone
+* **Causa:** En iPhone, WhatsApp enmascara el número telefónico detrás de un `@lid` privado.
+* **Solución:** Al primer mensaje, el bot le preguntará automáticamente su número de celular (`3109876543`). Una vez ingresado y validado contra el catálogo, el bot lo vinculará permanentemente en SQLite sin necesidad de intervención manual.
+
+### 3. Limpieza completa de sesiones y bases de datos
+Para reiniciar el entorno por completo y eliminar cualquier sesión corrupta de Postgres/Redis/SQLite:
+```bash
+docker compose -f docker-compose.yml -f docker/docker-compose.evolution.yml down -v
+docker compose -f docker-compose.yml -f docker/docker-compose.evolution.yml up -d
+```

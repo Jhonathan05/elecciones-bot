@@ -13,7 +13,13 @@ let SECCIONALES = new Set();
 let coordMesa = new Map(); // telefono(digits) -> [{codigo, municipio, seccional, nombre}]
 let coordSec = new Map();   // telefono(digits) -> {seccional, nombre, circunscripcion, municipio}
 
-function normalizaTel(t) { return String(t || '').replace(/\D/g, ''); }
+function normalizaTel(t) {
+  const d = String(t || '').replace(/\D/g, '');
+  if (d.length === 10 && d.startsWith('3')) {
+    return '57' + d;
+  }
+  return d;
+}
 function norm(v) { return String(v || '').toUpperCase().trim(); }
 
 function cargar() {
@@ -31,6 +37,11 @@ function cargar() {
     porCodigo.get(me.codigo).push(me);
     if (me.seccional) SECCIONALES.add(me.seccional);
   });
+  try {
+    const state = require('./state');
+    const mappings = state.listLidMappings();
+    mappings.forEach(r => lidMap.set(String(r.lid).replace(/\D/g, ''), normalizaTel(r.phone)));
+  } catch (e) {}
 }
 
 // Inyectado desde sheets.cargarCoordinadores() (fuente: PRECONTEO Z/AA + SECCIONALES)
@@ -62,34 +73,51 @@ function mesaEnSeccional(mesa, seccional) {
 
 const lidMap = new Map(); // lid -> phone
 
-// Devuelve { tipo:'mesa'|'seccional', telefono, mesas?, seccional? } o null
+function setLidMapping(lid, phone) {
+  const l = String(lid || '').replace(/\D/g, '');
+  const p = normalizaTel(phone);
+  if (l && p) lidMap.set(l, p);
+}
+
+function getLidMapping(lid) {
+  const l = String(lid || '').replace(/\D/g, '');
+  return lidMap.get(l) || null;
+}
+
+function buscarCoordinador(telefono) {
+  const t = normalizaTel(telefono);
+  if (coordMesa.has(t)) {
+    const mesas = coordMesa.get(t);
+    return { tipo: 'mesa', telefono: t, mesas, seccional: mesas[0] ? mesas[0].seccional : null };
+  }
+  if (coordSec.has(t)) {
+    const cs = coordSec.get(t);
+    return { tipo: 'seccional', telefono: t, seccional: cs.seccional, nombre: cs.nombre };
+  }
+  return null;
+}
+
+// Devuelve { tipo:'mesa'|'seccional', telefono, mesas?, seccional? } o { error: 'seccional_mismatch', seccionales } o null
 function isTelefonoAutorizado(telefono, seccionalFiltro = null) {
+  const rawDigits = String(telefono || '').replace(/\D/g, '');
   const t = normalizaTel(telefono);
   
-  // 1. Coincidencia directa por teléfono o LID mapeado
-  const mapped = lidMap.get(t) || t;
-  if (coordMesa.has(mapped)) return { tipo: 'mesa', telefono: mapped, mesas: coordMesa.get(mapped) };
-  if (coordSec.has(mapped)) return { tipo: 'seccional', telefono: mapped, seccional: coordSec.get(mapped).seccional };
-
-  // 2. Si viene de un LID (ID largo > 12 dígitos) y hay coordinadores registrados en esa seccional
-  if (t.length > 12 && seccionalFiltro) {
-    const secNorm = norm(seccionalFiltro);
-    
-    // Buscar en coordinadores seccionales
-    for (const [tel, cs] of coordSec) {
-      if (cs.seccional === secNorm) {
-        lidMap.set(t, tel);
-        return { tipo: 'seccional', telefono: tel, seccional: cs.seccional };
-      }
+  // 1. Coincidencia por mapeo previo de LID o teléfono directo
+  const mapped = lidMap.get(rawDigits) || lidMap.get(t) || t;
+  
+  if (coordMesa.has(mapped)) {
+    const mesas = coordMesa.get(mapped);
+    if (seccionalFiltro && !mesas.some(m => norm(m.seccional) === norm(seccionalFiltro))) {
+      return { error: 'seccional_mismatch', seccionales: [...new Set(mesas.map(m => m.seccional))] };
     }
-    
-    // Buscar en coordinadores de mesa de esa seccional
-    for (const [tel, cmList] of coordMesa) {
-      if (cmList.some(m => norm(m.seccional) === secNorm)) {
-        lidMap.set(t, tel);
-        return { tipo: 'mesa', telefono: tel, mesas: cmList };
-      }
+    return { tipo: 'mesa', telefono: mapped, mesas };
+  }
+  if (coordSec.has(mapped)) {
+    const cs = coordSec.get(mapped);
+    if (seccionalFiltro && norm(cs.seccional) !== norm(seccionalFiltro)) {
+      return { error: 'seccional_mismatch', seccionales: [cs.seccional] };
     }
+    return { tipo: 'seccional', telefono: mapped, seccional: cs.seccional };
   }
 
   return null;
@@ -113,5 +141,6 @@ module.exports = {
   getMesasPorCodigo, getMesaExacta, mesaEnSeccional,
   isTelefonoAutorizado, getCoordinadorSeccional, mesasDeSeccional,
   seccionales, totalMesas,
+  buscarCoordinador, setLidMapping, getLidMapping,
   _estado: () => ({ mesas: mesas.length, seccionales: [...SECCIONALES], coordMesa: coordMesa.size, coordSec: coordSec.size }),
 };

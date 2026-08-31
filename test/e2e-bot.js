@@ -152,16 +152,18 @@ async function main() {
     
     // === MOMENTO 1: INSTALACIÓN ===
     await runMoment(token, 'instalacion', MESA, [
+      'hola',
       '1',                    // Menú: Instalación
-      String(MESA),           // Código de mesa
+      '1',                    // Confirmar datos de la mesa (auto-seleccionada)
       '3', 'Recibido', 'Completas', 'Está', '-', 'si'  // Campos + confirmar
     ], MUN);
     await verifyExcel(token, MESA, 'instalacion');
     
     // === MOMENTO 2: PARTICIPACIÓN ===
     await runMoment(token, 'participacion', MESA, [
+      'hola',
       '2',                    // Menú: Participación
-      String(MESA),           // Código de mesa
+      '1',                    // Confirmar datos de la mesa (auto-seleccionada)
       '1', '100', '-', 'si',  // Boletín 1: 100 sufragantes, sin obs
       '2', '150', '-', 'no',  // Boletín 2: 150 sufragantes, sin obs, terminar
       'si'                    // Confirmar
@@ -170,8 +172,9 @@ async function main() {
     
     // === MOMENTO 3: ACTA 021 ===
     await runMoment(token, 'acta021', MESA, [
+      'hola',
       '3',                    // Menú: Acta 021
-      String(MESA),           // Código de mesa
+      '1',                    // Confirmar datos de la mesa (auto-seleccionada)
       '100', '50', '10', '5', '2',  // Planchas 1-5
       '0', '0', '0', '167', '0', '-', 'si'  // Blanco, nulos, noMarcados, total, incinerados, obs, confirmar
     ], MUN);

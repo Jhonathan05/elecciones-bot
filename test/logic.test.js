@@ -112,7 +112,7 @@ async function runTests() {
   {
     const ctx = makeCtx('573009999999', 'desconocida');
     const r = await flows.handle('573009999999', 'hola', ctx, 'desconocida');
-    assert.ok(/no está asociado/.test(r), 'línea desconocida rechazada');
+    assert.ok(/no está activa/.test(r), 'línea desconocida rechazada');
     console.log('✔ Línea no asociada rechazada');
   }
 
@@ -131,17 +131,18 @@ async function runTests() {
       coordSec: [{ telefono: '573001112233', seccional: 'CHAPARRAL', nombre: 'Test', circunscripcion: 'CHAPARRAL', municipio: '' }],
     });
 
-    // Puede reportar su mesa asignada
+    // Puede reportar su mesa asignada (auto-seleccionada, confirmada con '1')
     const ctxA = makeCtx('573001112244', 'chaparral');
     await conversar(ctxA, '573001112244', 'chaparral', [
-      'hola', '3', String(asignada), '1', '100', '50', '10', '5', '2', '30', '7', '0', '204', '0', '-', '1',
+      'hola', '3', '1', '100', '50', '10', '5', '2', '30', '7', '0', '204', '0', '-', '1',
     ]);
     assert.ok(ctxA._calls.some(c => c[0] === 'acta021'), 'coord mesa reporta su mesa asignada');
 
-    // No puede reportar mesa ajena
+    // No puede reportar mesa ajena (si elige corregir '2' e ingresa otra mesa)
     const ctxB = makeCtx('573001112244', 'chaparral');
     await flows.handle('573001112244', 'hola', ctxB, 'chaparral');
     await flows.handle('573001112244', '3', ctxB, 'chaparral');
+    await flows.handle('573001112244', '2', ctxB, 'chaparral'); // Elige NO, corregir mesa
     const rB = await flows.handle('573001112244', String(otra), ctxB, 'chaparral');
     assert.ok(/No estás asignado/.test(rB), 'coord mesa rechazado en mesa ajena: ' + rB);
     console.log('✔ Validación de asignación coordinador de mesa OK');

@@ -29,6 +29,10 @@ CREATE TABLE IF NOT EXISTS admins (
   user      TEXT PRIMARY KEY,
   pass_hash TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS lid_mappings (
+  lid   TEXT PRIMARY KEY,
+  phone TEXT NOT NULL
+);
 `);
 
 // ---------- Líneas (seccional -> instancia Evolution) ----------
@@ -86,9 +90,25 @@ function deleteLinea(seccional) {
   db.prepare('DELETE FROM lineas WHERE seccional = ?').run(seccional);
 }
 
+// ---------- Mapeo de LIDs (WhatsApp Privacy ID -> Teléfono) ----------
+function listLidMappings() {
+  return db.prepare('SELECT lid, phone FROM lid_mappings').all();
+}
+function getLidMapping(lid) {
+  if (!lid) return null;
+  const row = db.prepare('SELECT phone FROM lid_mappings WHERE lid = ?').get(String(lid).trim());
+  return row ? row.phone : null;
+}
+function setLidMapping(lid, phone) {
+  if (!lid || !phone) return;
+  db.prepare('INSERT INTO lid_mappings (lid, phone) VALUES (?, ?) ON CONFLICT(lid) DO UPDATE SET phone=?')
+    .run(String(lid).trim(), String(phone).trim(), String(phone).trim());
+}
+
 module.exports = {
   db, DB_PATH,
   listLineas, getLinea, getLineaPorInstance, upsertLinea, setLineaEstado, deleteLinea,
   getSession, saveSession, clearSession,
   getAdmin, setAdmin,
+  listLidMappings, getLidMapping, setLidMapping,
 };

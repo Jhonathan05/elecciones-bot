@@ -112,7 +112,7 @@ function menu(coord, seccional) {
   const nombre = (coord && (coord.nombre || (coord.mesas && coord.mesas[0] && coord.mesas[0].nombre))) || 'Coordinador';
   const esSec = coord && coord.tipo === 'seccional';
   const tipoStr = esSec ? 'Seccional' : 'de Mesa';
-  
+
   let textoMesas = '';
   if (esSec) {
     textoMesas = `📌 *Tienes asignadas todas las mesas de la seccional ${seccional}.*`;
@@ -170,13 +170,65 @@ async function handle(phone, rawText, ctx, instance) {
 
   if (!session) {
     const seccional = ctx.getSeccionalDeInstancia(instance);
-    if (!seccional) return '⛔ Este número no está asociado a una seccional. Contacta al administrador.';
+    if (!seccional) return '⛔ Esta línea no está activa para reporte. Contacta al administrador.';
     if (ctx.isCerrado()) return '🔒 La jornada está cerrada. Las correcciones deben hacerse directamente en el documento de Drive.';
+
+    // 1. Comprobar si ya está autorizado directamente (por teléfono directo o LID previamente vinculado)
     const coord = ctx.maestro.isTelefonoAutorizado(phone, seccional);
-    if (!coord) return '⛔ Este número no está autorizado para reportar. Solicita asignación al administrador.';
-    session = { paso: 'menu', momento: null, seccional, instance, mesa: null, municipio: null, borrador: {}, campo: null, correccion: false, coordinador: coord };
+    if (coord && coord.error === 'seccional_mismatch') {
+      return `⛔ Este número está registrado para reportar en la seccional *${coord.seccionales.join(', ')}*, pero estás escribiendo a la línea de la seccional *${seccional}*.\nPor favor escribe a la línea de WhatsApp que corresponda a tu seccional.`;
+    }
+    if (coord && coord.tipo) {
+      session = { paso: 'menu', momento: null, seccional, instance, mesa: null, municipio: null, borrador: {}, campo: null, correccion: false, coordinador: coord };
+      ctx.saveSession(phone, session);
+      return menu(coord, seccional);
+    }
+
+    // 2. Si no está reconocido directamente (ej. iPhone con LID de privacidad o número nuevo)
+    session = { paso: 'vincular_telefono', seccional, instance };
     ctx.saveSession(phone, session);
-    return menu(coord, seccional);
+    return `👋 ¡Hola! Bienvenido al sistema de reporte electoral de la seccional *${seccional}*.
+
+📱 Para identificarte, por favor escribe tu **número de celular registrado como coordinador** (ej: 3109876543):`;
+  }
+
+  // --- VINCULACIÓN AUTOMÁTICA DE TELÉFONO / LID ---
+  if (session.paso === 'vincular_telefono') {
+    const rawDigits = text.replace(/\D/g, '');
+    if (rawDigits.length < 7) {
+      return '⚠️ Por favor ingresa un número de celular válido de 10 dígitos (ej: 3109876543):';
+    }
+    const telNorm = ctx.maestro.normalizaTel(rawDigits);
+    const coordEncontrado = ctx.maestro.buscarCoordinador(telNorm);
+
+    if (!coordEncontrado) {
+      return `⚠️ El número celular *${text}* no aparece registrado en la lista oficial de coordinadores.
+Por favor verifica tu número o solicita tu asignación al administrador.
+
+📱 Escribe tu número de celular registrado:`;
+    }
+
+    const secLinea = session.seccional;
+    const esDeEstaSeccional = coordEncontrado.tipo === 'seccional'
+      ? ctx.maestro.norm(coordEncontrado.seccional) === ctx.maestro.norm(secLinea)
+      : coordEncontrado.mesas.some(m => ctx.maestro.norm(m.seccional) === ctx.maestro.norm(secLinea));
+
+    if (!esDeEstaSeccional) {
+      const secCoord = coordEncontrado.seccional || (coordEncontrado.mesas[0] && coordEncontrado.mesas[0].seccional);
+      ctx.clearSession(phone);
+      return `⛔ El número *${text}* está registrado para reportar en la seccional *${secCoord}*, pero estás escribiendo a la línea de la seccional *${secLinea}*.\n\nPor favor escribe a la línea de WhatsApp correspondiente a tu seccional (*${secCoord}*).`;
+    }
+
+    // Guardar vinculación permanente del LID/remitente al teléfono en SQLite y memoria
+    if (ctx.state && ctx.state.setLidMapping) {
+      ctx.state.setLidMapping(phone, telNorm);
+    }
+    ctx.maestro.setLidMapping(phone, telNorm);
+
+    const coordAutorizado = ctx.maestro.isTelefonoAutorizado(phone, secLinea);
+    session = { paso: 'menu', momento: null, seccional: secLinea, instance, mesa: null, municipio: null, borrador: {}, campo: null, correccion: false, coordinador: coordAutorizado };
+    ctx.saveSession(phone, session);
+    return `✅ ¡Identificación exitosa!\n\n` + menu(coordAutorizado, secLinea);
   }
 
   // --- MENÚ ---
@@ -186,6 +238,24 @@ async function handle(phone, rawText, ctx, instance) {
       return '⚠️ La opción ingresada no corresponde con la lista.\nPor favor responde seleccionando un número de la lista (1, 2 o 3):\n\n' + menu(session.coordinador, session.seccional);
     }
     session.momento = momento;
+
+    // Si el coordinador tiene exactamente 1 mesa asignada, auto-seleccionarla
+    const coord = session.coordinador;
+    if (coord && coord.tipo === 'mesa' && Array.isArray(coord.mesas) && coord.mesas.length === 1) {
+      const mesaAsignada = coord.mesas[0];
+      const mesaObj = ctx.maestro.getMesaExacta(mesaAsignada.codigo, {
+        seccional: session.seccional,
+        municipio: mesaAsignada.municipio
+      }) || mesaAsignada;
+
+      session.mesa = mesaAsignada.codigo;
+      session.municipio = mesaObj.municipio;
+      session.mesaObj = mesaObj;
+      session.paso = 'validar_mesa_info';
+      ctx.saveSession(phone, session);
+      return confirmacionMesaPrompt(mesaObj, coord);
+    }
+
     session.paso = 'mesa';
     ctx.saveSession(phone, session);
     return `🆔 Código de mesa (ingresa el número de mesa, ej: 134):`;
