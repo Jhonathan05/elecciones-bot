@@ -107,9 +107,26 @@
   .hidden { display:none; }
   .login { max-width:380px; margin:80px auto; }
   .msg { font-size:12px; margin:6px 0; }
-  .err { color:var(--error); } .okm { color:var(--secondary); }
-  h3,h4 { color:var(--on-surface); }
-  hr { border:0; border-top:1px solid var(--outline-variant); margin:12px 0; }
+  /* KPI Grid & Semáforo Styles */
+  .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:14px; }
+  .kpi-card { background:var(--surface-container-low); border:1px solid var(--outline-variant); border-radius:var(--radius-lg); padding:12px 14px; position:relative; }
+  .kpi-title { font-size:11px; font-weight:600; text-transform:uppercase; color:var(--on-surface-variant); margin-bottom:4px; }
+  .kpi-value { font-size:22px; font-weight:700; color:var(--primary); }
+  .kpi-sub { font-size:11px; color:var(--outline); margin-top:2px; }
+
+  /* Gallery Grid */
+  .gallery-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px; margin-top:12px; }
+  .gallery-card { background:var(--surface-container-low); border:1px solid var(--outline-variant); border-radius:var(--radius-md); overflow:hidden; cursor:pointer; transition:transform .2s; }
+  .gallery-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-float); }
+  .gallery-img { width:100%; height:140px; object-fit:cover; background:#222; }
+  .gallery-meta { padding:8px 10px; font-size:11px; }
+
+  /* Semáforo status dots & badges */
+  .dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:4px; }
+  .dot.ok { background:#1b502d; }
+  .dot.warn { background:#a36b00; }
+  .dot.bad { background:#ba1a1a; }
+  .dot.pend { background:#717a6d; }
 </style>
 </head>
 <body>
@@ -128,17 +145,31 @@
 
 <div id="appView" class="wrap hidden">
   <div class="tabs">
-    <div class="tab active" data-t="lineas">Líneas</div>
+    <div class="tab active" data-t="lineas">Líneas & Failover</div>
+    <div class="tab" data-t="semaforo">Semáforo en Vivo</div>
     <div class="tab" data-t="coord">Coordinadores</div>
-    <div class="tab" data-t="importar">Importar</div>
-    <div class="tab" data-t="informes">Informes</div>
+    <div class="tab" data-t="evidencias">Evidencias (Fotos)</div>
+    <div class="tab" data-t="importar">Importar / Config</div>
+    <div class="tab" data-t="informes">Informes & Alertas</div>
   </div>
 
-  <!-- LÍNEAS -->
+  <!-- LÍNEAS & FAILOVER -->
   <div class="panel active" id="p-lineas">
+    <!-- Card de Líneas de Respaldo Hot-Standby -->
+    <div class="card" style="border-left:4px solid var(--secondary);">
+      <div class="row" style="align-items:center; justify-content:space-between;">
+        <h3 style="margin:0">⚡ Líneas de Respaldo en Caliente (Hot-Standby)</h3>
+        <span class="badge ok">Contingencia Rápida</span>
+      </div>
+      <p style="font-size:12px; color:var(--on-surface-variant); margin:4px 0 10px 0;">
+        Vincula por QR estas líneas de contingencia. Si una línea oficial de cualquier seccional se bloquea o desconecta, conéctala de inmediato a una línea de respaldo en 1 clic.
+      </p>
+      <div id="backupLinesContainer" class="row" style="gap:12px;"></div>
+    </div>
+
     <div class="card">
-      <div class="row" style="align-items:center; justify-space-between;">
-        <h3 style="margin:0">Números por seccional (Instancias WhatsApp)</h3>
+      <div class="row" style="align-items:center; justify-content:space-between;">
+        <h3 style="margin:0">Líneas Oficiales por Seccional</h3>
         <button class="btn sec" id="refreshEstado" style="flex:0">Actualizar estado</button>
       </div>
       
@@ -152,18 +183,18 @@
         <thead>
           <tr>
             <th>Seccional</th>
-            <th>Instancia</th>
+            <th>Instancia Actual</th>
             <th>Teléfono</th>
             <th>Activa</th>
-            <th>Baneada</th>
             <th>Estado WA</th>
+            <th>Failover / Respaldo</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
       <hr/>
-      <h4>Alta / edición de línea</h4>
+      <h4>Alta / edición manual de línea</h4>
       <div class="row">
         <div><label>Seccional</label><input id="l_sec" /></div>
         <div><label>Instancia (Evolution)</label><input id="l_inst" placeholder="mismo nombre de seccional" /></div>
@@ -198,6 +229,108 @@
       <p id="repModalSubtitle" style="font-size:13px; color:var(--on-surface-variant); margin-top:0; border-bottom:1px solid var(--outline-variant); padding-bottom:8px;"></p>
       
       <div id="repModalBody"></div>
+    </div>
+  </div>
+
+  <!-- Modal Foto Zoom -->
+  <div class="modal" id="modalFoto">
+    <div class="box" style="max-width:700px; text-align:center;">
+      <h3 id="fotoModalTitle" style="margin:0 0 6px 0;">Evidencia Fotográfica</h3>
+      <p id="fotoModalSubtitle" style="font-size:12px; color:var(--on-surface-variant); margin:0 0 10px 0;"></p>
+      <div style="max-height:65vh; overflow:auto; margin:10px 0; background:#111; border-radius:var(--radius-md); text-align:center;">
+        <img id="fotoModalImg" src="" style="max-width:100%; max-height:60vh; height:auto; display:inline-block;" />
+      </div>
+      <div class="row" style="justify-content:center; gap:8px;">
+        <a id="fotoModalDownload" class="btn" href="#" target="_blank" download>Descargar Foto</a>
+        <button class="btn sec" id="closeFoto">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEMÁFORO EN VIVO -->
+  <div class="panel" id="p-semaforo">
+    <div class="card">
+      <div class="row" style="align-items:center; justify-content:space-between; margin-bottom:12px;">
+        <h3 style="margin:0">📊 Tablero de Control y Semáforo en Tiempo Real</h3>
+        <button class="btn sec" id="btnRefreshSemaforo">Actualizar Tablero</button>
+      </div>
+
+      <!-- KPI Grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-title">Mesas Instaladas</div>
+          <div class="kpi-value" id="kpi_instaladas">0 / 0</div>
+          <div class="kpi-sub" id="kpi_instaladas_pct">0% del total</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Sufragantes Reportados</div>
+          <div class="kpi-value" id="kpi_sufragantes">0</div>
+          <div class="kpi-sub">Participación acumulada</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Actas Transmitidas</div>
+          <div class="kpi-value" id="kpi_actas">0 / 0</div>
+          <div class="kpi-sub" id="kpi_actas_pct">0% del total</div>
+        </div>
+        <div class="kpi-card" style="border-color:rgba(186,26,26,0.3);">
+          <div class="kpi-title" style="color:var(--error);">Descuadres Detectados</div>
+          <div class="kpi-value" id="kpi_descuadres" style="color:var(--error);">0</div>
+          <div class="kpi-sub">Alertas matemáticas</div>
+        </div>
+      </div>
+
+      <!-- Filtros Semáforo -->
+      <div class="row" style="margin:12px 0; align-items:flex-end; gap:10px;">
+        <div style="flex:1; min-width:140px;">
+          <label style="font-size:11px;">Seccional:</label>
+          <select id="sem_secFilter"></select>
+        </div>
+        <div style="flex:1; min-width:140px;">
+          <label style="font-size:11px;">Estado:</label>
+          <select id="sem_stateFilter">
+            <option value="all">Todos los estados</option>
+            <option value="PENDIENTE">🔴 Pendiente</option>
+            <option value="EN_PROCESO">🟡 En Proceso</option>
+            <option value="COMPLETO">🟢 Completo (OK)</option>
+            <option value="DESCUADRE">🚨 Descuadre</option>
+          </select>
+        </div>
+        <div style="flex:1.5; min-width:180px;">
+          <label style="font-size:11px;">Buscar (Mesa, Municipio, Coordinador):</label>
+          <input id="sem_search" placeholder="Ej: 134, Alvarado, Camargo..." />
+        </div>
+      </div>
+
+      <table id="tblSemaforo">
+        <thead>
+          <tr>
+            <th>Mesa</th>
+            <th>Seccional / Municipio</th>
+            <th>Coordinador</th>
+            <th>1️⃣ Instalación</th>
+            <th>2️⃣ Participación</th>
+            <th>3️⃣ Acta 021</th>
+            <th>Estado Global</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EVIDENCIAS FOTOGRÁFICAS -->
+  <div class="panel" id="p-evidencias">
+    <div class="card">
+      <div class="row" style="align-items:center; justify-content:space-between;">
+        <h3 style="margin:0">📸 Galería de Evidencias de Acta 021 (E-14)</h3>
+        <button class="btn sec" id="btnRefreshEvidencias">Actualizar Galería</button>
+      </div>
+      <div class="row" style="margin:10px 0; max-width:320px;">
+        <label style="font-size:11px;">Filtrar por Seccional:</label>
+        <select id="evid_secFilter"></select>
+      </div>
+      <div id="evidenciasGallery" class="gallery-grid"></div>
     </div>
   </div>
 
@@ -430,8 +563,10 @@ function switchTab(tId) {
   if (tabBtn) tabBtn.classList.add('active');
   if (panelEl) panelEl.classList.add('active');
   if (tId === 'lineas') loadLineas();
+  if (tId === 'semaforo') loadSemaforo();
   if (tId === 'coord') loadCoord();
-  if (tId === 'importar') loadConfig();
+  if (tId === 'evidencias') loadEvidencias();
+  if (tId === 'importar') { loadConfig(); loadBackupsList(); }
   if (tId === 'informes') loadInformes();
 }
 
@@ -451,7 +586,7 @@ async function init(){
   }
 }
 
-// --- Líneas ---
+// --- Líneas & Failover ---
 const qrsCache = {};
 let rawLineasEstados = [];
 
@@ -465,10 +600,45 @@ async function loadLineas(){
 
 function renderLineasTable() {
   const filterText = (document.getElementById('f_lineaSearch').value || '').toLowerCase().trim();
+  
+  // 1. Renderizar tarjetas de líneas de respaldo (Hot-Standby)
+  const backupContainer = document.getElementById('backupLinesContainer');
+  backupContainer.innerHTML = '';
+  const backupLines = rawLineasEstados.filter(x => x.seccional && x.seccional.startsWith('RESPALDO_'));
+  
+  backupLines.forEach(bl => {
+    let qrBtn = '';
+    if (bl.qrcode) {
+      qrsCache[bl.seccional] = bl.qrcode;
+      qrBtn = `<button class="btn ok" style="padding:2px 8px; font-size:11px;" onclick="showQR('${bl.seccional}')">Ver QR</button>`;
+    } else {
+      delete qrsCache[bl.seccional];
+    }
+    const stBadge = bl.estado === 'open' 
+      ? '<span class="badge ok">🟢 Conectada</span>' 
+      : `<span class="badge warn">${bl.estado || 'Desconectada'}</span>`;
+    
+    backupContainer.innerHTML += `
+      <div class="kpi-card" style="flex:1; min-width:240px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong>⚡ ${bl.seccional}</strong>
+          ${stBadge}
+        </div>
+        <p style="font-size:11px; margin:4px 0 8px 0; color:var(--on-surface-variant);">Instancia: <code>${bl.instance}</code> | Tel: ${bl.phone || '-'}</p>
+        <div style="display:flex; gap:6px;">
+          ${qrBtn}
+          <button class="btn sec" style="padding:2px 8px; font-size:11px;" onclick="reconectarLinea('${bl.seccional}')">Reconectar / QR</button>
+        </div>
+      </div>
+    `;
+  });
+
+  // 2. Renderizar tabla de líneas oficiales por seccional
   const tb = document.querySelector('#tblLineas tbody');
   tb.innerHTML = '';
   
-  const filtered = rawLineasEstados.filter(x => {
+  const officialLines = rawLineasEstados.filter(x => !x.seccional || !x.seccional.startsWith('RESPALDO_'));
+  const filtered = officialLines.filter(x => {
     if (!filterText) return true;
     const sMatch = (x.seccional || '').toLowerCase().includes(filterText);
     const iMatch = (x.instance || '').toLowerCase().includes(filterText);
@@ -478,7 +648,7 @@ function renderLineasTable() {
   });
 
   if (filtered.length === 0) {
-    tb.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--outline); padding:14px;">No se encontraron líneas con el filtro indicado.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--outline); padding:14px;">No se encontraron líneas oficiales con el filtro indicado.</td></tr>';
     return;
   }
 
@@ -496,13 +666,27 @@ function renderLineasTable() {
     else if (l.estado === 'connecting') badgeEstado = `<span class="badge warn">Conectando...</span>`;
     else if (l.estado === 'close' || l.estado === 'error') badgeEstado = `<span class="badge bad">${l.estado}</span>`;
 
+    let failoverUI = '';
+    if (l.original_instance) {
+      failoverUI = `<span class="badge warn" style="margin-bottom:3px; display:inline-block;">⚡ En Respaldo (${l.instance})</span><br/>
+        <button class="btn ok" style="padding:2px 6px; font-size:11px;" onclick="restaurarLinea('${l.seccional}')">🔄 Restaurar Oficial</button>`;
+    } else {
+      failoverUI = `
+        <select onchange="if(this.value){ failoverLinea('${l.seccional}', this.value); this.value=''; }" style="padding:3px 6px; font-size:11px; width:auto; display:inline-block;">
+          <option value="">-- Asignar Respaldo --</option>
+          <option value="respaldo_1">⚡ Usar Respaldo 1</option>
+          <option value="respaldo_2">⚡ Usar Respaldo 2</option>
+        </select>
+      `;
+    }
+
     tb.innerHTML += `<tr>
       <td><strong>${l.seccional}</strong></td>
-      <td>${l.instance}</td>
+      <td><code>${l.instance}</code></td>
       <td>${l.phone || '-'}</td>
       <td>${l.enabled ? '<span class="badge ok">Sí</span>' : '<span class="badge bad">No</span>'}</td>
-      <td>${l.banned ? '<span class="badge bad">Sí</span>' : 'No'}</td>
       <td>${badgeEstado} ${qrBtn}</td>
+      <td>${failoverUI}</td>
       <td>
         <button class="btn sec" style="padding:3px 8px;" onclick="editLinea('${l.seccional}')">Editar</button>
         <button class="btn sec" style="padding:3px 8px; color:var(--tertiary);" onclick="reconectarLinea('${l.seccional}')" title="Forzar nuevo QR si está atascado">Reconectar</button>
@@ -510,6 +694,34 @@ function renderLineasTable() {
       </td>
     </tr>`;
   });
+}
+
+async function failoverLinea(sec, backupInst) {
+  if (!confirm(`¿Deseas conmutar de emergencia la línea "${sec}" a la instancia "${backupInst}"?`)) return;
+  document.getElementById('lineasMsg').textContent = `Conmutando ${sec} a ${backupInst}...`;
+  try {
+    const r = await api('/admin/lineas/failover', { method: 'POST', body: JSON.stringify({ seccional: sec, backupInstance: backupInst }) });
+    if (r.ok) {
+      document.getElementById('lineasMsg').textContent = `✅ ${r.msg}`;
+      loadLineas();
+    } else {
+      document.getElementById('lineasMsg').textContent = `⚠️ ${r.error}`;
+    }
+  } catch(e) { document.getElementById('lineasMsg').textContent = `⚠️ ${e.message}`; }
+}
+
+async function restaurarLinea(sec) {
+  if (!confirm(`¿Deseas restaurar la seccional "${sec}" a su línea oficial?`)) return;
+  document.getElementById('lineasMsg').textContent = `Restaurando ${sec}...`;
+  try {
+    const r = await api('/admin/lineas/restaurar', { method: 'POST', body: JSON.stringify({ seccional: sec }) });
+    if (r.ok) {
+      document.getElementById('lineasMsg').textContent = `✅ ${r.msg}`;
+      loadLineas();
+    } else {
+      document.getElementById('lineasMsg').textContent = `⚠️ ${r.error}`;
+    }
+  } catch(e) { document.getElementById('lineasMsg').textContent = `⚠️ ${e.message}`; }
 }
 
 document.getElementById('f_lineaSearch').oninput = renderLineasTable;
@@ -932,6 +1144,211 @@ async function delCoordSec(sec){
   else alert('Error al eliminar: ' + (r.error || r.msg || ''));
 }
 
+// --- Tablero Semáforo en Tiempo Real ---
+let rawSemaforoData = { resumen: {}, mesas: [] };
+
+async function loadSemaforo() {
+  try {
+    const r = await api('/admin/semaforo');
+    if (!r.ok) return;
+    rawSemaforoData = r;
+
+    // Actualizar KPIs
+    const res = r.resumen || {};
+    document.getElementById('kpi_instaladas').textContent = `${res.totalInstaladas || 0} / ${res.totalMesas || 0}`;
+    document.getElementById('kpi_instaladas_pct').textContent = `${res.pctInstaladas || 0}% del total`;
+    document.getElementById('kpi_sufragantes').textContent = Number(res.totalSufragantes || 0).toLocaleString();
+    document.getElementById('kpi_actas').textContent = `${res.totalActasTransmitidas || 0} / ${res.totalMesas || 0}`;
+    document.getElementById('kpi_actas_pct').textContent = `${res.pctActas || 0}% del total`;
+    document.getElementById('kpi_descuadres').textContent = `${res.totalDescuadres || 0}`;
+
+    // Llenar selector seccionales
+    const secSel = document.getElementById('sem_secFilter');
+    const curSec = secSel.value || 'all';
+    const seccionales = [...new Set(r.mesas.map(m => m.seccional))].sort();
+    secSel.innerHTML = '<option value="all">Todas las seccionales</option>';
+    seccionales.forEach(s => secSel.innerHTML += `<option value="${s}">${s}</option>`);
+    secSel.value = curSec;
+
+    renderSemaforoTable();
+  } catch(e) { console.error('Error cargando semáforo:', e); }
+}
+
+function renderSemaforoTable() {
+  const secF = document.getElementById('sem_secFilter').value;
+  const stF = document.getElementById('sem_stateFilter').value;
+  const q = (document.getElementById('sem_search').value || '').toLowerCase().trim();
+
+  const tb = document.querySelector('#tblSemaforo tbody');
+  tb.innerHTML = '';
+
+  const filtered = (rawSemaforoData.mesas || []).filter(m => {
+    if (secF !== 'all' && m.seccional !== secF) return false;
+    if (stF !== 'all' && m.estadoGlobal !== stF) return false;
+    if (q) {
+      const matchCod = String(m.codigo).includes(q);
+      const matchMun = (m.municipio || '').toLowerCase().includes(q);
+      const matchSec = (m.seccional || '').toLowerCase().includes(q);
+      const matchCoord = (m.coordinador || '').toLowerCase().includes(q);
+      if (!matchCod && !matchMun && !matchSec && !matchCoord) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tb.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:16px; color:var(--outline);">No hay mesas que coincidan con los filtros.</td></tr>';
+    return;
+  }
+
+  filtered.forEach(m => {
+    const inst = m.instalacion || {};
+    const part = m.participacion || {};
+    const acta = m.acta021 || {};
+
+    const bInst = inst.reportada 
+      ? `<span class="badge ok">✔ SI (${inst.jurados} jur)</span>` 
+      : `<span class="badge warn">⏳ Pendiente</span>`;
+
+    const bPart = part.sufragantes > 0 
+      ? `<span class="badge ok">✔ ${part.sufragantes} sufr.</span>` 
+      : `<span class="badge warn">⏳ Pendiente</span>`;
+
+    let bActa = `<span class="badge warn">⏳ Pendiente</span>`;
+    if (acta.reportada) {
+      if (acta.descuadre !== 0) bActa = `<span class="badge bad">🚨 Descuadre (${acta.descuadre > 0 ? '+' : ''}${acta.descuadre})</span>`;
+      else bActa = `<span class="badge ok">✔ ${acta.totalVotos} votos</span>`;
+    }
+
+    let bGlobal = `<span class="badge warn"><span class="dot pend"></span>Pendiente</span>`;
+    if (m.estadoGlobal === 'COMPLETO') bGlobal = `<span class="badge ok"><span class="dot ok"></span>Completo</span>`;
+    else if (m.estadoGlobal === 'EN_PROCESO') bGlobal = `<span class="badge warn"><span class="dot warn"></span>En Proceso</span>`;
+    else if (m.estadoGlobal === 'DESCUADRE') bGlobal = `<span class="badge bad"><span class="dot bad"></span>Descuadre</span>`;
+
+    const repData = {
+      codigo: m.codigo,
+      seccional: m.seccional,
+      municipio: m.municipio,
+      instalacion: {
+        reportada: inst.reportada,
+        instalada: inst.reportada ? 'SI' : 'NO',
+        jurados: inst.jurados,
+        kitElectoral: inst.kit,
+        sillas: inst.sillas,
+        mesa: inst.mesa,
+        observaciones: inst.obs
+      },
+      participacion: {
+        sufragantes: part.sufragantes,
+        b1: { sufragantes: part.boletin1 },
+        b2: { sufragantes: part.boletin2 },
+        b3: { sufragantes: part.boletin3 }
+      },
+      acta021: {
+        reportada: acta.reportada,
+        totalSufragantes: acta.totalVotos,
+        plancha1: acta.plancha1,
+        plancha2: acta.plancha2,
+        plancha3: acta.plancha3,
+        plancha4: acta.plancha4,
+        plancha5: acta.plancha5,
+        blanco: acta.blanco,
+        nulos: acta.nulos,
+        noMarcados: acta.noMarcados,
+        incinerados: acta.incinerados,
+        control: acta.alerta,
+        descuadre: acta.descuadre,
+        alerta: acta.descuadre !== 0 ? 'ALERTA CUADRE' : 'OK'
+      }
+    };
+
+    const escRep = JSON.stringify(repData).replace(/"/g, '&quot;');
+
+    tb.innerHTML += `<tr>
+      <td><strong>Mesa ${m.codigo}</strong></td>
+      <td>${m.seccional}<br/><span style="font-size:11px; color:var(--on-surface-variant);">${m.municipio}</span></td>
+      <td>${m.coordinador || '<span style="color:var(--outline);">Sin asignar</span>'}<br/><span style="font-size:11px;">${m.telefono || ''}</span></td>
+      <td>${bInst}</td>
+      <td>${bPart}</td>
+      <td>${bActa}</td>
+      <td>${bGlobal}</td>
+      <td>
+        <button class="btn sec" style="padding:2px 8px; font-size:11px;" onclick="verReportesMesa('${escRep}')">Ver Detalle</button>
+      </td>
+    </tr>`;
+  });
+}
+
+document.getElementById('sem_secFilter').onchange = renderSemaforoTable;
+document.getElementById('sem_stateFilter').onchange = renderSemaforoTable;
+document.getElementById('sem_search').oninput = renderSemaforoTable;
+document.getElementById('btnRefreshSemaforo').onclick = loadSemaforo;
+
+// --- Evidencias Fotográficas ---
+let rawEvidenciasData = [];
+
+async function loadEvidencias() {
+  try {
+    const secF = document.getElementById('evid_secFilter').value || 'all';
+    const qs = secF !== 'all' ? `?seccional=${encodeURIComponent(secF)}` : '';
+    const r = await api(`/admin/evidencias${qs}`);
+    rawEvidenciasData = r.evidencias || [];
+
+    // Llenar selector seccionales
+    const secSel = document.getElementById('evid_secFilter');
+    if (secSel.options.length <= 1) {
+      const seccionales = [...new Set(rawLineasEstados.filter(l => !l.seccional.startsWith('RESPALDO_')).map(l => l.seccional))].sort();
+      secSel.innerHTML = '<option value="all">Todas las seccionales</option>';
+      seccionales.forEach(s => secSel.innerHTML += `<option value="${s}">${s}</option>`);
+    }
+
+    renderEvidenciasGallery();
+  } catch(e) { console.error('Error cargando evidencias:', e); }
+}
+
+function renderEvidenciasGallery() {
+  const g = document.getElementById('evidenciasGallery');
+  g.innerHTML = '';
+
+  if (rawEvidenciasData.length === 0) {
+    g.innerHTML = '<p style="color:var(--outline); padding:12px;">No se han recibido fotos de Acta 021 aún.</p>';
+    return;
+  }
+
+  rawEvidenciasData.forEach(ev => {
+    const imgUrl = `/admin/evidencias/archivo/${encodeURIComponent(ev.filename)}`;
+    const dateStr = new Date(ev.created_at).toLocaleString();
+    const escData = JSON.stringify({
+      titulo: `Mesa ${ev.codigo_mesa} — ${ev.seccional} (${ev.municipio})`,
+      subtitulo: `Coordinador: ${ev.telefono} | Recibida: ${dateStr}`,
+      imgUrl
+    }).replace(/"/g, '&quot;');
+
+    g.innerHTML += `
+      <div class="gallery-card" onclick="verFotoZoom('${escData}')">
+        <img class="gallery-img" src="${imgUrl}" loading="lazy" />
+        <div class="gallery-meta">
+          <strong>Mesa ${ev.codigo_mesa} (${ev.seccional})</strong><br/>
+          <span style="color:var(--on-surface-variant);">${ev.municipio}</span><br/>
+          <span style="font-size:10px; color:var(--outline);">${dateStr}</span>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function verFotoZoom(rawJson) {
+  const d = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
+  document.getElementById('fotoModalTitle').textContent = d.titulo;
+  document.getElementById('fotoModalSubtitle').textContent = d.subtitulo;
+  document.getElementById('fotoModalImg').src = d.imgUrl;
+  document.getElementById('fotoModalDownload').href = d.imgUrl;
+  document.getElementById('modalFoto').classList.add('show');
+}
+
+document.getElementById('closeFoto').onclick = () => document.getElementById('modalFoto').classList.remove('show');
+document.getElementById('evid_secFilter').onchange = loadEvidencias;
+document.getElementById('btnRefreshEvidencias').onclick = loadEvidencias;
+
 // --- Importar, Configuración y Backups ---
 async function loadConfig() {
   try {
@@ -949,11 +1366,19 @@ async function loadBackupsList() {
     const r = await api('/admin/backups');
     const bList = document.getElementById('backupsList');
     if (r.ok && r.backups && r.backups.length) {
-      let h = '<strong>Backups de seguridad existentes:</strong><ul>';
-      r.backups.slice(0, 10).forEach(b => {
-        h += `<li>📄 <code>${b}</code></li>`;
+      let h = '<table style="width:100%; font-size:12px; margin-top:8px;"><thead><tr><th>Archivo</th><th>Tipo</th><th>Tamaño</th><th>Fecha</th><th>Descargar</th></tr></thead><tbody>';
+      r.backups.forEach(b => {
+        const sizeKb = Math.round((b.size || 0) / 1024);
+        const fStr = b.fecha ? new Date(b.fecha).toLocaleString() : '-';
+        h += `<tr>
+          <td><code>${b.nombre || b}</code></td>
+          <td><span class="badge ${b.tipo==='Excel'?'ok':'warn'}">${b.tipo || 'Snapshot'}</span></td>
+          <td>${sizeKb} KB</td>
+          <td>${fStr}</td>
+          <td><a class="btn sec" style="padding:2px 8px; font-size:11px; text-decoration:none;" href="/admin/backups/descargar/${encodeURIComponent(b.nombre || b)}">⬇ Bajar</a></td>
+        </tr>`;
       });
-      h += '</ul>';
+      h += '</tbody></table>';
       bList.innerHTML = h;
     } else {
       bList.innerHTML = '<p style="color:var(--outline);">No hay backups creados aún.</p>';

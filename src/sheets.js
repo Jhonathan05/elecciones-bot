@@ -217,8 +217,15 @@ async function init() {
         }
       });
     }
+    // Sembrar las 2 líneas de respaldo para Hot-Standby Failover
+    ['RESPALDO_1', 'RESPALDO_2'].forEach(resp => {
+      const cur = state.getLinea(resp);
+      if (!cur) {
+        state.upsertLinea(resp, resp.toLowerCase(), null, 1, 0);
+      }
+    });
   } catch (e) {
-    console.warn('Error al sembrar líneas iniciales de seccionales:', e.message);
+    console.warn('Error al sembrar líneas iniciales de seccionales/respaldo:', e.message);
   }
 
   console.log('[sheets] local listo. PRECONTEO filas:', (rowsIdx['PRECONTEO'] || []).length,

@@ -140,4 +140,20 @@ async function resolveRealPhone(instance, remoteJid) {
   return str.split('@')[0];
 }
 
-module.exports = { sendText, listInstances, createInstance, connectInstance, deleteInstance, logoutInstance, setWebhook, getInstanceStatus, extraerNumero, resolveRealPhone, BASE };
+async function downloadMediaBase64(instance, messageObj) {
+  try {
+    const res = await request('POST', `/chat/getBase64FromMediaMessage/${instance}`, {
+      message: messageObj,
+      convertToMp4: false,
+    }, 15000);
+    return res && res.base64 ? res.base64 : null;
+  } catch (e) {
+    console.warn('[EVOLUTION] Error al obtener media base64:', e.message);
+    return null;
+  }
+}
+
+module.exports = {
+  sendText, listInstances, createInstance, connectInstance, deleteInstance, logoutInstance,
+  setWebhook, getInstanceStatus, extraerNumero, resolveRealPhone, downloadMediaBase64, BASE
+};

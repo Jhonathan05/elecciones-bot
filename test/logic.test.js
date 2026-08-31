@@ -133,10 +133,17 @@ async function runTests() {
 
     // Puede reportar su mesa asignada (auto-seleccionada, confirmada con '1')
     const ctxA = makeCtx('573001112244', 'chaparral');
-    await conversar(ctxA, '573001112244', 'chaparral', [
+    const rFotoPrompt = await conversar(ctxA, '573001112244', 'chaparral', [
       'hola', '3', '1', '100', '50', '10', '5', '2', '30', '7', '0', '204', '0', '-', '1',
     ]);
     assert.ok(ctxA._calls.some(c => c[0] === 'acta021'), 'coord mesa reporta su mesa asignada');
+    assert.ok(rFotoPrompt.includes('Evidencia Fotográfica'), 'solicita foto de evidencia opcional');
+
+    // Finalizar sin foto '-' para recibir comprobante digital con hash de radicación
+    const rComprobante = await flows.handle('573001112244', '-', ctxA, 'chaparral');
+    assert.ok(rComprobante.includes('COMPROBANTE OFICIAL DE TRANSMISIÓN'), 'genera comprobante oficial: ' + rComprobante);
+    assert.ok(rComprobante.includes('REC-CHA-M'), 'incluye código de radicado único');
+    console.log('✔ Comprobante Oficial de Transmisión con código de radicado OK');
 
     // No puede reportar mesa ajena (si elige corregir '2' e ingresa otra mesa)
     const ctxB = makeCtx('573001112244', 'chaparral');
@@ -146,6 +153,46 @@ async function runTests() {
     const rB = await flows.handle('573001112244', String(otra), ctxB, 'chaparral');
     assert.ok(/No estás asignado/.test(rB), 'coord mesa rechazado en mesa ajena: ' + rB);
     console.log('✔ Validación de asignación coordinador de mesa OK');
+  }
+
+  // ---- 8) Comando ESTADO / RESUMEN ----
+  {
+    const ctx = makeCtx('573001112233', 'chaparral');
+    const rEstado = await flows.handle('573001112233', 'ESTADO', ctx, 'chaparral');
+    assert.ok(rEstado.includes('ESTADO DE REPORTES ELECTORALES'), 'comando ESTADO responde resumen');
+    console.log('✔ Comando ESTADO / RESUMEN OK');
+  }
+
+  // ---- 9) Failover de Líneas Hot-Standby en state.js ----
+  {
+    const state = require('../src/state');
+    state.upsertLinea('TEST_SEC', 'test_inst', '573001112200', 1, 0);
+    assert.strictEqual(state.getLinea('TEST_SEC').instance, 'test_inst');
+    
+    // Conmutar a respaldo 1
+    const okFailover = state.asignarRespaldo('TEST_SEC', 'respaldo_1');
+    assert.ok(okFailover, 'failover asignado');
+    const lineaRespaldo = state.getLinea('TEST_SEC');
+    assert.strictEqual(lineaRespaldo.instance, 'respaldo_1');
+    assert.strictEqual(lineaRespaldo.original_instance, 'test_inst');
+
+    // Restaurar oficial
+    const okRestore = state.restaurarRespaldo('TEST_SEC');
+    assert.ok(okRestore, 'respaldo restaurado');
+    const lineaRestaurada = state.getLinea('TEST_SEC');
+    assert.strictEqual(lineaRestaurada.instance, 'test_inst');
+    assert.strictEqual(lineaRestaurada.original_instance, null);
+    console.log('✔ Failover y Restauración de Líneas en caliente OK');
+  }
+
+  // ---- 10) Módulo de Backups en caliente ----
+  {
+    const backup = require('../src/backup');
+    const resBackup = backup.crearBackup();
+    assert.ok(resBackup.ok, 'backup creado');
+    const lista = backup.listarBackups();
+    assert.ok(Array.isArray(lista) && lista.length > 0, 'lista de backups disponible');
+    console.log('✔ Generación y listado de copias de seguridad OK');
   }
 
   console.log('\n✅ TODAS LAS PRUEBAS DE LÓGICA PASARON');

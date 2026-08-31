@@ -176,7 +176,8 @@ async function main() {
       '3',                    // Menú: Acta 021
       '1',                    // Confirmar datos de la mesa (auto-seleccionada)
       '100', '50', '10', '5', '2',  // Planchas 1-5
-      '0', '0', '0', '167', '0', '-', 'si'  // Blanco, nulos, noMarcados, total, incinerados, obs, confirmar
+      '0', '0', '0', '167', '0', '-', 'si', // Blanco, nulos, noMarcados, total, incinerados, obs, confirmar
+      '-'                     // Finalizar paso de foto de evidencia
     ], MUN);
     await verifyExcel(token, MESA, 'acta021');
     

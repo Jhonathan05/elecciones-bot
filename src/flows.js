@@ -37,11 +37,87 @@ Responde enviando el número de la opción (1, 2 o 3).
 (Escribe AYUDA o CANCELAR en cualquier momento.)`;
 }
 function ayuda() {
-  return `Comandos disponibles:
-• 1 / 2 / 3 -> Elegir momento a reportar
-• CANCELAR  -> Reiniciar la conversación
-• CORREGIR  -> Volver a ingresar los datos de la mesa
-• AYUDA     -> Ver este mensaje de ayuda`;
+  return `📌 *Comandos disponibles:*
+• *1 / 2 / 3* -> Elegir momento (Instalación, Participación, Acta 021)
+• *ESTADO*    -> Consultar el estado y avance actual de tu mesa
+• *CORREGIR*  -> Volver a ingresar los datos del formulario actual
+• *CANCELAR*  -> Reiniciar la conversación
+• *AYUDA*     -> Ver este mensaje de ayuda`;
+}
+
+async function construirTarjetaEstado(coord, seccional, ctx) {
+  const nombreCoord = (coord && (coord.nombre || (coord.mesas && coord.mesas[0] && coord.mesas[0].nombre))) || 'Coordinador';
+  const mapa = ctx.sheets && ctx.sheets.mapaVotos ? await ctx.sheets.mapaVotos() : {};
+  
+  let out = `📋 *ESTADO DE REPORTES ELECTORALES*\n👤 *Coordinador:* ${nombreCoord}\n🏛️ *Seccional:* ${seccional}\n══════════════════════════════\n`;
+
+  if (coord.tipo === 'mesa' && Array.isArray(coord.mesas)) {
+    coord.mesas.forEach(m => {
+      const k = `${m.codigo}|${norm(m.seccional)}|${norm(m.municipio)}`;
+      const d = mapa[k] || {};
+      const inst = d.instalacion || {};
+      const part = d.participacion || {};
+      const acta = d.acta021 || {};
+
+      const stInst = inst.instalada === 'SI' ? `✅ Instalada (${inst.jurados || 0} jurados)` : `⏳ Pendiente`;
+      const stPart = part.totalSufragantes ? `✅ ${part.totalSufragantes} sufragantes` : `⏳ Pendiente`;
+      let stActa = `⏳ Pendiente`;
+      if (acta.totalSufragantes || acta.plancha1 !== undefined) {
+        stActa = acta.descuadre === 0 ? `✅ Transmitida (${acta.totalSufragantes || 0} votos - OK)` : `⚠️ Descuadre (${acta.descuadre > 0 ? '+' : ''}${acta.descuadre})`;
+      }
+
+      out += `📌 *Mesa ${m.codigo}* (${m.municipio})\n`;
+      out += `  1️⃣ Instalación: ${stInst}\n`;
+      out += `  2️⃣ Participación: ${stPart}\n`;
+      out += `  3️⃣ Acta 021: ${stActa}\n\n`;
+    });
+  } else {
+    out += `📌 *Coordinador Seccional*\nTienes a cargo todas las mesas de la seccional *${seccional}*.\n\n`;
+  }
+
+  out += `══════════════════════════════\nEscribe *1*, *2* o *3* para iniciar un reporte.`;
+  return out;
+}
+
+function generarComprobanteRadicacion(session, resp, ctx, foto = null) {
+  const pad = n => String(n).padStart(2, '0');
+  const d = new Date();
+  const fechaStr = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  
+  const hashRaw = `${session.mesa}-${session.seccional}-${d.getTime()}-${resp.totalVotosMesa || 0}`;
+  const crypto = require('crypto');
+  const hash = crypto.createHash('md5').update(hashRaw).digest('hex').substring(0, 6).toUpperCase();
+  const radicado = `REC-${String(session.seccional || 'SEC').substring(0, 3).toUpperCase()}-M${session.mesa}-${hash}`;
+
+  const nombreCoord = (session.coordinador && (session.coordinador.nombre || (session.coordinador.mesas && session.coordinador.mesas[0] && session.coordinador.mesas[0].nombre))) || 'Coordinador';
+  const b = session.borrador || {};
+  const descuadre = resp.descuadre !== undefined ? resp.descuadre : 0;
+  const estadoCuadre = descuadre === 0 ? '✅ CUADRE PERFECTO' : `⚠️ ALERTA DESCUADRE (${descuadre > 0 ? '+' : ''}${descuadre} votos)`;
+
+  return `╔══════════════════════════════════════════╗
+   🗳️ COMPROBANTE OFICIAL DE TRANSMISIÓN
+   Comité de Cafeteros — Elecciones 2026
+╚══════════════════════════════════════════╝
+📌 *Mesa:* ${session.mesa} — ${session.seccional} (${session.municipio || ''})
+👤 *Coordinador:* ${nombreCoord}
+⏰ *Fecha y Hora:* ${fechaStr}
+🔢 *Radicado:* \`${radicado}\`
+══════════════════════════════════════════
+📊 *RESULTADO ACTA 021:*
+• Plancha 1: ${b.plancha1 || 0}
+• Plancha 2: ${b.plancha2 || 0}
+• Plancha 3: ${b.plancha3 || 0}
+• Plancha 4: ${b.plancha4 || 0}
+• Plancha 5: ${b.plancha5 || 0}
+• Blanco: ${b.blanco || 0}
+• Nulos: ${b.nulos || 0}
+• No Marcados: ${b.noMarcados || 0}
+• TOTAL VOTOS: ${b.totalVotosMesa || 0}
+• Incinerados: ${b.incinerados || 0}
+• Estado: ${estadoCuadre}
+${foto ? `📸 Evidencia: Foto digitalizada registrada (${foto})\n` : ''}══════════════════════════════════════════
+🔒 *Transmisión validada y registrada exitosamente.*
+Guarda este comprobante como soporte de tu reporte.`;
 }
 
 function validarCampo(campo, texto) {
@@ -158,6 +234,12 @@ async function handle(phone, rawText, ctx, instance) {
 
   if (lower === 'cancelar') { ctx.clearSession(phone); return 'Operación cancelada. Envía cualquier mensaje para empezar de nuevo.'; }
   if (lower === 'ayuda') return ayuda();
+  if (lower === 'estado' || lower === 'resumen') {
+    const seccional = ctx.getSeccionalDeInstancia(instance);
+    const coord = ctx.maestro.isTelefonoAutorizado(phone, seccional);
+    if (!coord || !coord.tipo) return '⛔ No estás autorizado para consultar el estado de mesas en esta seccional.';
+    return construirTarjetaEstado(coord, seccional, ctx);
+  }
   if (lower === 'corregir') {
     const s = ctx.getSession(phone);
     if (!s || !s.momento) return 'No hay datos que corregir. Elige un momento (1/2/3).';
@@ -384,7 +466,7 @@ Por favor verifica tu número o solicita tu asignación al administrador.
   }
 
   // --- INSTALACIÓN y ACTA 021 (campo a campo) ---
-  if (session.paso && (session.paso.startsWith('instalacion_') || session.paso.startsWith('acta021_'))) {
+  if (session.paso && (session.paso.startsWith('instalacion_') || (session.paso.startsWith('acta021_') && session.paso !== 'acta021_foto'))) {
     const campo = session.campo;
     const vr = validarCampo(campo, text);
     if (!vr.ok) return vr.msg + '\n\n' + PREGUNTA[campo];
@@ -419,6 +501,17 @@ Por favor verifica tu número o solicita tu asignación al administrador.
     if (text === '1' || lower === 'si' || lower === 'sí' || lower === 's') {
       const resp = await escribir(session, ctx);
       if (!resp.ok) return '⚠️ No se pudo guardar: ' + resp.msg + '. Corrige respondiendo con CORREGIR o cancela con CANCELAR.';
+
+      // Si es Acta 021, pasar a recepción opcional de foto de evidencia
+      if (session.momento === 'acta021') {
+        session.respActa = resp;
+        session.paso = 'acta021_foto';
+        ctx.saveSession(phone, session);
+        return `✅ *Acta 021 de la mesa ${session.mesa} (${session.seccional}) registrada exitosamente.*` +
+          (resp.alerta ? `\n${resp.alerta}\n` : '\n') +
+          `\n📸 *Evidencia Fotográfica (Opcional):*\nSi tienes el formulario físico del Acta 021 (E-14), envía una *foto clara* en este momento como respaldo de auditoría (o escribe *-* o *NO* para finalizar sin foto):`;
+      }
+
       ctx.clearSession(phone);
       return `✅ ${NOMBRE_MOMENTO[session.momento]} de la mesa ${session.mesa} (${session.seccional}) registrada exitosamente.` + (resp.alerta ? `\n${resp.alerta}` : '');
     }
@@ -430,6 +523,41 @@ Por favor verifica tu número o solicita tu asignación al administrador.
       return 'Vamos a reingresar los datos. ' + PREGUNTA[session.campo];
     }
     return '⚠️ La opción ingresada no corresponde con la lista.\n¿Confirmas el envío?\n1️⃣ SÍ\n2️⃣ NO\n\nResponde enviando 1 o 2.';
+  }
+
+  // --- EVIDENCIA FOTOGRÁFICA ACTA 021 ---
+  if (session.paso === 'acta021_foto') {
+    const isImage = Boolean(ctx.hasImage || text === '[FOTO]' || (ctx.rawMessage && ctx.rawMessage.imageMessage));
+    let fotoGuardada = null;
+
+    if (isImage && ctx.downloadImage) {
+      try {
+        const b64Data = await ctx.downloadImage();
+        if (b64Data) {
+          const fs = require('fs');
+          const path = require('path');
+          const evidenciasDir = path.join(process.env.BOT_DATA_DIR || path.join(__dirname, '..', 'data'), 'evidencias');
+          if (!fs.existsSync(evidenciasDir)) fs.mkdirSync(evidenciasDir, { recursive: true });
+          
+          const cleanB64 = b64Data.replace(/^data:image\/\w+;base64,/, '');
+          const filename = `ACTA021_MESA_${session.mesa}_${norm(session.seccional)}_${Date.now()}.jpg`;
+          const filepath = path.join(evidenciasDir, filename);
+          fs.writeFileSync(filepath, Buffer.from(cleanB64, 'base64'));
+          
+          if (ctx.state && ctx.state.guardarEvidencia) {
+            ctx.state.guardarEvidencia(session.mesa, session.seccional, session.municipio || '', phone, filename, filepath);
+          }
+          fotoGuardada = filename;
+        }
+      } catch (e) {
+        console.warn('Error guardando evidencia fotográfica:', e.message);
+      }
+    }
+
+    const resp = session.respActa || {};
+    const comp = generarComprobanteRadicacion(session, resp, ctx, fotoGuardada);
+    ctx.clearSession(phone);
+    return (fotoGuardada ? `📸 *¡Foto del acta archivada correctamente!*\n\n` : '') + comp;
   }
 
   return ayuda();

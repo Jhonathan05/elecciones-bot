@@ -16,6 +16,7 @@ const state = require('./state');
 const evo = require('./evolution');
 const sheets = require('./sheets');
 const maestro = require('./maestro');
+const backup = require('./backup');
 
 const SECRET = process.env.ADMIN_SECRET || require('./config').CONFIG.EVOLUTION_API_KEY || 'cambia-secret';
 
@@ -147,6 +148,42 @@ router.delete('/lineas', requireAuth, async (req, res) => {
   }
   state.deleteLinea(sec);
   res.json({ ok: true });
+});
+
+// Reasignar una línea a una instancia de respaldo (Failover Hot-Standby)
+router.post('/lineas/failover', requireAuth, async (req, res) => {
+  const b = req.body || {};
+  const sec = String(b.seccional || '').toUpperCase();
+  const backupInstance = String(b.backupInstance || '').trim();
+  if (!sec || !backupInstance) return res.status(400).json({ error: 'seccional y backupInstance son requeridos' });
+
+  const ok = state.asignarRespaldo(sec, backupInstance);
+  if (!ok) return res.status(400).json({ error: 'No se pudo asignar la línea de respaldo' });
+
+  try {
+    await evo.setWebhook(backupInstance, require('./config').CONFIG.BOT_WEBHOOK_URL);
+  } catch (e) {}
+
+  res.json({ ok: true, msg: `Línea ${sec} ahora atiende con la instancia de respaldo ${backupInstance}.` });
+});
+
+// Restaurar una línea a su instancia original
+router.post('/lineas/restaurar', requireAuth, async (req, res) => {
+  const b = req.body || {};
+  const sec = String(b.seccional || '').toUpperCase();
+  if (!sec) return res.status(400).json({ error: 'seccional requerida' });
+
+  const ok = state.restaurarRespaldo(sec);
+  if (!ok) return res.status(400).json({ error: 'No se encontró instancia original para restaurar' });
+
+  const linea = state.getLinea(sec);
+  if (linea && linea.instance) {
+    try {
+      await evo.setWebhook(linea.instance, require('./config').CONFIG.BOT_WEBHOOK_URL);
+    } catch (e) {}
+  }
+
+  res.json({ ok: true, msg: `Línea ${sec} restaurada a su instancia oficial.` });
 });
 
 
@@ -289,31 +326,147 @@ router.post('/config', requireAuth, (req, res) => {
   }});
 });
 
-// ---------- Backups de Seguridad ----------
+// ---------- Backups de Seguridad Automatizados ----------
 router.post('/backup', requireAuth, async (req, res) => {
-  try {
-    const backupDir = path.join(__dirname, '..', 'data', 'backups');
-    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
-    
-    const srcPath = require('./config').CONFIG.SHEET_LOCAL_PATH;
-    if (!fs.existsSync(srcPath)) return res.status(400).json({ error: 'El archivo Excel origen no existe.' });
-    
-    const timeStr = new Date().toISOString().replace(/[:.]/g, '-');
-    const backupName = `backup_${timeStr}.xlsx`;
-    const destPath = path.join(backupDir, backupName);
-    
-    fs.copyFileSync(srcPath, destPath);
-    res.json({ ok: true, msg: 'Backup creado exitosamente.', fileName: backupName });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  const r = backup.crearBackup();
+  if (!r.ok) return res.status(500).json(r);
+  res.json(r);
 });
 
 router.get('/backups', requireAuth, (req, res) => {
+  res.json({ backups: backup.listarBackups() });
+});
+
+router.get('/backups/descargar/:name', requireAuth, (req, res) => {
+  const name = path.basename(req.params.name);
+  const filePath = path.join(backup.BACKUP_DIR, name);
+  if (!fs.existsSync(filePath)) return res.status(404).send('Backup no encontrado');
+  res.download(filePath, name);
+});
+
+// ---------- Evidencias Fotográficas (Acta 021) ----------
+router.get('/evidencias', requireAuth, (req, res) => {
+  const { seccional } = req.query;
+  const lista = state.listEvidencias(seccional || null);
+  res.json({ evidencias: lista });
+});
+
+router.get('/evidencias/archivo/:filename', (req, res) => {
+  const filename = path.basename(req.params.filename);
+  const filePath = path.join(process.env.BOT_DATA_DIR || path.join(__dirname, '..', 'data'), 'evidencias', filename);
+  if (!fs.existsSync(filePath)) return res.status(404).send('Evidencia no encontrada');
+  res.sendFile(filePath);
+});
+
+// ---------- Tablero Semáforo y Métricas en Vivo ----------
+router.get('/semaforo', requireAuth, async (req, res) => {
   try {
-    const backupDir = path.join(__dirname, '..', 'data', 'backups');
-    if (!fs.existsSync(backupDir)) return res.json({ backups: [] });
-    const files = fs.readdirSync(backupDir).filter(f => f.endsWith('.xlsx')).reverse();
-    res.json({ backups: files });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const mapa = await sheets.mapaVotos();
+    const { coordMesa } = sheets.getCoordinadores();
+    const coordMap = new Map();
+    coordMesa.forEach(c => {
+      c.mesas.forEach(m => {
+        coordMap.set(`${m.codigo}|${maestro.norm(m.seccional)}|${maestro.norm(m.municipio)}`, {
+          nombre: m.nombre || c.nombre || '',
+          telefono: c.telefono
+        });
+      });
+    });
+
+    let totalMesas = 0;
+    let totalInstaladas = 0;
+    let totalSufragantes = 0;
+    let totalActasTransmitidas = 0;
+    let totalDescuadres = 0;
+    let mesasDetalle = [];
+
+    const seccionalesList = maestro.seccionales();
+    seccionalesList.forEach(secName => {
+      const listMesas = maestro.mesasDeSeccional(secName);
+      listMesas.forEach(m => {
+        totalMesas++;
+        const k = `${m.codigo}|${maestro.norm(m.seccional)}|${maestro.norm(m.municipio)}`;
+        const datos = mapa[k] || {};
+        const inst = datos.instalacion || {};
+        const part = datos.participacion || {};
+        const acta = datos.acta021 || {};
+        const coordInfo = coordMap.get(k) || { nombre: '', telefono: '' };
+
+        const isInstalada = inst.instalada === 'SI';
+        if (isInstalada) totalInstaladas++;
+        
+        const sufPart = part.totalSufragantes || 0;
+        if (sufPart > 0) totalSufragantes += sufPart;
+
+        const isActa = acta.totalSufragantes !== undefined || acta.plancha1 !== undefined;
+        const isDescuadre = acta.descuadre !== undefined && acta.descuadre !== 0;
+        if (isActa) totalActasTransmitidas++;
+        if (isDescuadre) totalDescuadres++;
+
+        let estadoGlobal = 'PENDIENTE';
+        if (isDescuadre) estadoGlobal = 'DESCUADRE';
+        else if (isActa) estadoGlobal = 'COMPLETO';
+        else if (sufPart > 0 || isInstalada) estadoGlobal = 'EN_PROCESO';
+
+        mesasDetalle.push({
+          codigo: m.codigo,
+          numeroLocal: m.numero_local || m.codigo,
+          seccional: m.seccional,
+          municipio: m.municipio,
+          ubicacion: m.ubicacion || 'Puesto Principal',
+          coordinador: coordInfo.nombre,
+          telefono: coordInfo.telefono,
+          instalacion: {
+            reportada: isInstalada,
+            jurados: inst.jurados || 0,
+            kit: inst.kitElectoral || '-',
+            sillas: inst.sillas || '-',
+            mesa: inst.mesa || '-',
+            obs: inst.observaciones || ''
+          },
+          participacion: {
+            sufragantes: sufPart,
+            boletin1: part.b1 || 0,
+            boletin2: part.b2 || 0,
+            boletin3: part.b3 || 0
+          },
+          acta021: {
+            reportada: isActa,
+            totalVotos: acta.totalSufragantes || 0,
+            plancha1: acta.plancha1 || 0,
+            plancha2: acta.plancha2 || 0,
+            plancha3: acta.plancha3 || 0,
+            plancha4: acta.plancha4 || 0,
+            plancha5: acta.plancha5 || 0,
+            blanco: acta.blanco || 0,
+            nulos: acta.nulos || 0,
+            noMarcados: acta.noMarcados || 0,
+            incinerados: acta.incinerados || 0,
+            descuadre: acta.descuadre || 0,
+            alerta: acta.alerta || 'OK'
+          },
+          estadoGlobal
+        });
+      });
+    });
+
+    res.json({
+      ok: true,
+      resumen: {
+        totalMesas,
+        totalInstaladas,
+        pctInstaladas: totalMesas ? Math.round((totalInstaladas / totalMesas) * 100) : 0,
+        totalSufragantes,
+        totalActasTransmitidas,
+        pctActas: totalMesas ? Math.round((totalActasTransmitidas / totalMesas) * 100) : 0,
+        totalDescuadres,
+        totalPendientes: totalMesas - totalActasTransmitidas
+      },
+      mesas: mesasDetalle
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ---------- Exportación Consolidada a CSV ----------

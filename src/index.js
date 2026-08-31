@@ -21,6 +21,8 @@ function isCerrado() {
   return hhmm >= CONFIG.CIERRE_HORARIO;
 }
 
+const backup = require('./backup');
+
 // ---- Contexto de conversación (inyectado a flows) ----
 function getSeccionalDeInstancia(instance) {
   const l = state.getLineaPorInstance(instance);
@@ -28,7 +30,7 @@ function getSeccionalDeInstancia(instance) {
   return l.seccional;
 }
 
-function makeCtx(phone, instance) {
+function makeCtx(phone, instance, extra = {}) {
   return {
     getSession: state.getSession,
     saveSession: state.saveSession,
@@ -39,10 +41,14 @@ function makeCtx(phone, instance) {
     state,
     linea: instance,
     telefono: phone,
+    rawMessage: extra.rawMessage || null,
+    hasImage: Boolean(extra.hasImage),
+    downloadImage: extra.downloadImage || null,
     sheets: {
       escribirInstalacion: (m, s, mun, d, ctx2) => sheets.escribirInstalacion(m, s, mun, d, ctx2),
       escribirParticipacion: (m, s, mun, b, ctx2) => sheets.escribirParticipacion(m, s, mun, b, ctx2),
       escribirActa021: (m, s, mun, d, ctx2) => sheets.escribirActa021(m, s, mun, d, ctx2),
+      mapaVotos: () => sheets.mapaVotos(),
     },
     logger: console,
   };
@@ -75,18 +81,23 @@ app.post('/webhook/evolution', async (req, res) => {
 
     const remoteJid = data.key.remoteJid;
     const msg = data.message || {};
+    const hasImage = !!msg.imageMessage;
     const text = msg.conversation || (msg.extendedTextMessage && msg.extendedTextMessage.text) ||
-      (msg.imageMessage && msg.imageMessage.caption) || '';
-    if (!text) return res.json({ ok: true, ignored: true });
+      (msg.imageMessage && msg.imageMessage.caption) || (hasImage ? '[FOTO]' : '');
+    if (!text && !hasImage) return res.json({ ok: true, ignored: true });
     
     const phone = await evo.resolveRealPhone(instance, remoteJid);
-    console.log('[WEBHOOK PROCESSED]', { remoteJid, resolvedPhone: phone, text });
+    console.log('[WEBHOOK PROCESSED]', { remoteJid, resolvedPhone: phone, text, hasImage });
     const seccional = getSeccionalDeInstancia(instance);
     if (!seccional) {
       await evo.sendText(instance, remoteJid, '⛔ Esta línea no está activa para reporte. Contacta al administrador.').catch(() => {});
       return res.json({ ok: true });
     }
-    const ctx = makeCtx(phone, instance);
+    const ctx = makeCtx(phone, instance, {
+      rawMessage: msg,
+      hasImage,
+      downloadImage: () => evo.downloadMediaBase64(instance, data.message),
+    });
     const reply = await flows.handle(phone, text, ctx, instance);
     console.log('[WEBHOOK REPLY TO]', remoteJid, 'REPLY:', reply);
     
@@ -123,6 +134,10 @@ async function main() {
     console.log(`Almacenamiento listo [${modo}] y coordinadores cargados.`);
   }
   catch (e) { console.warn('Sheets no disponible (modo degradado):', e.message); }
+  
+  // Iniciar copias automáticas de seguridad
+  backup.iniciarCronBackups();
+
   // refresco opcional del maestro desde el app
   if (CONFIG.APP_MESAS_URL) {
     setInterval(() => { /* aquí se podría refrescar maestro vía HTTP */ }, 15 * 60 * 1000);

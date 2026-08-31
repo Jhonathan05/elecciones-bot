@@ -90,13 +90,38 @@ docker exec elecciones-bot npm run test:logic
 
 ---
 
-## 🔒 Control de Seguridad y Fraude
+## 🔒 Control de Seguridad y Fraude (v0.3.0)
 - **Autenticación por Whitelist**: Solo los números de teléfono registrados como Coordinadores Seccionales o Coordinadores de Mesa pueden iniciar la interacción.
 - **Vínculo Automático Privacy ID (`@lid`)**: Sincroniza automáticamente los números privados de usuarios iPhone/WhatsApp Business con la seccional correspondiente y los persiste en SQLite (`lid_mappings`).
 - **Validación de Respuestas Guiadas por Número**: Los menús operan con opciones numéricas (`1`, `2`) evitando fallos tipográficos.
 - **Verificación previa a Diligenciamiento**: Muestra nombre del coordinador, seccional, municipio y ubicación de mesa para confirmación previa antes de capturar votos.
 - **Control de Desajuste de Seccional**: Alerta y guía al usuario si escribe a la línea de una seccional distinta a la asignada.
 - **Auto-selección para Coordinador de Mesa Única**: Agiliza el flujo para los coordinadores con una sola mesa asignada saltando la solicitud del código y yendo directo a la confirmación de datos.
+
+---
+
+## ⚡ Novedades y Mejoras de la Versión 0.3.0
+
+1. 📊 **Tablero Semáforo en Vivo (Dashboard Web)**:
+   - Panel visual con métricas de mesas instaladas, total de sufragantes acumulados, actas transmitidas y alertas matemáticas de descuadre.
+   - Filtros dinámicos por seccional, estado operativo (`PENDIENTE`, `EN_PROCESO`, `COMPLETO`, `DESCUADRE`) y búsqueda instantánea.
+
+2. 🛡️ **Failover en Caliente de Líneas (Hot-Standby)**:
+   - Soporte para 2 líneas de respaldo pre-vinculadas (`RESPALDO_1`, `RESPALDO_2`).
+   - Si una línea oficial de cualquier seccional se bloquea o desconecta, el administrador puede conmutarla a una línea de respaldo en **1 clic** desde el panel web sin perder sesiones ni reconfigurar nada.
+   - Botón de **Restaurar Línea Oficial** una vez restablecido el número principal.
+
+3. 📸 **Auditoría con Evidencia Fotográfica de Acta 021 (E-14)**:
+   - Al finalizar el preconteo numérico, el coordinador puede enviar opcionalmente una foto del formulario físico de su Acta 021.
+   - El bot descarga y archiva la foto en `/app/data/evidencias/` con registro en SQLite y galería de auditoría con zoom en el panel web.
+
+4. 📱 **Comando `ESTADO` / `RESUMEN` y Comprobante Oficial de Radicación**:
+   - Los coordinadores pueden consultar en cualquier momento el estado de sus mesas asignadas escribiendo `ESTADO` o `RESUMEN`.
+   - Al confirmar el Acta 021, el bot emite un **Comprobante Digital Oficial** con formato formal y código de radicado único generado mediante hash (`REC-SEC-MESA-HASH`).
+
+5. 💾 **Backups Automáticos en Caliente cada 15 Minutos**:
+   - Servicio periódico en segundo plano que genera snapshots con timestamp de `3_PRECONTEO 2022-PLANCHAS.xlsx` y `bot-state.db`.
+   - Rotación automática de los últimos 50 archivos y descarga directa desde el panel web.
 
 ---
 
