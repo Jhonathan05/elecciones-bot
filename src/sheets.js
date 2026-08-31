@@ -389,7 +389,7 @@ async function mapaVotos() {
     
     const pre = readSheet(wb.Sheets['PRECONTEO'], mP, [
       'SECCIONAL UBICACION MESA', 'MUNICIPIO POR EL QUE VOTA', 'CÓDIGO MESA', 'CONTROL', 'DESCUADRE', 'ALERTA',
-      'Total Sufragantes Planchas', 'Plancha 1', 'Plancha 2', 'Plancha 3', 'Plancha 4', 'Plancha 5',
+      'MESAS REPORTADAS', 'Total Sufragantes Planchas', 'Plancha 1', 'Plancha 2', 'Plancha 3', 'Plancha 4', 'Plancha 5',
       'Votos en Blanco Planchas', 'Votos Nulos Planchas', 'Votos no Marcados Planchas', 'Votos Incinerados Planchas', 'OTRAS CONSTANCIAS'
     ]);
     
@@ -410,6 +410,7 @@ async function mapaVotos() {
       const k = key(r);
       map[k] = map[k] || {};
       map[k].acta021 = {
+        reportada: num(r['MESAS REPORTADAS']) === 1,
         control: norm(r['CONTROL']),
         descuadre: num(r['DESCUADRE']),
         alerta: norm(r['ALERTA']),

@@ -613,7 +613,7 @@ function fmtReporteBtn(m) {
   const v = m.voto || {};
   const instOk = v.instalacion && v.instalacion.instalada === 'SI';
   const partSuf = v.participacion ? v.participacion.totalSufragantes : 0;
-  const preOk = v.acta021 && v.acta021.totalSufragantes > 0;
+  const preOk = v.acta021 && v.acta021.reportada;
   
   const escVoto = JSON.stringify({
     codigo: m.codigo,
@@ -699,15 +699,17 @@ function showMesaReports(rawJson) {
   // --- Momento 3: Preconteo (Acta 021) ---
   const acta = v.acta021;
   const esCuadreErr = acta && acta.alerta === 'ALERTA CUADRE';
+  const preReportado = acta && acta.reportada;
+
   html += `<div style="background:var(--surface-variant); padding:12px; border-radius:8px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
       <h4 style="margin:0; color:var(--primary);">3️⃣ Preconteo (Acta 021)</h4>
-      ${acta && acta.totalSufragantes > 0 
+      ${preReportado 
         ? `<span class="badge ${esCuadreErr ? 'bad' : 'ok'}">${esCuadreErr ? 'DESCUADRE (' + acta.descuadre + ')' : 'CUADRE OK'}</span>` 
         : '<span class="badge warn">SIN REPORTAR</span>'}
     </div>`;
   
-  if (acta && acta.totalSufragantes > 0) {
+  if (preReportado) {
     html += `<table style="font-size:12px; margin-top:6px; width:100%;">
       <tr><td><strong>Total Votos Sufragantes (Mesa):</strong></td><td><strong>${acta.totalSufragantes}</strong></td></tr>
       <tr><td><strong>Plancha 1:</strong></td><td>${acta.plancha1 || 0}</td></tr>
@@ -723,7 +725,7 @@ function showMesaReports(rawJson) {
       <tr><td><strong>Observaciones / Constancias:</strong></td><td>${acta.observaciones || 'Sin constancias'}</td></tr>
     </table>`;
   } else {
-    html += `<p style="font-size:12px; color:var(--on-surface-variant); margin:4px 0 0 0;">No se ha registrado aún el preconteo del Acta 021.</p>`;
+    html += `<p style="font-size:12px; color:var(--on-surface-variant); margin:4px 0 0 0;">No se ha registrado aún el preconteo del Acta 021 por parte del coordinador.</p>`;
   }
   html += `</div>`;
 
