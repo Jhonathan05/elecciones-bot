@@ -323,7 +323,11 @@
       <div class="row">
         <div style="flex:2; min-width:240px;">
           <label style="font-weight:600;">Ruta Local del Archivo Excel (SHEET_LOCAL_PATH):</label>
-          <input id="cfg_localPath" placeholder="/app/shared/3_PRECONTEO 2022-PLANCHAS.xlsx" />
+          <div style="display:flex; gap:6px;">
+            <input id="cfg_localPath" placeholder="/app/shared/3_PRECONTEO 2022-PLANCHAS.xlsx" style="flex:1;" />
+            <input type="file" id="filePickerInput" accept=".xlsx,.xls,.csv" style="display:none;" />
+            <button class="btn sec" id="btnBrowseFile" style="padding:4px 10px; font-size:12px; white-space:nowrap;" title="Buscar archivo en el explorador de archivos local">📁 Explorar...</button>
+          </div>
         </div>
         <div style="flex:2; min-width:240px;">
           <label style="font-weight:600;">Ruta Remota de RClone (RCLONE_REMOTE):</label>
@@ -969,6 +973,40 @@ document.getElementById('btnCreateBackup').onclick = async () => {
   } catch(e) {
     document.getElementById('backupMsg').className = 'msg err';
     document.getElementById('backupMsg').textContent = '⚠️ ' + e.message;
+  }
+};
+
+document.getElementById('btnBrowseFile').onclick = () => {
+  document.getElementById('filePickerInput').click();
+};
+
+document.getElementById('filePickerInput').onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  document.getElementById('cfg_localPath').value = `/app/shared/${file.name}`;
+  document.getElementById('cfgMsg').className = 'msg okm';
+  document.getElementById('cfgMsg').textContent = `📁 Archivo "${file.name}" seleccionado en explorador. Subiendo...`;
+
+  const formData = new FormData();
+  formData.append('archivo', file);
+  try {
+    const res = await fetch('/admin/importar', {
+      method: 'POST',
+      headers: { 'x-admin-token': TOKEN },
+      body: formData
+    });
+    const j = await res.json();
+    if (j.ok) {
+      document.getElementById('cfgMsg').className = 'msg okm';
+      document.getElementById('cfgMsg').textContent = `✅ Archivo "${file.name}" cargado e importado con éxito (${j.mesas || 0} mesas).`;
+    } else {
+      document.getElementById('cfgMsg').className = 'msg err';
+      document.getElementById('cfgMsg').textContent = '⚠️ ' + (j.error || 'Error al importar archivo.');
+    }
+  } catch(err) {
+    document.getElementById('cfgMsg').className = 'msg err';
+    document.getElementById('cfgMsg').textContent = '⚠️ ' + err.message;
   }
 };
 
