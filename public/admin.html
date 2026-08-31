@@ -157,19 +157,89 @@
 
   <!-- COORDINADORES -->
   <div class="panel" id="p-coord">
+    <!-- 1. COORDINADORES SECCIONALES PRIMERO -->
     <div class="card">
       <div class="row" style="align-items:center">
-        <h3 style="margin:0">Coordinadores de mesa</h3>
-        <button class="btn sec" id="newCoordMesa">+ Nuevo coordinador de mesa</button>
+        <h3 style="margin:0">1. Coordinadores Seccionales</h3>
+        <button class="btn sec" id="newCoordSec">+ Asignar coordinador seccional</button>
       </div>
-      <table id="tblCoordMesa"><thead><tr><th>Teléfono</th><th>Nombre</th><th>Seccional</th><th>Mesa</th><th>Municipio</th><th>Voto</th><th></th></tr></thead><tbody></tbody></table>
+      <p style="font-size:12px; color:var(--on-surface-variant); margin:4px 0 12px 0;">
+        Un coordinador seccional puede reportar cualquier mesa perteneciente a su seccional.
+      </p>
+      <table id="tblCoordSec">
+        <thead>
+          <tr>
+            <th>Seccional</th>
+            <th>Estado</th>
+            <th>Coordinador</th>
+            <th>Teléfono</th>
+            <th>Circunscripción / Municipio</th>
+            <th>Total Mesas</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
-    <div class="card">
-      <div class="row" style="align-items:center">
-        <h3 style="margin:0">Coordinadores seccionales</h3>
-        <button class="btn sec" id="newCoordSec">+ Nuevo coordinador seccional</button>
+
+    <!-- 2. COORDINADORES DE MESA SEGUNDO CON FILTROS Y PAGINACIÓN -->
+    <div class="card" style="margin-top:16px;">
+      <div class="row" style="align-items:center; justify-content:space-between;">
+        <h3 style="margin:0">2. Coordinadores de Mesa</h3>
+        <button class="btn sec" id="newCoordMesa">+ Asignar coordinador de mesa</button>
       </div>
-      <table id="tblCoordSec"><thead><tr><th>Teléfono</th><th>Nombre</th><th>Seccional</th><th>Circunscripción</th><th>Municipio</th><th>Mesas</th><th></th></tr></thead><tbody></tbody></table>
+
+      <!-- Barra de Filtros -->
+      <div class="row" style="margin: 12px 0; align-items:flex-end; gap:12px;">
+        <div style="flex:1; min-width:140px;">
+          <label style="font-size:11px;">Filtrar por Seccional</label>
+          <select id="f_secFilter" style="width:100%; padding:6px; font-size:13px;"></select>
+        </div>
+        <div style="flex:1; min-width:140px;">
+          <label style="font-size:11px;">Estado Coordinador</label>
+          <select id="f_stateFilter" style="width:100%; padding:6px; font-size:13px;">
+            <option value="all">Todas las mesas</option>
+            <option value="assigned">Con Coordinador</option>
+            <option value="unassigned">Sin Coordinador (Vacías)</option>
+          </select>
+        </div>
+        <div style="flex:2; min-width:180px;">
+          <label style="font-size:11px;">Buscar (Mesa, Municipio, Nombre)</label>
+          <input id="f_search" placeholder="Ej: 134, Casabianca..." style="padding:6px; font-size:13px; width:100%;" />
+        </div>
+      </div>
+
+      <!-- Tabla de Mesas -->
+      <table id="tblCoordMesa">
+        <thead>
+          <tr>
+            <th>Seccional</th>
+            <th>Mesa</th>
+            <th>Municipio</th>
+            <th>Estado</th>
+            <th>Coordinador</th>
+            <th>Teléfono</th>
+            <th>Reportes</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <!-- Paginación -->
+      <div class="row" style="align-items:center; justify-content:space-between; margin-top:12px; font-size:13px;">
+        <div id="pageInfo" style="color:var(--on-surface-variant);">Mostrando 0 de 0 mesas</div>
+        <div class="row" style="align-items:center; gap:8px;">
+          <label style="font-size:11px; margin:0;">Filas por pág:</label>
+          <select id="pageSize" style="padding:4px 8px; font-size:12px;">
+            <option value="20">20</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
+          <button class="btn sec" id="btnPrevPage" style="padding:4px 10px;">◀ Anterior</button>
+          <button class="btn sec" id="btnNextPage" style="padding:4px 10px;">Siguiente ▶</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -364,26 +434,177 @@ document.getElementById('saveLinea').onclick = async () => {
 document.getElementById('refreshEstado').onclick = loadLineas;
 
 // --- Coordinadores ---
+let rawCoordinadoresData = { seccional: [], mesa: [] };
+let filteredMesas = [];
+let currentPage = 1;
+let pageSize = 50;
+
 async function loadCoord(){
-  const r = await api('/admin/coordinadores'); const c = r.coordinadores;
-  const tbM = document.querySelector('#tblCoordMesa tbody'); tbM.innerHTML='';
-  c.mesa.forEach(x => x.mesas.forEach(m => {
-    tbM.innerHTML += `<tr><td>${x.telefono}</td><td>${x.nombre||''}</td><td>${x.seccional}</td><td>${m.codigo}</td><td>${m.municipio||''}</td><td>${fmtVoto(m.voto)}</td>
-      <td><button class="btn sec" onclick="editCoordMesa('${x.telefono}','${m.codigo}')">Editar</button>
-          <button class="btn bad" onclick="delCoordMesa('${x.telefono}','${m.codigo}')">Eliminar</button></td></tr>`;
-  }));
-  const tbS = document.querySelector('#tblCoordSec tbody'); tbS.innerHTML='';
-  c.seccional.forEach(x => {
-    tbS.innerHTML += `<tr><td>${x.telefono}</td><td>${x.nombre||''}</td><td>${x.seccional}</td><td>${x.circunscripcion||''}</td><td>${x.municipio||''}</td><td>${x.mesas.length} mesas</td>
-      <td><button class="btn sec" onclick="editCoordSec('${x.telefono}')">Editar</button>
-          <button class="btn bad" onclick="delCoordSec('${x.seccional}')">Eliminar</button></td></tr>`;
+  try {
+    const r = await api('/admin/coordinadores');
+    rawCoordinadoresData = r.coordinadores || { seccional: [], mesa: [] };
+
+    // 1. Llenar dropdown de seccionales para filtros
+    const secSelect = document.getElementById('f_secFilter');
+    const prevSecVal = secSelect.value || 'all';
+    secSelect.innerHTML = '<option value="all">Todas las seccionales</option>';
+    rawCoordinadoresData.seccional.forEach(s => {
+      secSelect.innerHTML += `<option value="${s.seccional}">${s.seccional}</option>`;
+    });
+    secSelect.value = prevSecVal;
+
+    // 2. Renderizar Coordinadores Seccionales
+    const tbS = document.querySelector('#tblCoordSec tbody');
+    tbS.innerHTML = '';
+    rawCoordinadoresData.seccional.forEach(x => {
+      const badgeEstado = x.asignado 
+        ? '<span class="badge ok">Asignado</span>' 
+        : '<span class="badge warn">Vacía / Sin asignar</span>';
+      
+      const escDataSec = JSON.stringify({ 
+        telefono: x.telefono || '', 
+        nombre: x.nombre || '', 
+        seccional: x.seccional || '', 
+        circunscripcion: x.circunscripcion || '', 
+        municipio: x.municipio || '' 
+      }).replace(/"/g, '&quot;');
+
+      let btnAccion = '';
+      if (x.asignado) {
+        btnAccion = `<button class="btn sec" style="padding:2px 6px; font-size:11px;" onclick="editCoordSec('${escDataSec}')">Editar</button>
+                     <button class="btn bad" style="padding:2px 6px; font-size:11px;" onclick="delCoordSec('${x.seccional}')">Quitar</button>`;
+      } else {
+        btnAccion = `<button class="btn ok" style="padding:2px 6px; font-size:11px;" onclick="assignCoordSec('${x.seccional}')">+ Asignar</button>`;
+      }
+
+      tbS.innerHTML += `<tr>
+        <td><strong>${x.seccional}</strong></td>
+        <td>${badgeEstado}</td>
+        <td>${x.nombre || '<span style="color:var(--outline);">—</span>'}</td>
+        <td>${x.telefono || '<span style="color:var(--outline);">—</span>'}</td>
+        <td>${x.circunscripcion || ''} ${x.municipio ? ' / ' + x.municipio : ''}</td>
+        <td>${x.totalMesas || 0} mesas</td>
+        <td>${btnAccion}</td>
+      </tr>`;
+    });
+
+    // 3. Aplicar filtros y renderizar mesas
+    applyMesaFilters();
+  } catch(e){}
+}
+
+function applyMesaFilters() {
+  const secFilter = document.getElementById('f_secFilter').value;
+  const stateFilter = document.getElementById('f_stateFilter').value;
+  const searchText = (document.getElementById('f_search').value || '').toLowerCase().trim();
+
+  filteredMesas = (rawCoordinadoresData.mesa || []).filter(m => {
+    // Filtro por Seccional
+    if (secFilter !== 'all' && m.seccional !== secFilter) return false;
+    // Filtro por Estado
+    if (stateFilter === 'assigned' && !m.asignado) return false;
+    if (stateFilter === 'unassigned' && m.asignado) return false;
+    // Búsqueda por texto
+    if (searchText) {
+      const matchCod = String(m.codigo).includes(searchText);
+      const matchMun = (m.municipio || '').toLowerCase().includes(searchText);
+      const matchNom = (m.nombre || '').toLowerCase().includes(searchText);
+      const matchTel = (m.telefono || '').includes(searchText);
+      if (!matchCod && !matchMun && !matchNom && !matchTel) return false;
+    }
+    return true;
   });
+
+  currentPage = 1;
+  renderMesaPage();
+}
+
+function renderMesaPage() {
+  pageSize = parseInt(document.getElementById('pageSize').value, 10) || 50;
+  const total = filteredMesas.length;
+  const maxPage = Math.ceil(total / pageSize) || 1;
+  if (currentPage > maxPage) currentPage = maxPage;
+
+  const startIdx = (currentPage - 1) * pageSize;
+  const pageItems = filteredMesas.slice(startIdx, startIdx + pageSize);
+
+  const tbM = document.querySelector('#tblCoordMesa tbody');
+  tbM.innerHTML = '';
+
+  if (pageItems.length === 0) {
+    tbM.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--outline); padding:16px;">No se encontraron mesas con los filtros seleccionados.</td></tr>';
+  } else {
+    pageItems.forEach(m => {
+      const badgeEstado = m.asignado 
+        ? '<span class="badge ok">Asignado</span>' 
+        : '<span class="badge warn" style="opacity:0.8;">Sin Asignar</span>';
+
+      const escData = JSON.stringify({ 
+        telefono: m.telefono || '', 
+        nombre: m.nombre || '', 
+        seccional: m.seccional || '', 
+        municipio: m.municipio || '', 
+        codigo: m.codigo 
+      }).replace(/"/g, '&quot;');
+
+      let btnAcciones = '';
+      if (m.asignado) {
+        btnAcciones = `<button class="btn sec" style="padding:2px 6px; font-size:11px;" onclick="editCoordMesa('${escData}')">Editar</button>
+                       <button class="btn bad" style="padding:2px 6px; font-size:11px;" onclick="delCoordMesa('${escData}')">Quitar</button>`;
+      } else {
+        btnAcciones = `<button class="btn ok" style="padding:2px 6px; font-size:11px;" onclick="assignCoordMesa('${m.seccional}','${m.municipio}',${m.codigo})">+ Asignar</button>`;
+      }
+
+      tbM.innerHTML += `<tr>
+        <td>${m.seccional}</td>
+        <td><strong>Mesa ${m.codigo}</strong></td>
+        <td>${m.municipio || ''}</td>
+        <td>${badgeEstado}</td>
+        <td>${m.nombre || '<span style="color:var(--outline);">—</span>'}</td>
+        <td>${m.telefono || '<span style="color:var(--outline);">—</span>'}</td>
+        <td>${fmtVoto(m.voto)}</td>
+        <td>${btnAcciones}</td>
+      </tr>`;
+    });
+  }
+
+  // Actualizar Info de paginación
+  const startNum = total === 0 ? 0 : startIdx + 1;
+  const endNum = Math.min(startIdx + pageSize, total);
+  document.getElementById('pageInfo').textContent = `Mostrando ${startNum} - ${endNum} de ${total} mesas (Pág. ${currentPage} de ${maxPage})`;
+
+  document.getElementById('btnPrevPage').disabled = currentPage <= 1;
+  document.getElementById('btnNextPage').disabled = currentPage >= maxPage;
+}
+
+// Event Listeners de Filtros y Paginación
+document.getElementById('f_secFilter').onchange = applyMesaFilters;
+document.getElementById('f_stateFilter').onchange = applyMesaFilters;
+document.getElementById('f_search').oninput = applyMesaFilters;
+document.getElementById('pageSize').onchange = renderMesaPage;
+
+document.getElementById('btnPrevPage').onclick = () => { if (currentPage > 1) { currentPage--; renderMesaPage(); } };
+document.getElementById('btnNextPage').onclick = () => {
+  const maxPage = Math.ceil(filteredMesas.length / pageSize) || 1;
+  if (currentPage < maxPage) { currentPage++; renderMesaPage(); }
+};
+
+function assignCoordSec(sec) {
+  openModal('seccional', { seccional: sec }, false);
+}
+
+function assignCoordMesa(sec, mun, cod) {
+  openModal('mesa', { seccional: sec, municipio: mun, codigo: cod }, false);
 }
 document.getElementById('newCoordMesa').onclick = () => openModal('mesa');
 document.getElementById('newCoordSec').onclick = () => openModal('seccional');
-function openModal(tipo, data={}){
+
+let isEditMode = false;
+
+function openModal(tipo, data={}, isEdit = false){
+  isEditMode = isEdit;
   document.getElementById('c_tipo').value=tipo;
-  document.getElementById('modalTitle').textContent = (tipo==='mesa'?'Coordinador de mesa':'Coordinador seccional');
+  document.getElementById('modalTitle').textContent = (isEdit ? 'Editar ' : 'Nuevo ') + (tipo==='mesa'?'Coordinador de mesa':'Coordinador seccional');
   document.getElementById('c_munWrap').style.display = tipo==='mesa'?'flex':'none';
   document.getElementById('c_codWrap').style.display = tipo==='mesa'?'flex':'none';
   document.getElementById('c_circWrap').style.display = tipo==='seccional'?'flex':'none';
@@ -391,6 +612,7 @@ function openModal(tipo, data={}){
   document.getElementById('c_nombre').value=data.nombre||''; document.getElementById('c_contacto').value=data.telefono||'';
   document.getElementById('c_circ').value=data.circunscripcion||''; document.getElementById('c_numero').value=data.numero||'';
   document.getElementById('c_codigo').value=data.codigo||'';
+  document.getElementById('c_msg').textContent = '';
   document.getElementById('modalCoord').classList.add('show');
 }
 document.getElementById('c_cancel').onclick = () => document.getElementById('modalCoord').classList.remove('show');
@@ -399,14 +621,40 @@ document.getElementById('c_save').onclick = async () => {
   const b = { seccional:document.getElementById('c_sec').value.toUpperCase(), nombre:document.getElementById('c_nombre').value, contacto:document.getElementById('c_contacto').value,
     municipio:document.getElementById('c_mun').value, circunscripcion:document.getElementById('c_circ').value, numero:document.getElementById('c_numero').value };
   if (tipo==='mesa') b.codigo=document.getElementById('c_codigo').value;
-  const r = await api('/admin/coordinadores/'+tipo, { method:'POST', body:JSON.stringify(b) });
-  document.getElementById('c_msg').textContent = r.ok?'Guardado.':'Error: '+(r.error||'');
-  if (r.ok){ document.getElementById('modalCoord').classList.remove('show'); loadCoord(); }
+  document.getElementById('c_msg').className = 'msg';
+  document.getElementById('c_msg').textContent = 'Guardando...';
+  try {
+    const method = isEditMode ? 'PUT' : 'POST';
+    const r = await api('/admin/coordinadores/'+tipo, { method, body:JSON.stringify(b) });
+    if (r.ok){
+      document.getElementById('c_msg').className = 'msg okm';
+      document.getElementById('c_msg').textContent = 'Guardado exitosamente.';
+      setTimeout(() => document.getElementById('modalCoord').classList.remove('show'), 500);
+      loadCoord();
+    } else {
+      document.getElementById('c_msg').className = 'msg err';
+      document.getElementById('c_msg').textContent = '⚠️ ' + (r.error || r.msg || 'Error al guardar');
+    }
+  } catch(e) {
+    document.getElementById('c_msg').className = 'msg err';
+    document.getElementById('c_msg').textContent = '⚠️ ' + e.message;
+  }
 };
-function editCoordMesa(tel,codigo){ openModal('mesa',{telefono:tel,codigo}); }
-function editCoordSec(tel){ openModal('seccional',{telefono:tel}); }
-async function delCoordMesa(tel,codigo){ await api('/admin/coordinadores/mesa',{method:'DELETE',body:JSON.stringify({codigo})}); loadCoord(); }
-async function delCoordSec(sec){ await api('/admin/coordinadores/seccional',{method:'DELETE',body:JSON.stringify({seccional:sec})}); loadCoord(); }
+function editCoordMesa(rawJson){ const d = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson; openModal('mesa', d, true); }
+function editCoordSec(rawJson){ const d = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson; openModal('seccional', d, true); }
+async function delCoordMesa(rawJson){
+  const d = typeof rawJson === 'string' ? JSON.parse(rawJson) : rawJson;
+  if (!confirm(`¿Deseas quitar al coordinador de la mesa ${d.codigo} (${d.seccional})?`)) return;
+  const r = await api('/admin/coordinadores/mesa', { method:'DELETE', body:JSON.stringify({ codigo: d.codigo, seccional: d.seccional, municipio: d.municipio }) });
+  if (r.ok) loadCoord();
+  else alert('Error al eliminar: ' + (r.error || r.msg || ''));
+}
+async function delCoordSec(sec){
+  if (!confirm(`¿Deseas quitar al coordinador seccional de ${sec}?`)) return;
+  const r = await api('/admin/coordinadores/seccional', { method:'DELETE', body:JSON.stringify({ seccional: sec }) });
+  if (r.ok) loadCoord();
+  else alert('Error al eliminar: ' + (r.error || r.msg || ''));
+}
 
 // --- Importar ---
 document.getElementById('btnImportar').onclick = async () => {
@@ -427,21 +675,27 @@ document.getElementById('btnPlantilla').onclick = async () => {
 
 // --- Informes ---
 async function loadInformes(){
-  const r = await api('/admin/informes');
-  let h = '<h4>Por seccional</h4><table><thead><tr><th>Seccional</th><th>Mesas</th><th>Instaladas</th><th>021</th><th>Cuadre OK</th><th>Descuadre</th><th>Sufragantes</th></tr></thead><tbody>';
-  r.porSeccional.forEach(s => {
-    const pct = s.total? Math.round(100*s.instaladas/s.total):0;
-    h += `<tr><td>${s.seccional}</td><td>${s.total}</td><td>${s.instaladas} <div class="bar"><span style="width:${pct}%"></span></div></td>
-      <td>${s.mesas021}</td><td>${s.cuadreOK}</td><td>${s.descuadre}</td><td>${s.sufragantes}</td></tr>`;
-  });
-  h += '</tbody></table>';
-  h += '<h4>Por circunscripción</h4><table><thead><tr><th>Circunscripción</th><th>Mesas</th><th>Instaladas</th><th>021</th><th>Sufragantes</th></tr></thead><tbody>';
-  r.porCircunscripcion.forEach(c => { h += `<tr><td>${c.circunscripcion}</td><td>${c.total}</td><td>${c.instaladas}</td><td>${c.mesas021}</td><td>${c.sufragantes}</td></tr>`; });
-  h += '</tbody></table>';
-  h += '<h4>Alertas tempranas ('+r.alertas.length+')</h4>';
-  if (r.alertas.length){ h += '<ul>'; r.alertas.slice(0,50).forEach(a => h += `<li><span class="badge bad">${a.tipo}</span> Mesa ${a.codigo} — ${a.seccional} ${a.municipio||''} ${a.descuadre!==undefined?'('+a.descuadre+')':''}</li>`); h += '</ul>'; }
-  else h += '<p class="okm">Sin alertas.</p>';
-  document.getElementById('informesOut').innerHTML = h;
+  try {
+    const r = await api('/admin/informes');
+    let h = '<h4>Resumen de Alertas</h4>';
+    if (r.resumen) {
+      h += `<p><strong>Mesas con Alerta en Acta 021:</strong> ${r.resumen.mesasConAlertaActa || 0}</p>`;
+      h += `<p><strong>Mesas con Alerta en Instalación:</strong> ${r.resumen.mesasConAlertaInstalacion || 0}</p>`;
+      h += `<p><strong>Descuadres de Votos:</strong> ${r.resumen.descuadres || 0}</p>`;
+    }
+    const alertas = (r.alertasActa || []).concat(r.alertasInstalacion || []).concat(r.alertasParticipacion || []);
+    h += '<h4>Alertas tempranas ('+alertas.length+')</h4>';
+    if (alertas.length){
+      h += '<ul>';
+      alertas.slice(0,50).forEach(a => h += `<li><span class="badge bad">${a.alerta || 'ALERTA'}</span> Mesa ${a.codigo || ''} — ${a.seccional || ''} ${a.municipio||''} ${a.descuadre!==undefined?'(Descuadre: '+a.descuadre+')':''}</li>`);
+      h += '</ul>';
+    } else {
+      h += '<p class="okm">Sin alertas registradas.</p>';
+    }
+    document.getElementById('informesOut').innerHTML = h;
+  } catch(e) {
+    document.getElementById('informesOut').innerHTML = '<p class="err">Error al cargar informes: ' + e.message + '</p>';
+  }
 }
 document.getElementById('btnInformes').onclick = loadInformes;
 

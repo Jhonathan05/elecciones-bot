@@ -145,69 +145,112 @@ router.delete('/lineas', requireAuth, async (req, res) => {
 router.get('/coordinadores', requireAuth, async (req, res) => {
   try {
     const mapa = await sheets.mapaVotos();
-    const { coordMesa, coordSec } = sheets.getCoordinadores();
+    const { coordMesa: rawCoordMesa, coordSec: rawCoordSec } = sheets.getCoordinadores();
     const norm = maestro.norm;
-    const mesa = coordMesa.map(c => ({
-      tipo: 'mesa', telefono: c.telefono, nombre: (c.mesas[0] && c.mesas[0].nombre) || '', seccional: (c.mesas[0] && c.mesas[0].seccional) || '',
-      mesas: c.mesas.map(m => ({ codigo: m.codigo, municipio: m.municipio, seccional: m.seccional, voto: mapa[`${m.codigo}|${norm(m.seccional)}|${norm(m.municipio)}`] || null })),
-    }));
-    const seccional = coordSec.map(c => {
-      const mesasSec = maestro.mesasDeSeccional(c.seccional);
-      const mesas = mesasSec.map(m => ({ codigo: m.codigo, municipio: m.municipio, seccional: m.seccional, voto: mapa[`${m.codigo}|${norm(m.seccional)}|${norm(m.municipio)}`] || null }));
-      return { tipo: 'seccional', telefono: c.telefono, nombre: c.nombre, seccional: c.seccional, circunscripcion: c.circunscripcion, municipio: c.municipio, mesas };
+
+    // 1. Obtener todas las seccionales del sistema y cruzar con coordinadores seccionales
+    const seccionalesCatalog = maestro.seccionales();
+    const coordSecMap = new Map();
+    rawCoordSec.forEach(c => coordSecMap.set(norm(c.seccional), c));
+
+    const seccionales = seccionalesCatalog.map(secName => {
+      const c = coordSecMap.get(norm(secName));
+      const mesasSec = maestro.mesasDeSeccional(secName);
+      return {
+        tipo: 'seccional',
+        seccional: secName,
+        asignado: !!c,
+        telefono: c ? c.telefono : null,
+        nombre: c ? c.nombre : null,
+        circunscripcion: c ? c.circunscripcion : secName,
+        municipio: c ? c.municipio : null,
+        totalMesas: mesasSec.length,
+      };
     });
-    res.json({ coordinadores: { mesa, seccional } });
+
+    // 2. Obtener TODAS las mesas del catálogo y cruzar con coordinadores de mesa
+    const coordMesaMap = new Map(); // "codigo|seccional|municipio" -> { telefono, nombre }
+    rawCoordMesa.forEach(c => {
+      c.mesas.forEach(m => {
+        const k = `${m.codigo}|${norm(m.seccional)}|${norm(m.municipio)}`;
+        coordMesaMap.set(k, { telefono: c.telefono, nombre: c.nombre || m.nombre || '' });
+      });
+    });
+
+    // Construir lista completa de todas las mesas
+    const todasLasMesas = [];
+    const seccionalesList = maestro.seccionales();
+    seccionalesList.forEach(secName => {
+      const listMesas = maestro.mesasDeSeccional(secName);
+      listMesas.forEach(m => {
+        const k = `${m.codigo}|${norm(m.seccional)}|${norm(m.municipio)}`;
+        const assigned = coordMesaMap.get(k);
+        todasLasMesas.push({
+          tipo: 'mesa',
+          codigo: m.codigo,
+          seccional: m.seccional,
+          municipio: m.municipio,
+          ubicacion: m.ubicacion || '',
+          asignado: !!assigned,
+          telefono: assigned ? assigned.telefono : null,
+          nombre: assigned ? assigned.nombre : null,
+          voto: mapa[`${m.codigo}|${norm(m.seccional)}|${norm(m.municipio)}`] || null,
+        });
+      });
+    });
+
+    res.json({ coordinadores: { seccional: seccionales, mesa: todasLasMesas } });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 router.post('/coordinadores/mesa', requireAuth, async (req, res) => {
   const b = req.body || {};
-  if (!b.codigo || !b.contacto) return res.status(400).json({ error: 'codigo y contacto requeridos' });
+  if (!b.codigo || !b.contacto) return res.status(400).json({ error: 'Código de mesa y teléfono/contacto son requeridos' });
   const r = await sheets.escribirCoordinadorMesa({ codigo: b.codigo, municipio: b.municipio, seccional: b.seccional, nombre: b.nombre, contacto: b.contacto });
-  if (!r.ok) return res.status(400).json(r);
+  if (!r.ok) return res.status(400).json({ ok: false, error: r.msg || r.error || 'Error al guardar en PRECONTEO' });
   reloadCoordinadores();
-  res.json(r);
+  res.json({ ok: true });
 });
 router.put('/coordinadores/mesa', requireAuth, async (req, res) => {
   const b = req.body || {};
-  if (!b.codigo || !b.contacto) return res.status(400).json({ error: 'codigo y contacto requeridos' });
+  if (!b.codigo || !b.contacto) return res.status(400).json({ error: 'Código de mesa y teléfono/contacto son requeridos' });
   const r = await sheets.escribirCoordinadorMesa({ codigo: b.codigo, municipio: b.municipio, seccional: b.seccional, nombre: b.nombre, contacto: b.contacto });
-  if (!r.ok) return res.status(400).json(r);
+  if (!r.ok) return res.status(400).json({ ok: false, error: r.msg || r.error || 'Error al actualizar en PRECONTEO' });
   reloadCoordinadores();
-  res.json(r);
+  res.json({ ok: true });
 });
 router.delete('/coordinadores/mesa', requireAuth, async (req, res) => {
   const b = req.body || {};
-  if (!b.codigo) return res.status(400).json({ error: 'codigo requerido' });
+  if (!b.codigo) return res.status(400).json({ error: 'Código de mesa requerido' });
   const r = await sheets.limpiarCoordinadorMesa({ codigo: b.codigo, municipio: b.municipio, seccional: b.seccional });
-  if (!r.ok) return res.status(400).json(r);
+  if (!r.ok) return res.status(400).json({ ok: false, error: r.msg || r.error || 'Error al eliminar coordinador' });
   reloadCoordinadores();
-  res.json(r);
+  res.json({ ok: true });
 });
 
 router.post('/coordinadores/seccional', requireAuth, async (req, res) => {
   const b = req.body || {};
-  if (!b.seccional || !b.contacto) return res.status(400).json({ error: 'seccional y contacto requeridos' });
+  if (!b.seccional || !b.contacto) return res.status(400).json({ error: 'Seccional y teléfono/contacto son requeridos' });
   const r = await sheets.escribirCoordinadorSeccional(b);
-  if (!r.ok) return res.status(400).json(r);
+  if (!r.ok) return res.status(400).json({ ok: false, error: r.msg || r.error || 'Error al guardar coordinador seccional' });
   reloadCoordinadores();
-  res.json(r);
+  res.json({ ok: true });
 });
 router.put('/coordinadores/seccional', requireAuth, async (req, res) => {
   const b = req.body || {};
-  if (!b.seccional || !b.contacto) return res.status(400).json({ error: 'seccional y contacto requeridos' });
+  if (!b.seccional || !b.contacto) return res.status(400).json({ error: 'Seccional y teléfono/contacto son requeridos' });
   const r = await sheets.escribirCoordinadorSeccional(b);
-  if (!r.ok) return res.status(400).json(r);
+  if (!r.ok) return res.status(400).json({ ok: false, error: r.msg || r.error || 'Error al actualizar coordinador seccional' });
   reloadCoordinadores();
-  res.json(r);
+  res.json({ ok: true });
 });
 router.delete('/coordinadores/seccional', requireAuth, async (req, res) => {
   const b = req.body || {};
-  if (!b.seccional) return res.status(400).json({ error: 'seccional requerido' });
+  if (!b.seccional) return res.status(400).json({ error: 'Seccional requerida' });
   const r = await sheets.limpiarCoordinadorSeccional({ seccional: b.seccional });
-  if (!r.ok) return res.status(400).json(r);
+  if (!r.ok) return res.status(400).json({ ok: false, error: r.msg || r.error || 'Error al eliminar coordinador seccional' });
   reloadCoordinadores();
-  res.json(r);
+  res.json({ ok: true });
 });
 
 // ---------- Importar y plantilla ----------

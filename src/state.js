@@ -39,7 +39,9 @@ function getLinea(seccional) {
   return db.prepare('SELECT * FROM lineas WHERE seccional = ?').get(seccional);
 }
 function getLineaPorInstance(instance) {
-  return db.prepare('SELECT * FROM lineas WHERE instance = ?').get(instance);
+  if (!instance) return null;
+  const instUpper = String(instance).trim().toUpperCase();
+  return db.prepare('SELECT * FROM lineas WHERE UPPER(instance) = ? OR UPPER(seccional) = ?').get(instUpper, instUpper);
 }
 function upsertLinea(seccional, instance, phone, enabled = 1, banned = 0) {
   db.prepare(`INSERT INTO lineas (seccional, instance, phone, enabled, banned)

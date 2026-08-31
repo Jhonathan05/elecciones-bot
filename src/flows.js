@@ -14,34 +14,34 @@ const ORDEN = {
   acta021: ['plancha1', 'plancha2', 'plancha3', 'plancha4', 'plancha5', 'blanco', 'nulos', 'noMarcados', 'total', 'incinerados', 'obs'],
 };
 const PREGUNTA = {
-  jurados: '🔢 Jurados presentes (0 a 3):',
-  kit: '📦 Kit electoral (Recibido / No Recibido):',
-  sillas: '🪑 Sillas (Completas / No Completas):',
-  mesa: '🗳️ Mesa física (Está / No Está):',
-  obs: '📝 Observaciones (opcional, escribe "-" si no aplica):',
-  plancha1: '🟦 Votos Plancha 1:', plancha2: '🟦 Votos Plancha 2:', plancha3: '🟦 Votos Plancha 3:',
-  plancha4: '🟦 Votos Plancha 4:', plancha5: '🟦 Votos Plancha 5:',
-  blanco: '⚪ Votos en blanco:', nulos: '🚫 Votos nulos:', noMarcados: '⬜ Votos no marcados:',
-  total: '🔢 Total de votos de la mesa (sufragantes):',
+  jurados: '🔢 Jurados presentes en la mesa (ingresa un número de 0 a 3):',
+  kit: '📦 Kit electoral:\n1️⃣ Recibido\n2️⃣ No Recibido\n\nResponde con el número (1 o 2):',
+  sillas: '🪑 Sillas de la mesa:\n1️⃣ Completas\n2️⃣ No Completas\n\nResponde con el número (1 o 2):',
+  mesa: '🗳️ Estado de la mesa física:\n1️⃣ Está\n2️⃣ No Está\n\nResponde con el número (1 o 2):',
+  obs: '📝 Observaciones (escribe tu comentario o escribe "-" si no aplica):',
+  plancha1: '🟦 Votos Plancha 1 (ingresa la cantidad):', plancha2: '🟦 Votos Plancha 2 (ingresa la cantidad):', plancha3: '🟦 Votos Plancha 3 (ingresa la cantidad):',
+  plancha4: '🟦 Votos Plancha 4 (ingresa la cantidad):', plancha5: '🟦 Votos Plancha 5 (ingresa la cantidad):',
+  blanco: '⚪ Votos en blanco (ingresa la cantidad):', nulos: '🚫 Votos nulos (ingresa la cantidad):', noMarcados: '⬜ Votos no marcados (ingresa la cantidad):',
+  total: '🔢 Total de votos sufragantes de la mesa:',
   incinerados: '🔥 Votos incinerados (0 si ninguno):',
 };
 
 function norm(v) { return String(v || '').toUpperCase().trim(); }
 function menu() {
-  return `Hola. Soy el bot de reporte electoral. Elige el momento a diligenciar:
+  return `Hola. Soy el bot de reporte electoral. Por favor elige el momento a diligenciar:
 1️⃣ Instalación
 2️⃣ Participación (parciales)
 3️⃣ Acta 021 (preconteo)
-Responde con el número. (Escribe AYUDA o CANCELAR en cualquier momento.)`;
+
+Responde enviando el número de la opción (1, 2 o 3).
+(Escribe AYUDA o CANCELAR en cualquier momento.)`;
 }
 function ayuda() {
-  return `Comandos:
-• 1 / 2 / 3  -> elegir momento
-• CANCELAR   -> borrar la conversación actual
-• CORREGIR   -> volver a ingresar los datos de la mesa actual
-• AYUDA     -> este mensaje
-
-Cada dato se valida al escribirlo. Al final verás un resumen y deberás confirmar con "SI".`;
+  return `Comandos disponibles:
+• 1 / 2 / 3 -> Elegir momento a reportar
+• CANCELAR  -> Reiniciar la conversación
+• CORREGIR  -> Volver a ingresar los datos de la mesa
+• AYUDA     -> Ver este mensaje de ayuda`;
 }
 
 function validarCampo(campo, texto) {
@@ -108,6 +108,50 @@ function escribir(session, ctx) {
   return { ok: false, msg: 'Momento desconocido' };
 }
 
+function menu(coord, seccional) {
+  const nombre = (coord && (coord.nombre || (coord.mesas && coord.mesas[0] && coord.mesas[0].nombre))) || 'Coordinador';
+  const esSec = coord && coord.tipo === 'seccional';
+  const tipoStr = esSec ? 'Seccional' : 'de Mesa';
+  
+  let textoMesas = '';
+  if (esSec) {
+    textoMesas = `📌 *Tienes asignadas todas las mesas de la seccional ${seccional}.*`;
+  } else if (coord && coord.mesas && coord.mesas.length) {
+    const lista = coord.mesas.map(m => `• *Mesa ${m.codigo}* — ${m.municipio || ''}`).join('\n');
+    textoMesas = `📌 *Tus mesas asignadas:*
+${lista}`;
+  }
+
+  return `👋 ¡Hola, ${nombre}!
+Estás registrado como Coordinador ${tipoStr} en la seccional *${seccional}*.
+
+${textoMesas}
+
+Por favor elige el momento a diligenciar:
+1️⃣ Instalación
+2️⃣ Participación (parciales)
+3️⃣ Acta 021 (preconteo)
+
+Responde enviando el número de la opción (1, 2 o 3).
+(Escribe AYUDA o CANCELAR en cualquier momento.)`;
+}
+
+function confirmacionMesaPrompt(me, coord) {
+  const nombre = (coord && (coord.nombre || (coord.mesas && coord.mesas[0] && coord.mesas[0].nombre))) || 'Coordinador';
+  return `📋 *Confirmación de datos de la mesa:*
+• *Coordinador:* ${nombre}
+• *Seccional:* ${me.seccional}
+• *Municipio:* ${me.municipio}
+• *Mesa:* ${me.codigo} ${me.numero_local ? '(Mesa N° ' + me.numero_local + ')' : ''}
+• *Ubicación / Puesto:* ${me.ubicacion || 'Puesto Principal'}
+
+¿Confirmas que los datos de la mesa son correctos?
+1️⃣ SÍ, continuar con el reporte
+2️⃣ NO, corregir número de mesa
+
+Responde enviando 1 o 2:`;
+}
+
 async function handle(phone, rawText, ctx, instance) {
   const text = String(rawText || '').trim();
   const lower = text.toLowerCase();
@@ -119,7 +163,7 @@ async function handle(phone, rawText, ctx, instance) {
     if (!s || !s.momento) return 'No hay datos que corregir. Elige un momento (1/2/3).';
     s.borrador = {}; s.campo = ORDEN[s.momento][0]; s.paso = s.momento + '_' + s.campo;
     ctx.saveSession(phone, s);
-    return `Vamos a reingresar. ${PREGUNTA[s.campo]}`;
+    return `Vamos a reingresar los datos. ${PREGUNTA[s.campo]}`;
   }
 
   let session = ctx.getSession(phone);
@@ -132,25 +176,27 @@ async function handle(phone, rawText, ctx, instance) {
     if (!coord) return '⛔ Este número no está autorizado para reportar. Solicita asignación al administrador.';
     session = { paso: 'menu', momento: null, seccional, instance, mesa: null, municipio: null, borrador: {}, campo: null, correccion: false, coordinador: coord };
     ctx.saveSession(phone, session);
-    return handle(phone, text, ctx, instance);
+    return menu(coord, seccional);
   }
 
   // --- MENÚ ---
   if (session.paso === 'menu') {
     const momento = MOMENTOS[text];
-    if (!momento) return 'Opción no válida. Responde 1, 2 o 3.\n' + menu();
+    if (!momento) {
+      return '⚠️ La opción ingresada no corresponde con la lista.\nPor favor responde seleccionando un número de la lista (1, 2 o 3):\n\n' + menu(session.coordinador, session.seccional);
+    }
     session.momento = momento;
     session.paso = 'mesa';
     ctx.saveSession(phone, session);
-    return `🆔 Código de mesa (ej: 53):`;
+    return `🆔 Código de mesa (ingresa el número de mesa, ej: 134):`;
   }
 
   // --- MESA ---
   if (session.paso === 'mesa') {
     const codigo = Number(text);
-    if (!Number.isInteger(codigo) || codigo <= 0) return 'Código inválido. Envía el número de mesa (ej: 53).';
+    if (!Number.isInteger(codigo) || codigo <= 0) return '⚠️ Código de mesa inválido. Por favor envía un número válido (ej: 134).';
     const candidatas = ctx.maestro.getMesasPorCodigo(codigo);
-    if (candidatas.length === 0) return `No existe la mesa ${codigo}. Verifica el código.`;
+    if (candidatas.length === 0) return `⚠️ No existe la mesa ${codigo} en el catálogo. Por favor verifica el número.`;
     const enSec = candidatas.filter(me => ctx.maestro.mesaEnSeccional(me, session.seccional));
     const pool = enSec.length ? enSec : candidatas;
     // Filtrar por asignación del coordinador
@@ -161,26 +207,37 @@ async function handle(phone, rawText, ctx, instance) {
         m.codigo === codigo && norm(m.municipio) === norm(me.municipio) && norm(m.seccional) === norm(me.seccional)));
       if (poolFinal.length === 0) return `⛔ No estás asignado a la mesa ${codigo}. Solicita asignación al administrador.`;
     } else if (!enSec.length) {
-      return `⛔ La mesa ${codigo} no pertenece a tu seccional.`;
+      return `⛔ La mesa ${codigo} no pertenece a tu seccional (${session.seccional}).`;
     }
     if (poolFinal.length > 1) {
       session.mesa = codigo;
       session.candidatas = poolFinal.map(me => me.municipio);
       session.paso = 'mesa_mun';
       ctx.saveSession(phone, session);
-      return `La mesa ${codigo} vota por varios municipios. ¿Municipio por el que vota?\n` + poolFinal.map(me => '• ' + me.municipio).join('\n');
+      let listMun = poolFinal.map((me, idx) => `${idx + 1}️⃣ ${me.municipio}`).join('\n');
+      return `La mesa ${codigo} está presente en varios municipios. Elige el municipio por el que vota:\n\n${listMun}\n\nResponde con el número correspondiente.`;
     }
     session.mesa = codigo;
     session.municipio = poolFinal[0].municipio;
-    session.paso = siguienteTrasMesa(session, ctx);
+    session.mesaObj = poolFinal[0];
+    session.paso = 'validar_mesa_info';
     ctx.saveSession(phone, session);
-    return session.paso === 'part_rep' ? '🔢 Número de boletín (1, 2 o 3):' : PREGUNTA[session.campo];
+    return confirmacionMesaPrompt(poolFinal[0], session.coordinador);
   }
   if (session.paso === 'mesa_mun') {
-    const mun = text.toUpperCase();
-    const found = session.candidatas.find(m => String(m).toUpperCase() === mun) ||
-      session.candidatas.find(m => String(m).toUpperCase().includes(mun));
-    if (!found) return 'Municipio no encontrado. Escribe uno de:\n' + session.candidatas.map(m => '• ' + m).join('\n');
+    const idxNum = parseInt(text, 10);
+    let found = null;
+    if (!isNaN(idxNum) && idxNum >= 1 && idxNum <= session.candidatas.length) {
+      found = session.candidatas[idxNum - 1];
+    } else {
+      const munUpper = text.toUpperCase();
+      found = session.candidatas.find(m => String(m).toUpperCase() === munUpper) ||
+        session.candidatas.find(m => String(m).toUpperCase().includes(munUpper));
+    }
+    if (!found) {
+      let listMun = session.candidatas.map((me, idx) => `${idx + 1}️⃣ ${me}`).join('\n');
+      return `⚠️ La opción ingresada no corresponde con la lista.\nElige un municipio de la lista:\n\n${listMun}`;
+    }
     const me = ctx.maestro.getMesaExacta(session.mesa, { seccional: session.seccional, municipio: found });
     if (session.coordinador.tipo === 'mesa') {
       const ok = session.coordinador.mesas.some(m =>
@@ -188,34 +245,52 @@ async function handle(phone, rawText, ctx, instance) {
       if (!ok) return `⛔ No estás asignado a la mesa ${session.mesa} (${found}).`;
     }
     session.municipio = me.municipio;
-    session.paso = siguienteTrasMesa(session, ctx);
+    session.mesaObj = me;
+    session.paso = 'validar_mesa_info';
     ctx.saveSession(phone, session);
-    return session.paso === 'part_rep' ? '🔢 Número de boletín (1, 2 o 3):' : PREGUNTA[session.campo];
+    return confirmacionMesaPrompt(me, session.coordinador);
+  }
+
+  // --- CONFIRMACIÓN DE DATOS DE LA MESA Y UBICACIÓN ---
+  if (session.paso === 'validar_mesa_info') {
+    if (text === '1' || lower === 'si' || lower === 'sí' || lower === 's') {
+      session.paso = siguienteTrasMesa(session, ctx);
+      ctx.saveSession(phone, session);
+      return session.paso === 'part_rep' ? '🔢 Número de boletín (1, 2 o 3):' : PREGUNTA[session.campo];
+    }
+    if (text === '2' || lower === 'no' || lower === 'n') {
+      session.paso = 'mesa';
+      session.mesa = null;
+      session.municipio = null;
+      ctx.saveSession(phone, session);
+      return 'Entendido. Por favor ingresa el número de mesa correcto (ej: 134):';
+    }
+    return '⚠️ La opción ingresada no corresponde con la lista.\n' + confirmacionMesaPrompt(session.mesaObj, session.coordinador);
   }
 
   // --- PARTICIPACIÓN (dinámica por boletines) ---
   if (session.paso === 'part_rep') {
     const r = V.validarNumeroReporte(text);
-    if (!r.ok) return r.msg + ' 🔢 Número de boletín (1, 2 o 3):';
+    if (!r.ok) return '⚠️ Opción inválida. Responde 1, 2 o 3 para el número de boletín.';
     const num = r.value;
     const anteriores = session.borrador;
     const seq = V.validarSecuenciaParticipacion(anteriores, num);
-    if (!seq.ok) return seq.msg + ' 🔢 Número de boletín:';
+    if (!seq.ok) return seq.msg;
     session._rep = num;
     session.paso = 'part_suf';
     ctx.saveSession(phone, session);
-    return `👥 Sufragantes del boletín ${num}:`;
+    return `👥 Sufragantes del boletín ${num} (ingresa la cantidad de votos):`;
   }
   if (session.paso === 'part_suf') {
     const s = V.validarSufragantes(text);
-    if (!s.ok) return s.msg + ' 👥 Sufragantes:';
+    if (!s.ok) return '⚠️ Cantidad inválida. Ingresa un número entero.';
     const num = session._rep;
     const dec = V.validarNoDecrecimiento(session.borrador, num, s.value);
-    if (!dec.ok) return dec.msg + ' 👥 Sufragantes del boletín ' + num + ':';
+    if (!dec.ok) return dec.msg;
     session._suf = s.value;
     session.paso = 'part_obs';
     ctx.saveSession(phone, session);
-    return '📝 Observaciones de este boletín (escribe "-" si no aplica):';
+    return '📝 Observaciones de este boletín (escribe tu comentario o "-" si no aplica):';
   }
   if (session.paso === 'part_obs') {
     const o = text === '-' ? '' : text;
@@ -224,25 +299,25 @@ async function handle(phone, rawText, ctx, instance) {
     session.borrador[session._rep] = { sufragantes: session._suf, observaciones: r.value };
     session.paso = 'part_mas';
     ctx.saveSession(phone, session);
-    return '¿Reportar otro boletín? (SI / NO):';
+    return '¿Deseas reportar otro boletín?\n1️⃣ SÍ\n2️⃣ NO\n\nResponde 1 o 2:';
   }
   if (session.paso === 'part_mas') {
-    if (lower === 'si' || lower === 'sí' || lower === 's') {
+    if (text === '1' || lower === 'si' || lower === 'sí' || lower === 's') {
       session.paso = 'part_rep'; ctx.saveSession(phone, session);
       return '🔢 Número de boletín (1, 2 o 3):';
     }
-    if (lower === 'no' || lower === 'n') {
+    if (text === '2' || lower === 'no' || lower === 'n') {
       session.paso = 'confirm'; ctx.saveSession(phone, session);
       return resumen(session);
     }
-    return 'Responde SI o NO.';
+    return '⚠️ La opción ingresada no corresponde con la lista.\n¿Deseas reportar otro boletín?\n1️⃣ SÍ\n2️⃣ NO\n\nResponde enviando 1 o 2.';
   }
 
   // --- INSTALACIÓN y ACTA 021 (campo a campo) ---
   if (session.paso && (session.paso.startsWith('instalacion_') || session.paso.startsWith('acta021_'))) {
     const campo = session.campo;
     const vr = validarCampo(campo, text);
-    if (!vr.ok) return vr.msg + '\n' + PREGUNTA[campo];
+    if (!vr.ok) return vr.msg + '\n\n' + PREGUNTA[campo];
     // mapear a borrador
     if (session.momento === 'instalacion') {
       if (campo === 'jurados') session.borrador.jurados = vr.value;
@@ -266,25 +341,25 @@ async function handle(phone, rawText, ctx, instance) {
     }
     session.paso = 'confirm';
     ctx.saveSession(phone, session);
-    return resumen(session);
+    return resumen(session) + '\n\n¿Confirmas el envío?\n1️⃣ SÍ\n2️⃣ NO\n\nResponde 1 o 2:';
   }
 
   // --- CONFIRMAR ---
   if (session.paso === 'confirm') {
-    if (lower === 'si' || lower === 'sí' || lower === 's') {
+    if (text === '1' || lower === 'si' || lower === 'sí' || lower === 's') {
       const resp = await escribir(session, ctx);
-      if (!resp.ok) return '⚠ No se pudo guardar: ' + resp.msg + '. Corrige con CORREGIR o CANCELAR.';
+      if (!resp.ok) return '⚠️ No se pudo guardar: ' + resp.msg + '. Corrige respondiendo con CORREGIR o cancela con CANCELAR.';
       ctx.clearSession(phone);
-      return `✅ ${NOMBRE_MOMENTO[session.momento]} de la mesa ${session.mesa} registrada.` + (resp.alerta ? `\n${resp.alerta}` : '');
+      return `✅ ${NOMBRE_MOMENTO[session.momento]} de la mesa ${session.mesa} (${session.seccional}) registrada exitosamente.` + (resp.alerta ? `\n${resp.alerta}` : '');
     }
-    if (lower === 'no' || lower === 'n') {
+    if (text === '2' || lower === 'no' || lower === 'n') {
       // reingresar desde el inicio del momento
       session.borrador = {}; session.campo = ORDEN[session.momento][0];
       session.paso = session.momento + '_' + session.campo;
       ctx.saveSession(phone, session);
-      return 'Vamos a reingresar. ' + PREGUNTA[session.campo];
+      return 'Vamos a reingresar los datos. ' + PREGUNTA[session.campo];
     }
-    return 'Responde SI para confirmar o NO para corregir.';
+    return '⚠️ La opción ingresada no corresponde con la lista.\n¿Confirmas el envío?\n1️⃣ SÍ\n2️⃣ NO\n\nResponde enviando 1 o 2.';
   }
 
   return ayuda();

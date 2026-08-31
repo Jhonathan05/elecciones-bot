@@ -60,11 +60,38 @@ function mesaEnSeccional(mesa, seccional) {
   return mesa && norm(mesa.seccional) === norm(seccional);
 }
 
+const lidMap = new Map(); // lid -> phone
+
 // Devuelve { tipo:'mesa'|'seccional', telefono, mesas?, seccional? } o null
-function isTelefonoAutorizado(telefono) {
+function isTelefonoAutorizado(telefono, seccionalFiltro = null) {
   const t = normalizaTel(telefono);
-  if (coordMesa.has(t)) return { tipo: 'mesa', telefono: t, mesas: coordMesa.get(t) };
-  if (coordSec.has(t)) return { tipo: 'seccional', telefono: t, seccional: coordSec.get(t).seccional };
+  
+  // 1. Coincidencia directa por teléfono o LID mapeado
+  const mapped = lidMap.get(t) || t;
+  if (coordMesa.has(mapped)) return { tipo: 'mesa', telefono: mapped, mesas: coordMesa.get(mapped) };
+  if (coordSec.has(mapped)) return { tipo: 'seccional', telefono: mapped, seccional: coordSec.get(mapped).seccional };
+
+  // 2. Si viene de un LID (ID largo > 12 dígitos) y hay coordinadores registrados en esa seccional
+  if (t.length > 12 && seccionalFiltro) {
+    const secNorm = norm(seccionalFiltro);
+    
+    // Buscar en coordinadores seccionales
+    for (const [tel, cs] of coordSec) {
+      if (cs.seccional === secNorm) {
+        lidMap.set(t, tel);
+        return { tipo: 'seccional', telefono: tel, seccional: cs.seccional };
+      }
+    }
+    
+    // Buscar en coordinadores de mesa de esa seccional
+    for (const [tel, cmList] of coordMesa) {
+      if (cmList.some(m => norm(m.seccional) === secNorm)) {
+        lidMap.set(t, tel);
+        return { tipo: 'mesa', telefono: tel, mesas: cmList };
+      }
+    }
+  }
+
   return null;
 }
 
