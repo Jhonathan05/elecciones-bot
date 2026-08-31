@@ -1,33 +1,97 @@
-# Bot de contingencia WhatsApp → Google Sheets (elecciones-fnc)
+# Bot de Contingencia Electoral WhatsApp → Google Drive / Excel
 
-Canal alternativo de reporte electoral por WhatsApp para cuando el aplicativo web no está disponible.
-Un número de WhatsApp **por seccional** alimenta una hoja de cálculo en Google Drive con los 3 momentos
-(Instalación, Participación y Acta 021), validando datos, evitando duplicados y registrando auditoría.
+Sistema de contingencia para recolección de datos electorales en tiempo real mediante **WhatsApp** (Evolution API) y sincronización continua con **Google Drive / Excel local**.
 
-## Arquitectura
-- **Evolution API** (self-hosted, una instancia por seccional) recibe los mensajres de WhatsApp.
-- **Bot** (Node/Express): webhook de Evolution + conversación guiada + escritura en Google Sheets + panel admin.
-- **Google Sheets** (Workspace): plantilla `3_PRECONTEO 2022-PLANCHAS.xlsx` con hojas PRECONTEO / INSTALACION / PARTICIPACION / CONSOLIDADO / HISTORIAL.
+Permite gestionar los 3 momentos del día de las elecciones:
+1. 1️⃣ **Instalación de la Mesa** (Jurados, Kit electoral, Sillas, Mesa física).
+2. 2️⃣ **Participación** (Boletines B1, B2, B3).
+3. 3️⃣ **Preconteo (Acta 021)** (Votos por plancha 1 a 5, Blanco, Nulos, No marcados, Incinerados y Alertas de Cuadre).
 
-## Setup
-1. `cp .env.example .env` y completa: `EVOLUTION_API_KEY`, ruta a la cuenta de servicio de Google, `GOOGLE_SHEET_ID`, `ADMIN_PASS_HASH` (`node -e "console.log(require('bcryptjs').hashSync('tu_pass',10))"`).
-2. Catálogo de mesas: `node scripts/export-maestro.js` (lee la DB del app) o edita `config/mesas.json` / `config/coordinadores.json`.
-3. Plantilla: ya generada en `3_PRECONTEO 2022-PLANCHAS.xlsx`. Súbela a Drive y usa su ID en `GOOGLE_SHEET_ID`.
-   Para regenerarla: `node scripts/build-template.js`.
-4. `docker compose up -d` (red `infra-net`).
-5. Por cada seccional: crea la instancia en Evolution (escanea el QR en el puerto 8082) y regístrala en el
-   panel `/admin/ui` (seccional ↔ instancia/number). El panel permite **reasignar en caliente** si un número se banea.
+---
 
-## Seguridad / control de fraude
-- Teléfono vinculado a coordinador conocido (whitelist en `coordinadores.json`); número no autorizado no reporta.
-- Scoping por seccional: cada línea solo acepta mesas de su seccional.
-- Una sola respuesta confirmada por mesa (`ESTADO`); tras el cierre de jornada (`CIERRE_HORARIO`) el bot se bloquea y las correcciones se hacen en Drive.
-- Todo lo que escribe el bot queda en la hoja `HISTORIAL` (timestamp, línea, teléfono, mesa, campo, valor anterior/nuevo, motivo).
+## 🏗️ Arquitectura del Sistema
 
-## Pruebas
-- `node test/logic.test.js` valida el flujo conversacional y los validadores sin servicios externos.
-- `node -e "require('./src/validators');require('./src/flows')"` comprueba la carga de módulos.
+- **Evolution API (Docker)**: Gestiona las instancias de WhatsApp vinculadas por código QR.
+- **Bot Container (Node.js 22)**: Procesa la lógica conversacional interactiva por números, efectúa validaciones, administra el panel de control y sincroniza datos.
+- **Base de Datos SQLite (`data/bot.db`)**: Mantiene el estado en caliente de coordinadores, mapeo de WhatsApp Privacy `@lid` y asignación de líneas.
+- **Almacenamiento Local Sincronizado**: Lee y escribe instantáneamente en `/app/shared/3_PRECONTEO 2022-PLANCHAS.xlsx`.
+- **RClone Daemon / Google Drive Desktop**: Mantiene sincronizada la carpeta local del servidor con Google Drive en tiempo real.
 
-## Notas
-- El bot usa `better-sqlite3`; en Windows instálalo con `npm install --ignore-scripts` (binario precompilado).
-- Reemplazar un número baneado por uno totalmente nuevo exige escanear su QR una vez; el panel solo reasigna líneas ya emparejadas.
+---
+
+## 🚀 Guía de Despliegue Impecable desde Cero
+
+### 1. Requisitos Previos
+- Docker Engine y Docker Compose instalados.
+- Red de Docker externa creada:
+  ```bash
+  docker network create infra-net
+  ```
+
+### 2. Clonar Repositorio y Configurar Entorno
+```bash
+git clone https://github.com/Jhonathan05/elecciones-bot.git
+cd elecciones-bot
+cp .env.example .env
+```
+
+Edita `.env` definiendo tus variables de entorno:
+```env
+BOT_PORT=8090
+ADMIN_USER=admin
+# Generar hash con: node -e "console.log(require('bcryptjs').hashSync('TU_PASSWORD',8))"
+ADMIN_PASS_HASH='$2a$08$...'
+
+EVOLUTION_API_URL=http://evolution-api:8080
+EVOLUTION_API_KEY=tu_api_key_aqui
+BOT_WEBHOOK_URL=http://tu-servidor:8090/webhook/evolution
+
+SHEET_MODE=local
+SHEET_LOCAL_PATH=/app/shared/3_PRECONTEO 2022-PLANCHAS.xlsx
+RCLONE_REMOTE=gdrive:Elecciones2026/3_PRECONTEO 2022-PLANCHAS.xlsx
+```
+
+### 3. Crear Estructura de Volúmenes Locales
+```bash
+sudo mkdir -p /var/elecciones/gdrive
+sudo chown -R $USER:$USER /var/elecciones/gdrive
+```
+
+### 4. Desplegar los Contenedores
+Usando las imágenes publicadas en **Docker Hub**:
+```bash
+docker compose up -d
+```
+
+O si deseas desplegar la pila completa con **Evolution API**:
+```bash
+docker compose -f docker-compose.yml -f docker/docker-compose.evolution.yml up -d
+```
+
+### 5. Acceder al Panel de Administración Web
+Ingresa en tu navegador a:
+```text
+http://TU_IP_SERVIDOR:8090/admin/ui/admin.html
+```
+
+---
+
+## 📄 Guía de Infraestructura y Sincronización
+Para más detalles técnicos sobre cómo configurar RClone en un servidor **Ubuntu Server CLI** sin permisos de administrador de Workspace, consulta la guía dedicada:
+👉 [docs/INFRAESTRUCTURA-DRIVE.md](docs/INFRAESTRUCTURA-DRIVE.md)
+
+---
+
+## 🧪 Comprobación y Tests de Lógica
+Para ejecutar los tests automatizados de validaciones y flujos sin dependencias externas:
+```bash
+docker exec elecciones-bot npm run test:logic
+```
+
+---
+
+## 🔒 Control de Seguridad y Fraude
+- **Autenticación por Whitelist**: Solo los números de teléfono registrados como Coordinadores Seccionales o Coordinadores de Mesa pueden iniciar la interacción.
+- **Vínculo Automático Privacy ID (`@lid`)**: Sincroniza automáticamente los números privados de usuarios iPhone/WhatsApp Business con la seccional correspondiente.
+- **Validación de Respuestas Guiadas por Número**: Los menús operan con opciones numéricas (`1`, `2`) evitando fallos tipográficos.
+- **Verificación previa a Diligenciamiento**: Muestra nombre del coordinador, seccional, municipio y ubicación de mesa para confirmación previa antes de capturar votos.
