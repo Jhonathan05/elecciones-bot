@@ -7,7 +7,11 @@
 const V = require('./validators');
 
 const MOMENTOS = { '1': 'instalacion', '2': 'participacion', '3': 'acta021' };
-const NOMBRE_MOMENTO = { instalacion: 'Instalación', participacion: 'Participación', acta021: 'Acta 021' };
+const NOMBRE_MOMENTO = {
+  instalacion: 'Instalación (Formato FE-FG-F-0018)',
+  participacion: 'Participación Acumulada',
+  acta021: 'Escrutinio Preliminar (Actas FE-FG-F-0069 / FE-FG-F-0021)'
+};
 
 const ORDEN = {
   instalacion: ['jurados', 'kit', 'sillas', 'mesa', 'obs'],
@@ -15,30 +19,49 @@ const ORDEN = {
 };
 const PREGUNTA = {
   jurados: '🔢 Jurados presentes en la mesa (ingresa un número de 0 a 3):',
-  kit: '📦 Kit electoral:\n1️⃣ Recibido\n2️⃣ No Recibido\n\nResponde con el número (1 o 2):',
+  kit: '📦 Kit electoral (Formato FE-FG-F-0018):\n1️⃣ Recibido\n2️⃣ No Recibido\n\nResponde con el número (1 o 2):',
   sillas: '🪑 Sillas de la mesa:\n1️⃣ Completas\n2️⃣ No Completas\n\nResponde con el número (1 o 2):',
   mesa: '🗳️ Estado de la mesa física:\n1️⃣ Está\n2️⃣ No Está\n\nResponde con el número (1 o 2):',
   obs: '📝 Observaciones (escribe tu comentario o escribe "-" si no aplica):',
   plancha1: '🟦 Votos Plancha 1 (ingresa la cantidad):', plancha2: '🟦 Votos Plancha 2 (ingresa la cantidad):', plancha3: '🟦 Votos Plancha 3 (ingresa la cantidad):',
   plancha4: '🟦 Votos Plancha 4 (ingresa la cantidad):', plancha5: '🟦 Votos Plancha 5 (ingresa la cantidad):',
   blanco: '⚪ Votos en blanco (ingresa la cantidad):', nulos: '🚫 Votos nulos (ingresa la cantidad):', noMarcados: '⬜ Votos no marcados (ingresa la cantidad):',
-  total: '🔢 Total de votos sufragantes de la mesa:',
+  total: '🔢 Total de votos sufragantes de la mesa (Actas FE-FG-F-0069 / FE-FG-F-0021):',
   incinerados: '🔥 Votos incinerados (0 si ninguno):',
 };
 
 function norm(v) { return String(v || '').toUpperCase().trim(); }
-function menu() {
-  return `Hola. Soy el bot de reporte electoral. Por favor elige el momento a diligenciar:
-1️⃣ Instalación
-2️⃣ Participación (parciales)
-3️⃣ Acta 021 (preconteo)
+function menu(coord, seccional) {
+  const nombre = (coord && (coord.nombre || (coord.mesas && coord.mesas[0] && coord.mesas[0].nombre))) || 'Coordinador';
+  const esSec = coord && coord.tipo === 'seccional';
+  const tipoStr = esSec ? 'Coordinador Seccional' : 'Coordinador de Apoyo Electoral';
+
+  let textoMesas = '';
+  if (esSec) {
+    textoMesas = `📌 *Tienes asignadas todas las mesas de la seccional ${seccional}.*`;
+  } else if (coord && coord.mesas && coord.mesas.length) {
+    const lista = coord.mesas.map(m => `• *Mesa ${m.codigo}* — ${m.municipio || ''}`).join('\n');
+    textoMesas = `📌 *Tus mesas asignadas (código en tu escarapela):*
+${lista}`;
+  }
+
+  return `👋 ¡Hola, ${nombre}!
+Estás registrado como *${tipoStr}* en la seccional *${seccional}*.
+
+${textoMesas}
+
+Por favor elige el momento a diligenciar:
+1️⃣ Instalación de Mesa (Formato FE-FG-F-0018 | 7:00 am - 7:30 am)
+2️⃣ Participación Acumulada (B1: 9:30am · B2: 11:30am · B3: 2:00pm)
+3️⃣ Escrutinio Preliminar (Actas FE-FG-F-0069 Municipal / FE-FG-F-0021 Dptal)
 
 Responde enviando el número de la opción (1, 2 o 3).
 (Escribe AYUDA o CANCELAR en cualquier momento.)`;
 }
+
 function ayuda() {
   return `📌 *Comandos disponibles:*
-• *1 / 2 / 3* -> Elegir momento (Instalación, Participación, Acta 021)
+• *1 / 2 / 3* -> Elegir momento (Instalación, Participación, Escrutinio)
 • *ESTADO*    -> Consultar el estado y avance actual de tu mesa
 • *CORREGIR*  -> Volver a ingresar los datos del formulario actual
 • *CANCELAR*  -> Reiniciar la conversación
@@ -47,9 +70,11 @@ function ayuda() {
 
 async function construirTarjetaEstado(coord, seccional, ctx) {
   const nombreCoord = (coord && (coord.nombre || (coord.mesas && coord.mesas[0] && coord.mesas[0].nombre))) || 'Coordinador';
+  const esSec = coord && coord.tipo === 'seccional';
+  const tipoStr = esSec ? 'Coordinador Seccional' : 'Coordinador de Apoyo Electoral';
   const mapa = ctx.sheets && ctx.sheets.mapaVotos ? await ctx.sheets.mapaVotos() : {};
   
-  let out = `📋 *ESTADO DE REPORTES ELECTORALES*\n👤 *Coordinador:* ${nombreCoord}\n🏛️ *Seccional:* ${seccional}\n══════════════════════════════\n`;
+  let out = `📋 *ESTADO DE REPORTES ELECTORALES*\n👤 *${tipoStr}:* ${nombreCoord}\n🏛️ *Seccional:* ${seccional}\n══════════════════════════════\n`;
 
   if (coord.tipo === 'mesa' && Array.isArray(coord.mesas)) {
     coord.mesas.forEach(m => {
@@ -67,9 +92,9 @@ async function construirTarjetaEstado(coord, seccional, ctx) {
       }
 
       out += `📌 *Mesa ${m.codigo}* (${m.municipio})\n`;
-      out += `  1️⃣ Instalación: ${stInst}\n`;
-      out += `  2️⃣ Participación: ${stPart}\n`;
-      out += `  3️⃣ Acta 021: ${stActa}\n\n`;
+      out += `  1️⃣ Instalación (FE-FG-F-0018): ${stInst}\n`;
+      out += `  2️⃣ Participación Acumulada: ${stPart}\n`;
+      out += `  3️⃣ Escrutinio Preliminar: ${stActa}\n\n`;
     });
   } else {
     out += `📌 *Coordinador Seccional*\nTienes a cargo todas las mesas de la seccional *${seccional}*.\n\n`;
@@ -79,7 +104,7 @@ async function construirTarjetaEstado(coord, seccional, ctx) {
   return out;
 }
 
-function generarComprobanteRadicacion(session, resp, ctx, foto = null) {
+function generarComprobanteRadicacion(session, resp, ctx, fotos = []) {
   const pad = n => String(n).padStart(2, '0');
   const d = new Date();
   const fechaStr = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
@@ -90,20 +115,34 @@ function generarComprobanteRadicacion(session, resp, ctx, foto = null) {
   const radicado = `REC-${String(session.seccional || 'SEC').substring(0, 3).toUpperCase()}-M${session.mesa}-${hash}`;
 
   const nombreCoord = (session.coordinador && (session.coordinador.nombre || (session.coordinador.mesas && session.coordinador.mesas[0] && session.coordinador.mesas[0].nombre))) || 'Coordinador';
+  const esSec = session.coordinador && session.coordinador.tipo === 'seccional';
+  const rolStr = esSec ? 'Coordinador Seccional' : 'Coordinador de Apoyo Electoral';
   const b = session.borrador || {};
   const descuadre = resp.descuadre !== undefined ? resp.descuadre : 0;
   const estadoCuadre = descuadre === 0 ? '✅ CUADRE PERFECTO' : `⚠️ ALERTA DESCUADRE (${descuadre > 0 ? '+' : ''}${descuadre} votos)`;
 
+  let fotosInfo = '';
+  if (Array.isArray(fotos) && fotos.length > 0) {
+    fotosInfo = `📸 *Evidencias fotográficas (${fotos.length}):*\n` + fotos.map((f, i) => `  • Foto ${i + 1}: \`${f}\``).join('\n') + '\n';
+  } else if (typeof fotos === 'string' && fotos) {
+    fotosInfo = `📸 Evidencia fotográfica: \`${fotos}\`\n`;
+  }
+
   return `╔══════════════════════════════════════════╗
    🗳️ COMPROBANTE OFICIAL DE TRANSMISIÓN
-   Comité de Cafeteros — Elecciones 2026
+   Federación Nacional de Cafeteros de Colombia
+   Elecciones Cafeteras 2026 — 6 de Septiembre
 ╚══════════════════════════════════════════╝
-📌 *Mesa:* ${session.mesa} — ${session.seccional} (${session.municipio || ''})
-👤 *Coordinador:* ${nombreCoord}
+📌 *Mesa (Escarapela):* ${session.mesa} — ${session.seccional} (${session.municipio || ''})
+👤 *${rolStr}:* ${nombreCoord}
 ⏰ *Fecha y Hora:* ${fechaStr}
 🔢 *Radicado:* \`${radicado}\`
 ══════════════════════════════════════════
-📊 *RESULTADO ACTA 021:*
+📋 *ACTAS OFICIALES RADICADAS:*
+• Acta Escrutinio Municipal (FE-FG-F-0069)
+• Acta Escrutinio Departamental (FE-FG-F-0021)
+══════════════════════════════════════════
+📊 *RESULTADO ESCRUTINIO:*
 • Plancha 1: ${b.plancha1 || 0}
 • Plancha 2: ${b.plancha2 || 0}
 • Plancha 3: ${b.plancha3 || 0}
@@ -115,7 +154,7 @@ function generarComprobanteRadicacion(session, resp, ctx, foto = null) {
 • TOTAL VOTOS: ${b.totalVotosMesa || 0}
 • Incinerados: ${b.incinerados || 0}
 • Estado: ${estadoCuadre}
-${foto ? `📸 Evidencia: Foto digitalizada registrada (${foto})\n` : ''}══════════════════════════════════════════
+${fotosInfo}══════════════════════════════════════════
 🔒 *Transmisión validada y registrada exitosamente.*
 Guarda este comprobante como soporte de tu reporte.`;
 }
@@ -184,41 +223,15 @@ function escribir(session, ctx) {
   return { ok: false, msg: 'Momento desconocido' };
 }
 
-function menu(coord, seccional) {
-  const nombre = (coord && (coord.nombre || (coord.mesas && coord.mesas[0] && coord.mesas[0].nombre))) || 'Coordinador';
-  const esSec = coord && coord.tipo === 'seccional';
-  const tipoStr = esSec ? 'Seccional' : 'de Mesa';
-
-  let textoMesas = '';
-  if (esSec) {
-    textoMesas = `📌 *Tienes asignadas todas las mesas de la seccional ${seccional}.*`;
-  } else if (coord && coord.mesas && coord.mesas.length) {
-    const lista = coord.mesas.map(m => `• *Mesa ${m.codigo}* — ${m.municipio || ''}`).join('\n');
-    textoMesas = `📌 *Tus mesas asignadas:*
-${lista}`;
-  }
-
-  return `👋 ¡Hola, ${nombre}!
-Estás registrado como Coordinador ${tipoStr} en la seccional *${seccional}*.
-
-${textoMesas}
-
-Por favor elige el momento a diligenciar:
-1️⃣ Instalación
-2️⃣ Participación (parciales)
-3️⃣ Acta 021 (preconteo)
-
-Responde enviando el número de la opción (1, 2 o 3).
-(Escribe AYUDA o CANCELAR en cualquier momento.)`;
-}
-
 function confirmacionMesaPrompt(me, coord) {
   const nombre = (coord && (coord.nombre || (coord.mesas && coord.mesas[0] && coord.mesas[0].nombre))) || 'Coordinador';
-  return `📋 *Confirmación de datos de la mesa:*
-• *Coordinador:* ${nombre}
+  const esSec = coord && coord.tipo === 'seccional';
+  const rolStr = esSec ? 'Coordinador Seccional' : 'Coordinador de Apoyo Electoral';
+  return `📋 *Confirmación de datos de la mesa (Escarapela):*
+• *${rolStr}:* ${nombre}
 • *Seccional:* ${me.seccional}
 • *Municipio:* ${me.municipio}
-• *Mesa:* ${me.codigo} ${me.numero_local ? '(Mesa N° ' + me.numero_local + ')' : ''}
+• *Mesa (Escarapela):* ${me.codigo} ${me.numero_local ? '(Mesa N° ' + me.numero_local + ')' : ''}
 • *Ubicación / Puesto:* ${me.ubicacion || 'Puesto Principal'}
 
 ¿Confirmas que los datos de la mesa son correctos?
@@ -408,7 +421,15 @@ Por favor verifica tu número o solicita tu asignación al administrador.
     if (text === '1' || lower === 'si' || lower === 'sí' || lower === 's') {
       session.paso = siguienteTrasMesa(session, ctx);
       ctx.saveSession(phone, session);
-      return session.paso === 'part_rep' ? '🔢 Número de boletín (1, 2 o 3):' : PREGUNTA[session.campo];
+      if (session.paso === 'part_rep') {
+        return `⏰ *Selecciona el reporte de participación:*
+1️⃣ Reporte 1 (9:30 a.m. - 10:00 a.m.)
+2️⃣ Reporte 2 (11:30 a.m. - 12:00 m.)
+3️⃣ Reporte 3 (2:00 p.m. - 2:30 p.m.)
+
+Responde con el número de opción (1, 2 o 3):`;
+      }
+      return PREGUNTA[session.campo];
     }
     if (text === '2' || lower === 'no' || lower === 'n') {
       session.paso = 'mesa';
@@ -423,7 +444,12 @@ Por favor verifica tu número o solicita tu asignación al administrador.
   // --- PARTICIPACIÓN (dinámica por boletines) ---
   if (session.paso === 'part_rep') {
     const r = V.validarNumeroReporte(text);
-    if (!r.ok) return '⚠️ Opción inválida. Responde 1, 2 o 3 para el número de boletín.';
+    if (!r.ok) {
+      return `⚠️ Opción inválida. Responde con el número de reporte (1, 2 o 3):
+1️⃣ Reporte 1 (9:30 a.m. - 10:00 a.m.)
+2️⃣ Reporte 2 (11:30 a.m. - 12:00 m.)
+3️⃣ Reporte 3 (2:00 p.m. - 2:30 p.m.)`;
+    }
     const num = r.value;
     const anteriores = session.borrador;
     const seq = V.validarSecuenciaParticipacion(anteriores, num);
@@ -431,7 +457,9 @@ Por favor verifica tu número o solicita tu asignación al administrador.
     session._rep = num;
     session.paso = 'part_suf';
     ctx.saveSession(phone, session);
-    return `👥 Sufragantes del boletín ${num} (ingresa la cantidad de votos):`;
+    const HORARIOS_REP = { '1': '9:30 a.m. - 10:00 a.m.', '2': '11:30 a.m. - 12:00 m.', '3': '2:00 p.m. - 2:30 p.m.' };
+    return `👥 *Cantidad de sufragantes ACUMULADA al corte del Reporte ${num} (${HORARIOS_REP[num]}):*
+(Ingresa el total de votantes que han sufragado en la mesa desde la apertura hasta este momento):`;
   }
   if (session.paso === 'part_suf') {
     const s = V.validarSufragantes(text);
@@ -442,7 +470,7 @@ Por favor verifica tu número o solicita tu asignación al administrador.
     session._suf = s.value;
     session.paso = 'part_obs';
     ctx.saveSession(phone, session);
-    return '📝 Observaciones de este boletín (escribe tu comentario o "-" si no aplica):';
+    return '📝 Observaciones de este reporte (escribe tu comentario o "-" si no aplica):';
   }
   if (session.paso === 'part_obs') {
     const o = text === '-' ? '' : text;
@@ -451,12 +479,17 @@ Por favor verifica tu número o solicita tu asignación al administrador.
     session.borrador[session._rep] = { sufragantes: session._suf, observaciones: r.value };
     session.paso = 'part_mas';
     ctx.saveSession(phone, session);
-    return '¿Deseas reportar otro boletín?\n1️⃣ SÍ\n2️⃣ NO\n\nResponde 1 o 2:';
+    return '¿Deseas reportar otro boletín de participación?\n1️⃣ SÍ\n2️⃣ NO\n\nResponde 1 o 2:';
   }
   if (session.paso === 'part_mas') {
     if (text === '1' || lower === 'si' || lower === 'sí' || lower === 's') {
       session.paso = 'part_rep'; ctx.saveSession(phone, session);
-      return '🔢 Número de boletín (1, 2 o 3):';
+      return `⏰ *Selecciona el siguiente reporte de participación:*
+1️⃣ Reporte 1 (9:30 a.m. - 10:00 a.m.)
+2️⃣ Reporte 2 (11:30 a.m. - 12:00 m.)
+3️⃣ Reporte 3 (2:00 p.m. - 2:30 p.m.)
+
+Responde 1, 2 o 3:`;
     }
     if (text === '2' || lower === 'no' || lower === 'n') {
       session.paso = 'confirm'; ctx.saveSession(phone, session);
@@ -466,7 +499,7 @@ Por favor verifica tu número o solicita tu asignación al administrador.
   }
 
   // --- INSTALACIÓN y ACTA 021 (campo a campo) ---
-  if (session.paso && (session.paso.startsWith('instalacion_') || (session.paso.startsWith('acta021_') && session.paso !== 'acta021_foto'))) {
+  if (session.paso && (session.paso.startsWith('instalacion_') || (session.paso.startsWith('acta021_') && !session.paso.startsWith('acta021_foto')))) {
     const campo = session.campo;
     const vr = validarCampo(campo, text);
     if (!vr.ok) return vr.msg + '\n\n' + PREGUNTA[campo];
@@ -502,14 +535,17 @@ Por favor verifica tu número o solicita tu asignación al administrador.
       const resp = await escribir(session, ctx);
       if (!resp.ok) return '⚠️ No se pudo guardar: ' + resp.msg + '. Corrige respondiendo con CORREGIR o cancela con CANCELAR.';
 
-      // Si es Acta 021, pasar a recepción opcional de foto de evidencia
+      // Si es Escrutinio (Acta 021), pasar a recepción opcional de fotos de evidencia (máximo 2)
       if (session.momento === 'acta021') {
         session.respActa = resp;
-        session.paso = 'acta021_foto';
+        session.fotosGuardadas = [];
+        session.paso = 'acta021_foto_1';
         ctx.saveSession(phone, session);
-        return `✅ *Acta 021 de la mesa ${session.mesa} (${session.seccional}) registrada exitosamente.*` +
+        return `✅ *Escrutinio preliminar de la mesa ${session.mesa} (${session.seccional}) registrado exitosamente.*` +
           (resp.alerta ? `\n${resp.alerta}\n` : '\n') +
-          `\n📸 *Evidencia Fotográfica (Opcional):*\nSi tienes el formulario físico del Acta 021 (E-14), envía una *foto clara* en este momento como respaldo de auditoría (o escribe *-* o *NO* para finalizar sin foto):`;
+          `\n📸 *Evidencia Fotográfica Oficial (Opcional - Máximo 2 fotos):*\n` +
+          `Por favor envía una *foto clara* donde se visualicen juntas el *Acta Municipal (FE-FG-F-0069)* y el *Acta Departamental (FE-FG-F-0021)* con el código de la mesa visible en tu escarapela.\n\n` +
+          `*(Si tienes los dos formularios por separado, envía primero una foto y luego te pediremos la segunda; o escribe "-" o "NO" para finalizar sin foto):*`;
       }
 
       ctx.clearSession(phone);
@@ -525,11 +561,9 @@ Por favor verifica tu número o solicita tu asignación al administrador.
     return '⚠️ La opción ingresada no corresponde con la lista.\n¿Confirmas el envío?\n1️⃣ SÍ\n2️⃣ NO\n\nResponde enviando 1 o 2.';
   }
 
-  // --- EVIDENCIA FOTOGRÁFICA ACTA 021 ---
-  if (session.paso === 'acta021_foto') {
+  // --- EVIDENCIA FOTOGRÁFICA 1 ---
+  if (session.paso === 'acta021_foto_1') {
     const isImage = Boolean(ctx.hasImage || text === '[FOTO]' || (ctx.rawMessage && ctx.rawMessage.imageMessage));
-    let fotoGuardada = null;
-
     if (isImage && ctx.downloadImage) {
       try {
         const b64Data = await ctx.downloadImage();
@@ -540,24 +574,64 @@ Por favor verifica tu número o solicita tu asignación al administrador.
           if (!fs.existsSync(evidenciasDir)) fs.mkdirSync(evidenciasDir, { recursive: true });
           
           const cleanB64 = b64Data.replace(/^data:image\/\w+;base64,/, '');
-          const filename = `ACTA021_MESA_${session.mesa}_${norm(session.seccional)}_${Date.now()}.jpg`;
+          const filename = `ACTA_MESA_${session.mesa}_${norm(session.seccional)}_FOTO1_${Date.now()}.jpg`;
           const filepath = path.join(evidenciasDir, filename);
           fs.writeFileSync(filepath, Buffer.from(cleanB64, 'base64'));
           
           if (ctx.state && ctx.state.guardarEvidencia) {
-            ctx.state.guardarEvidencia(session.mesa, session.seccional, session.municipio || '', phone, filename, filepath);
+            ctx.state.guardarEvidencia(session.mesa, session.seccional, session.municipio || '', phone, filename, filepath, 1);
           }
-          fotoGuardada = filename;
+          if (!session.fotosGuardadas) session.fotosGuardadas = [];
+          session.fotosGuardadas.push(filename);
+          session.paso = 'acta021_foto_2';
+          ctx.saveSession(phone, session);
+          return `✅ *¡1ª foto archivada exitosamente!*\n\n📸 *¿Deseas adjuntar una 2ª foto?* (por ejemplo, del Acta Departamental FE-FG-F-0021 o del Listado de Electores FE-FG-F-0019).\n\nEnvía la 2ª foto ahora, o escribe *-* o *NO* para finalizar y recibir tu comprobante:`;
         }
       } catch (e) {
-        console.warn('Error guardando evidencia fotográfica:', e.message);
+        console.warn('Error guardando primera evidencia fotográfica:', e.message);
+      }
+    }
+
+    // Si respondió '-' o no envió imagen
+    const resp = session.respActa || {};
+    const comp = generarComprobanteRadicacion(session, resp, ctx, session.fotosGuardadas || []);
+    ctx.clearSession(phone);
+    return comp;
+  }
+
+  // --- EVIDENCIA FOTOGRÁFICA 2 ---
+  if (session.paso === 'acta021_foto_2') {
+    const isImage = Boolean(ctx.hasImage || text === '[FOTO]' || (ctx.rawMessage && ctx.rawMessage.imageMessage));
+    if (isImage && ctx.downloadImage) {
+      try {
+        const b64Data = await ctx.downloadImage();
+        if (b64Data) {
+          const fs = require('fs');
+          const path = require('path');
+          const evidenciasDir = path.join(process.env.BOT_DATA_DIR || path.join(__dirname, '..', 'data'), 'evidencias');
+          if (!fs.existsSync(evidenciasDir)) fs.mkdirSync(evidenciasDir, { recursive: true });
+          
+          const cleanB64 = b64Data.replace(/^data:image\/\w+;base64,/, '');
+          const filename = `ACTA_MESA_${session.mesa}_${norm(session.seccional)}_FOTO2_${Date.now()}.jpg`;
+          const filepath = path.join(evidenciasDir, filename);
+          fs.writeFileSync(filepath, Buffer.from(cleanB64, 'base64'));
+          
+          if (ctx.state && ctx.state.guardarEvidencia) {
+            ctx.state.guardarEvidencia(session.mesa, session.seccional, session.municipio || '', phone, filename, filepath, 2);
+          }
+          if (!session.fotosGuardadas) session.fotosGuardadas = [];
+          session.fotosGuardadas.push(filename);
+        }
+      } catch (e) {
+        console.warn('Error guardando segunda evidencia fotográfica:', e.message);
       }
     }
 
     const resp = session.respActa || {};
-    const comp = generarComprobanteRadicacion(session, resp, ctx, fotoGuardada);
+    const fotos = session.fotosGuardadas || [];
+    const comp = generarComprobanteRadicacion(session, resp, ctx, fotos);
     ctx.clearSession(phone);
-    return (fotoGuardada ? `📸 *¡Foto del acta archivada correctamente!*\n\n` : '') + comp;
+    return `📸 *¡${fotos.length} foto(s) de auditoría archivada(s) correctamente!*\n\n` + comp;
   }
 
   return ayuda();

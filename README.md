@@ -100,7 +100,29 @@ docker exec elecciones-bot npm run test:logic
 
 ---
 
-## ⚡ Novedades y Mejoras de la Versión 0.3.0
+## ⚡ Novedades y Mejoras de la Versión 0.4.0 (Alineación con Formatos Oficiales FNC)
+
+1. 📜 **Nomenclatura y Formatos Oficiales de la Federación Nacional de Cafeteros**:
+   - **Rol Oficial:** *Coordinador de Apoyo Electoral* con verificación de código en la **escarapela**.
+   - **Instalación (Formato FE-FG-F-0018):** Verificación de 3 jurados, kit electoral, sillas y mesa física (7:00 a.m. - 7:30 a.m.).
+   - **Participación Acumulada:** Selector dinámico con ventanas horarias institucionales:
+     - `Reporte 1`: 9:30 a.m. - 10:00 a.m.
+     - `Reporte 2`: 11:30 a.m. - 12:00 m.
+     - `Reporte 3`: 2:00 p.m. - 2:30 p.m.
+     *(Las horas sirven como guía orientativa sin bloquear envíos diferidos en zonas de baja conectividad).*
+   - **Escrutinio Preliminar (Actas FE-FG-F-0069 Municipal / FE-FG-F-0021 Departamental):** Captura de votos por plancha, blancos, nulos, no marcados e incinerados.
+
+2. 📸 **Auditoría con Flujo de Hasta 2 Fotos de Evidencia**:
+   - El bot permite adjuntar hasta **2 fotografías oficiales** (Acta Municipal FE-FG-F-0069, Acta Departamental FE-FG-F-0021 o Listado de Electores FE-FG-F-0019) o tomarlas juntas en una sola foto.
+   - Indexación con `foto_index` en SQLite y visualización con insignias en la galería del panel de administración.
+
+3. 🏛️ **Comprobante Digital Institucional FNC con Hash de Radicación**:
+   - Encabezado formal de la *Federación Nacional de Cafeteros de Colombia — Elecciones Cafeteras 2026*.
+   - Detalle de actas oficiales radicadas, desglose numérico, estado de cuadre matemático y relación de evidencias fotográficas archivadas con código único `REC-SEC-MESA-HASH`.
+
+---
+
+## ⚡ Historial de Versión 0.3.0
 
 1. 📊 **Tablero Semáforo en Vivo (Dashboard Web)**:
    - Panel visual con métricas de mesas instaladas, total de sufragantes acumulados, actas transmitidas y alertas matemáticas de descuadre.
@@ -111,15 +133,7 @@ docker exec elecciones-bot npm run test:logic
    - Si una línea oficial de cualquier seccional se bloquea o desconecta, el administrador puede conmutarla a una línea de respaldo en **1 clic** desde el panel web sin perder sesiones ni reconfigurar nada.
    - Botón de **Restaurar Línea Oficial** una vez restablecido el número principal.
 
-3. 📸 **Auditoría con Evidencia Fotográfica de Acta 021 (E-14)**:
-   - Al finalizar el preconteo numérico, el coordinador puede enviar opcionalmente una foto del formulario físico de su Acta 021.
-   - El bot descarga y archiva la foto en `/app/data/evidencias/` con registro en SQLite y galería de auditoría con zoom en el panel web.
-
-4. 📱 **Comando `ESTADO` / `RESUMEN` y Comprobante Oficial de Radicación**:
-   - Los coordinadores pueden consultar en cualquier momento el estado de sus mesas asignadas escribiendo `ESTADO` o `RESUMEN`.
-   - Al confirmar el Acta 021, el bot emite un **Comprobante Digital Oficial** con formato formal y código de radicado único generado mediante hash (`REC-SEC-MESA-HASH`).
-
-5. 💾 **Backups Automáticos en Caliente cada 15 Minutos**:
+3. 💾 **Backups Automáticos en Caliente cada 15 Minutos**:
    - Servicio periódico en segundo plano que genera snapshots con timestamp de `3_PRECONTEO 2022-PLANCHAS.xlsx` y `bot-state.db`.
    - Rotación automática de los últimos 50 archivos y descarga directa desde el panel web.
 

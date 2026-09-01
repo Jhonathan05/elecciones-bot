@@ -142,6 +142,9 @@ async function runTests() {
     // Finalizar sin foto '-' para recibir comprobante digital con hash de radicación
     const rComprobante = await flows.handle('573001112244', '-', ctxA, 'chaparral');
     assert.ok(rComprobante.includes('COMPROBANTE OFICIAL DE TRANSMISIÓN'), 'genera comprobante oficial: ' + rComprobante);
+    assert.ok(rComprobante.includes('Federación Nacional de Cafeteros'), 'incluye encabezado oficial FNC');
+    assert.ok(rComprobante.includes('FE-FG-F-0069'), 'incluye acta municipal');
+    assert.ok(rComprobante.includes('FE-FG-F-0021'), 'incluye acta departamental');
     assert.ok(rComprobante.includes('REC-CHA-M'), 'incluye código de radicado único');
     console.log('✔ Comprobante Oficial de Transmisión con código de radicado OK');
 
@@ -155,7 +158,30 @@ async function runTests() {
     console.log('✔ Validación de asignación coordinador de mesa OK');
   }
 
-  // ---- 8) Comando ESTADO / RESUMEN ----
+  // ---- 8) Flujo de 2 Fotos de Evidencia (FE-FG-F-0069 y FE-FG-F-0021) ----
+  {
+    const ctxFoto = makeCtx('573001112233', 'chaparral');
+    ctxFoto.downloadImage = async () => 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=';
+    
+    // Llegar hasta confirmación de Acta 021
+    await conversar(ctxFoto, '573001112233', 'chaparral', [
+      'hola', '3', COD, '1', '100', '50', '10', '5', '2', '30', '7', '0', '204', '0', '-', '1',
+    ]);
+    
+    // Enviar 1ª foto
+    ctxFoto.hasImage = true;
+    const rFoto2Prompt = await flows.handle('573001112233', '[FOTO]', ctxFoto, 'chaparral');
+    assert.ok(rFoto2Prompt.includes('1ª foto archivada'), 'confirma 1ª foto y pide 2ª');
+    
+    // Enviar 2ª foto
+    ctxFoto.hasImage = true;
+    const rComp2Fotos = await flows.handle('573001112233', '[FOTO]', ctxFoto, 'chaparral');
+    assert.ok(rComp2Fotos.includes('2 foto(s) de auditoría'), 'confirma 2 fotos archivadas');
+    assert.ok(rComp2Fotos.includes('COMPROBANTE OFICIAL DE TRANSMISIÓN'), 'emite comprobante con 2 fotos');
+    console.log('✔ Flujo de 2 Fotos de Evidencia Oficiales OK');
+  }
+
+  // ---- 9) Comando ESTADO / RESUMEN ----
   {
     const ctx = makeCtx('573001112233', 'chaparral');
     const rEstado = await flows.handle('573001112233', 'ESTADO', ctx, 'chaparral');
@@ -163,7 +189,7 @@ async function runTests() {
     console.log('✔ Comando ESTADO / RESUMEN OK');
   }
 
-  // ---- 9) Failover de Líneas Hot-Standby en state.js ----
+  // ---- 10) Failover de Líneas Hot-Standby en state.js ----
   {
     const state = require('../src/state');
     state.upsertLinea('TEST_SEC', 'test_inst', '573001112200', 1, 0);
@@ -185,7 +211,7 @@ async function runTests() {
     console.log('✔ Failover y Restauración de Líneas en caliente OK');
   }
 
-  // ---- 10) Módulo de Backups en caliente ----
+  // ---- 11) Módulo de Backups en caliente ----
   {
     const backup = require('../src/backup');
     const resBackup = backup.crearBackup();

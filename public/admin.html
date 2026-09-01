@@ -304,12 +304,12 @@
       <table id="tblSemaforo">
         <thead>
           <tr>
-            <th>Mesa</th>
+            <th>Mesa (Escarapela)</th>
             <th>Seccional / Municipio</th>
-            <th>Coordinador</th>
-            <th>1️⃣ Instalación</th>
-            <th>2️⃣ Participación</th>
-            <th>3️⃣ Acta 021</th>
+            <th>Coordinador de Apoyo</th>
+            <th>1️⃣ Instalación (FE-FG-F-0018)</th>
+            <th>2️⃣ Participación Acumulada</th>
+            <th>3️⃣ Escrutinio (FE-FG-F-0069/0021)</th>
             <th>Estado Global</th>
             <th>Acción</th>
           </tr>
@@ -1323,11 +1323,15 @@ function renderEvidenciasGallery() {
       imgUrl
     }).replace(/"/g, '&quot;');
 
+    const fotoBadge = ev.foto_index === 2 ? '<span class="badge warn" style="font-size:10px;">Foto 2</span>' : '<span class="badge ok" style="font-size:10px;">Foto 1</span>';
     g.innerHTML += `
       <div class="gallery-card" onclick="verFotoZoom('${escData}')">
         <img class="gallery-img" src="${imgUrl}" loading="lazy" />
         <div class="gallery-meta">
-          <strong>Mesa ${ev.codigo_mesa} (${ev.seccional})</strong><br/>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>Mesa ${ev.codigo_mesa} (${ev.seccional})</strong>
+            ${fotoBadge}
+          </div>
           <span style="color:var(--on-surface-variant);">${ev.municipio}</span><br/>
           <span style="font-size:10px; color:var(--outline);">${dateStr}</span>
         </div>

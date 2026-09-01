@@ -1,6 +1,6 @@
 {
   "name": "elecciones-whatsapp-bot",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Canal de contingencia por WhatsApp (Evolution API) -> Google Sheets para el preconteo electoral",
   "main": "src/index.js",
   "scripts": {

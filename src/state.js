@@ -42,12 +42,14 @@ CREATE TABLE IF NOT EXISTS evidencias (
   telefono    TEXT NOT NULL,
   filename    TEXT NOT NULL,
   filepath    TEXT NOT NULL,
+  foto_index  INTEGER NOT NULL DEFAULT 1,
   created_at  TEXT NOT NULL
 );
 `);
 
-// Migración suave si original_instance no existía
+// Migración suave si columnas no existían
 try { db.exec(`ALTER TABLE lineas ADD COLUMN original_instance TEXT;`); } catch {}
+try { db.exec(`ALTER TABLE evidencias ADD COLUMN foto_index INTEGER NOT NULL DEFAULT 1;`); } catch {}
 
 // ---------- Líneas (seccional -> instancia Evolution) ----------
 function listLineas() {
@@ -133,10 +135,10 @@ function setLidMapping(lid, phone) {
 }
 
 // ---------- Evidencias Fotográficas (Acta 021) ----------
-function guardarEvidencia(codigo, seccional, municipio, telefono, filename, filepath) {
+function guardarEvidencia(codigo, seccional, municipio, telefono, filename, filepath, fotoIndex = 1) {
   const createdAt = new Date().toISOString();
-  return db.prepare(`INSERT INTO evidencias (codigo_mesa, seccional, municipio, telefono, filename, filepath, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?)`).run(Number(codigo), seccional, municipio, telefono, filename, filepath, createdAt);
+  return db.prepare(`INSERT INTO evidencias (codigo_mesa, seccional, municipio, telefono, filename, filepath, foto_index, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(Number(codigo), seccional, municipio, telefono, filename, filepath, Number(fotoIndex) || 1, createdAt);
 }
 function listEvidencias(seccional = null) {
   if (seccional) {
